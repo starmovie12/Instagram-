@@ -22,8 +22,26 @@ export const IG_CONFIG = {
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
 
-  /** GraphQL endpoint */
+  /** GraphQL endpoint (shortcode → post/reel/carousel media) */
   graphqlUrl: "https://www.instagram.com/api/graphql",
+
+  /**
+   * Username → profile info (HD profile picture, user id, privacy, bio).
+   * Reliable web endpoint; needs the X-IG-App-ID header only.
+   */
+  webProfileInfoUrl:
+    "https://www.instagram.com/api/v1/users/web_profile_info/?username=",
+
+  /**
+   * user_id → active stories (24h). Private API path hit with app-id header.
+   * Used by Story Downloader + Anonymous Story Viewer.
+   */
+  reelsMediaUrl:
+    "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=",
+
+  /** user_id → highlights tray (list of highlight albums + cover images). */
+  highlightsTrayUrl:
+    "https://www.instagram.com/api/v1/highlights/{userId}/highlights_tray/",
 
   /**
    * FALLBACK PLAN — agar khud ka scraper bahut tootne lage to `true` karo

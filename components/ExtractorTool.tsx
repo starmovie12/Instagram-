@@ -24,7 +24,7 @@ function downloadHref(url: string, filename: string): string {
   return `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
 }
 
-function CopyButton({ text, label }: { text: string; label: string }) {
+export function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -33,7 +33,6 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         try {
           await navigator.clipboard.writeText(text);
         } catch {
-          // Fallback for older browsers / non-secure contexts
           const ta = document.createElement("textarea");
           ta.value = text;
           document.body.appendChild(ta);
@@ -69,11 +68,8 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
         body: JSON.stringify({ url }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
-      } else {
-        setResult(data);
-      }
+      if (!res.ok) setError(data.error ?? "Something went wrong. Please try again.");
+      else setResult(data);
     } catch {
       setError("Network error — please check your connection and try again.");
     } finally {
@@ -86,7 +82,7 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
       const text = await navigator.clipboard.readText();
       if (text) setUrl(text.trim());
     } catch {
-      // Clipboard permission denied — user can paste manually.
+      /* clipboard denied — paste manually */
     }
   }
 
@@ -106,14 +102,14 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
             aria-label="Instagram URL"
             required
           />
-          <button type="button" className="paste-btn" onClick={handlePaste}>
-            📋 Paste
-          </button>
+          <button type="button" className="paste-btn" onClick={handlePaste}>📋 Paste</button>
         </div>
         <button className="go-btn" type="submit" disabled={loading}>
           {loading ? (<><span className="spinner" />Fetching…</>) : "Download"}
         </button>
       </form>
+
+      <p className="tool-hint">🔒 No login • Public content only • We never store your links</p>
 
       {error && <div className="tool-error" role="alert">⚠️ {error}</div>}
 
@@ -139,9 +135,7 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
                   className="media-preview"
                   src={downloadHref(item.url, "")}
                   poster={item.thumbnail ? downloadHref(item.thumbnail, "") : undefined}
-                  controls
-                  playsInline
-                  preload="metadata"
+                  controls playsInline preload="metadata"
                 />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -149,18 +143,13 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
               )}
               <div className="media-actions">
                 <a
-                  className="btn btn-primary"
+                  className="btn btn-gold"
                   href={downloadHref(item.url, `${base}-${i + 1}.${item.type === "video" ? "mp4" : "jpg"}`)}
                 >
-                  ⬇️ Download {item.type === "video" ? "Video (HD)" : "Photo (HD)"}
+                  ⬇️ Download {item.type === "video" ? "Video HD" : "Photo HD"}
                 </a>
                 {item.type === "video" && item.thumbnail && (
-                  <a
-                    className="btn"
-                    href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}
-                  >
-                    🖼️ Thumbnail
-                  </a>
+                  <a className="btn" href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}>🖼️ Thumbnail</a>
                 )}
               </div>
             </div>
@@ -171,38 +160,30 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
               📋 Caption
               {result.caption && <CopyButton text={result.caption} label="Copy Caption" />}
             </h3>
-            <p className="caption-text">
-              {result.caption || <em style={{ color: "var(--text-dim)" }}>No caption on this post.</em>}
-            </p>
+            {result.caption
+              ? <p className="caption-text">{result.caption}</p>
+              : <p className="muted">No caption on this post.</p>}
           </div>
 
           <div className="section">
             <h3>
-              #️⃣ Hashtags {result.hashtags.length > 0 && `(${result.hashtags.length})`}
+              <span>#️⃣ Hashtags {result.hashtags.length > 0 && <span className="num">({result.hashtags.length})</span>}</span>
               {result.hashtags.length > 0 && (
                 <CopyButton text={result.hashtags.join(" ")} label="Copy All Hashtags" />
               )}
             </h3>
-            {result.hashtags.length > 0 ? (
-              <div className="tags">
-                {result.hashtags.map((t) => <span key={t}>{t}</span>)}
-              </div>
-            ) : (
-              <p style={{ color: "var(--text-dim)", fontSize: "0.9rem" }}>
-                <em>No hashtags on this post.</em>
-              </p>
-            )}
+            {result.hashtags.length > 0
+              ? <div className="tags">{result.hashtags.map((t) => <span key={t}>{t}</span>)}</div>
+              : <p className="muted">No hashtags on this post.</p>}
           </div>
 
           {result.mentions.length > 0 && (
             <div className="section">
               <h3>
-                @ Mentions ({result.mentions.length})
+                <span>@ Mentions <span className="num">({result.mentions.length})</span></span>
                 <CopyButton text={result.mentions.join(" ")} label="Copy Mentions" />
               </h3>
-              <div className="tags">
-                {result.mentions.map((m) => <span className="mention" key={m}>{m}</span>)}
-              </div>
+              <div className="tags">{result.mentions.map((m) => <span className="mention" key={m}>{m}</span>)}</div>
             </div>
           )}
         </div>
