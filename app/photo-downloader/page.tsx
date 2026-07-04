@@ -8,34 +8,25 @@ export const metadata: Metadata = {
   alternates: { canonical: "/photo-downloader" },
 };
 
-export default function PhotoDownloaderPage() {
+export default function Page() {
   return (
     <ToolPage
-      h1={<><span className="grad">Instagram Photo</span> Downloader</>}
+      eyebrow="Photo Downloader"
+      variant="url"
+      currentHref="/photo-downloader"
+      h1={<><span className="accent">Instagram Photo</span> Downloader</>}
       sub="Save any public photo or full carousel post in original resolution — every slide gets its own download button."
-      placeholder="Paste Instagram photo or carousel link here…"
+      placeholder="Paste Instagram photo or carousel link…"
       steps={[
-        "On the Instagram post, tap ••• (three dots) and choose Copy Link.",
-        "Paste the link above and hit Download.",
-        "For carousels, each slide appears with its own HD download button.",
+        { title: "Copy the post link", body: "On the post, tap ••• (three dots) and choose Copy Link." },
+        { title: "Paste it above", body: "Drop the link in the box and press Download." },
+        { title: "Save every photo", body: "For carousels, each slide appears with its own HD download button." },
       ]}
       faqs={[
-        {
-          q: "Does it work with multi-photo (carousel) posts?",
-          a: "Yes — every photo and video in the carousel is extracted, each with its own download button.",
-        },
-        {
-          q: "What resolution are the photos?",
-          a: "The original full resolution that Instagram stores — typically 1080px wide or higher.",
-        },
-        {
-          q: "Can I download my own photos back from Instagram?",
-          a: "Absolutely — that's one of the most common uses, recovering your own photos when you've lost the originals.",
-        },
-        {
-          q: "Do you keep a copy of downloaded photos?",
-          a: "No. Nothing is stored on our servers — media streams directly from Instagram's CDN to your device.",
-        },
+        { q: "Does it work with multi-photo (carousel) posts?", a: "Yes — every photo and video in the carousel is extracted, each with its own download button." },
+        { q: "What resolution are the photos?", a: "The original full resolution Instagram stores — typically 1080px wide or higher." },
+        { q: "Can I download my own photos back?", a: "Absolutely — recovering your own photos when you've lost the originals is one of the most common uses." },
+        { q: "Do you keep a copy?", a: "No. Nothing is stored on our servers — media streams directly from Instagram's CDN to your device." },
       ]}
     />
   );

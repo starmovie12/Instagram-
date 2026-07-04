@@ -1,18 +1,27 @@
-# 📸 InstaGrab
+# 👑 InstaGrab
 
-Instagram Content Extractor & Downloader — reels, photos, carousels, **plus caption + hashtag extraction** (the wedge that makes this more than another downloader).
+The **premium** Instagram toolkit — every downloader plus **caption + hashtag extraction** (the wedge that makes this more than another downloader).
 
-Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. See the InstaGrab PRD for full product context.
+Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed on the **"Warm Light Regalia"** system (CROWN): white-first canvas, warm-cream gold cards, a five-tier gold palette, and Syne / Space Mono / Inter type — gold-tinted shadows, zero glass. Way more premium than the plain competitor clones.
 
-## Features
+## Features / Tools
 
-- 🎬 Download reels / video posts in HD (no watermark)
-- 🖼️ Download photos & every slide of carousel posts
-- 📋 Full caption text with one-click copy
-- #️⃣ All hashtags extracted & separated, copy-all button
-- @ Mentions extracted
-- 🖼️ Video thumbnail download
-- 🔒 No login ever, public content only, rate-limited API
+**URL-based** (paste a post/reel link):
+- 🎬 Reels downloader (HD MP4, no watermark)
+- ▶️ Video / IGTV downloader
+- 🖼️ Photo downloader
+- 🎠 Carousel downloader (every slide)
+- 📋 Caption extractor — full text, one-click copy *(signature)*
+- #️⃣ Hashtag extractor — all tags separated, copy-all *(signature)*
+- @ Mentions + 🖼️ video thumbnail download
+
+**Username-based** (enter an @handle):
+- ⭕ Story downloader (active 24h stories)
+- 👁️ Anonymous story viewer (no trace)
+- ✨ Highlights downloader (covers + stories inside each album)
+- 🪪 Profile picture / DP downloader (full HD)
+
+Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
 
 ## Project structure
 
@@ -28,14 +37,25 @@ app/
   about|privacy-policy|terms|contact|dmca
   api/extract/route.ts    → serverless extraction endpoint (rate limited)
   api/download/route.ts   → CDN download proxy (Instagram-CDN-only, not open)
+  api/profile/route.ts    → username-based tools (dp/stories/highlights)
 components/
-  ExtractorTool.tsx       → client tool UI (input → result card)
-  ToolPage.tsx            → shared landing page shell
+  ExtractorTool.tsx       → URL tool UI (link → result card)
+  UsernameTool.tsx        → username tool UI (dp/stories/viewer/highlights)
+  ToolPage.tsx            → shared landing page shell (both variants)
 lib/
-  instagram-config.ts     → ⚠️ THE swappable config — patch doc_id here
+  instagram-config.ts     → ⚠️ THE swappable config — patch doc_id/endpoints here
   instagram-extractor.ts  → all Instagram-specific logic
+  tools.ts                → central tool registry (drives nav/grid/footer)
   rate-limit.ts
 ```
+
+## Design system
+
+The whole UI follows **CROWN "Warm Light Regalia"** (see the design doc): pure-white
+canvas (`#ffffff`), warm-cream cards (`#f7ecd0`), a locked five-tier gold palette where
+`#f59e0b` gold-orange is reserved **only** for the primary CTA, gold-tinted shadows, and a
+three-font contract — **Syne** (display), **Space Mono** (every number), **Inter** (body).
+Tokens live as CSS variables at the top of `app/globals.css`. No dark mode — light *is* the brand.
 
 ## 🔧 When the extractor breaks (every 2–4 weeks — expected!)
 

@@ -31,8 +31,11 @@ export class ExtractError extends Error {
     message: string,
     public readonly code:
       | "INVALID_URL"
+      | "INVALID_USERNAME"
       | "PRIVATE"
       | "NOT_FOUND"
+      | "NO_STORIES"
+      | "NO_HIGHLIGHTS"
       | "STORY_UNSUPPORTED"
       | "EXTRACTOR_DOWN"
       | "UPSTREAM_BLOCKED"
@@ -257,4 +260,236 @@ export async function extract(rawUrl: string): Promise<ExtractResult> {
     return extractViaFallback(shortcode);
   }
   return extractViaGraphql(shortcode);
+}
+
+/* ============================================================
+   USERNAME-BASED TOOLS
+   (Profile Picture · Stories · Anonymous Viewer · Highlights)
+   ============================================================ */
+
+export type ProfileResult = {
+  username: string;
+  fullName: string;
+  userId: string;
+  isPrivate: boolean;
+  isVerified: boolean;
+  biography: string;
+  followers: number;
+  following: number;
+  posts: number;
+  profilePicHd: string;
+};
+
+export type StoryItem = {
+  type: "video" | "image";
+  url: string;
+  thumbnail: string;
+  takenAt: number;
+};
+
+export type StoriesResult = {
+  username: string;
+  fullName: string;
+  profilePicHd: string;
+  items: StoryItem[];
+};
+
+export type HighlightAlbum = {
+  id: string;
+  title: string;
+  cover: string;
+};
+
+export type HighlightsResult = {
+  username: string;
+  fullName: string;
+  profilePicHd: string;
+  albums: HighlightAlbum[];
+};
+
+/** Accept "@handle", "handle", or any instagram.com/<handle> URL. */
+export function parseUsername(raw: string): string {
+  const input = raw.trim();
+  if (!input) throw new ExtractError("Please enter a username.", "INVALID_USERNAME");
+
+  let candidate = input;
+  if (/^https?:\/\//i.test(input) || input.includes("instagram.com")) {
+    try {
+      const url = new URL(input.startsWith("http") ? input : `https://${input}`);
+      candidate = url.pathname.split("/").filter(Boolean)[0] ?? "";
+    } catch {
+      /* fall through */
+    }
+  }
+  candidate = candidate.replace(/^@/, "").trim();
+
+  if (!/^[A-Za-z0-9._]{1,30}$/.test(candidate)) {
+    throw new ExtractError(
+      "That doesn't look like a valid username. Use a handle like @nasa.",
+      "INVALID_USERNAME"
+    );
+  }
+  return candidate;
+}
+
+function igHeaders(referer = "https://www.instagram.com/") {
+  return {
+    "User-Agent": IG_CONFIG.userAgent,
+    "X-IG-App-ID": IG_CONFIG.appId,
+    "X-ASBD-ID": "129477",
+    "X-Requested-With": "XMLHttpRequest",
+    "Sec-Fetch-Site": "same-origin",
+    Referer: referer,
+    Accept: "*/*",
+  };
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function fetchJson(url: string, referer?: string): Promise<any> {
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: igHeaders(referer), cache: "no-store" });
+  } catch {
+    throw new ExtractError("Couldn't reach Instagram. Please try again.", "UPSTREAM_BLOCKED");
+  }
+  if (res.status === 404) {
+    throw new ExtractError("No account found with that username.", "NOT_FOUND");
+  }
+  if (res.status === 429 || res.status === 403) {
+    throw new ExtractError(
+      "Instagram is rate-limiting our server right now. Please try again in a minute.",
+      "UPSTREAM_BLOCKED"
+    );
+  }
+  if (!res.ok) {
+    throw new ExtractError("Instagram returned an unexpected response.", "EXTRACTOR_DOWN");
+  }
+  try {
+    return await res.json();
+  } catch {
+    throw new ExtractError(
+      "Instagram changed its response format — the extractor needs a patch.",
+      "EXTRACTOR_DOWN"
+    );
+  }
+}
+
+export async function extractProfile(rawUsername: string): Promise<ProfileResult> {
+  const username = parseUsername(rawUsername);
+  const json = await fetchJson(
+    IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
+    `https://www.instagram.com/${username}/`
+  );
+  const u = json?.data?.user;
+  if (!u) {
+    throw new ExtractError("No account found with that username.", "NOT_FOUND");
+  }
+  return {
+    username: u.username ?? username,
+    fullName: u.full_name ?? "",
+    userId: u.id ?? "",
+    isPrivate: !!u.is_private,
+    isVerified: !!u.is_verified,
+    biography: u.biography ?? "",
+    followers: u.edge_followed_by?.count ?? 0,
+    following: u.edge_follow?.count ?? 0,
+    posts: u.edge_owner_to_timeline_media?.count ?? 0,
+    profilePicHd: u.profile_pic_url_hd ?? u.profile_pic_url ?? "",
+  };
+}
+
+function reelItemToStory(item: any): StoryItem {
+  const isVideo = item?.media_type === 2 || Array.isArray(item?.video_versions);
+  if (isVideo) {
+    const v = item.video_versions?.[0];
+    return {
+      type: "video",
+      url: v?.url ?? "",
+      thumbnail: item?.image_versions2?.candidates?.[0]?.url ?? "",
+      takenAt: item?.taken_at ?? 0,
+    };
+  }
+  return {
+    type: "image",
+    url: item?.image_versions2?.candidates?.[0]?.url ?? "",
+    thumbnail: item?.image_versions2?.candidates?.[0]?.url ?? "",
+    takenAt: item?.taken_at ?? 0,
+  };
+}
+
+export async function extractStories(rawUsername: string): Promise<StoriesResult> {
+  const profile = await extractProfile(rawUsername);
+  if (profile.isPrivate) {
+    throw new ExtractError(
+      "This account is private — only public stories can be viewed or downloaded.",
+      "PRIVATE"
+    );
+  }
+  const json = await fetchJson(
+    IG_CONFIG.reelsMediaUrl + encodeURIComponent(profile.userId),
+    `https://www.instagram.com/${profile.username}/`
+  );
+  const reel = json?.reels?.[profile.userId] ?? json?.reels_media?.[0];
+  const rawItems: any[] = reel?.items ?? [];
+  const items = rawItems.map(reelItemToStory).filter((i) => i.url);
+  if (items.length === 0) {
+    throw new ExtractError(
+      `@${profile.username} has no active stories right now (stories last only 24 hours).`,
+      "NO_STORIES"
+    );
+  }
+  return {
+    username: profile.username,
+    fullName: profile.fullName,
+    profilePicHd: profile.profilePicHd,
+    items,
+  };
+}
+
+export async function extractHighlights(rawUsername: string): Promise<HighlightsResult> {
+  const profile = await extractProfile(rawUsername);
+  if (profile.isPrivate) {
+    throw new ExtractError(
+      "This account is private — only public highlights can be accessed.",
+      "PRIVATE"
+    );
+  }
+  const json = await fetchJson(
+    IG_CONFIG.highlightsTrayUrl.replace("{userId}", encodeURIComponent(profile.userId)),
+    `https://www.instagram.com/${profile.username}/`
+  );
+  const tray: any[] = json?.tray ?? [];
+  const albums: HighlightAlbum[] = tray.map((t) => ({
+    id: String(t?.id ?? "").replace(/^highlight:/, ""),
+    title: t?.title ?? "Highlight",
+    cover:
+      t?.cover_media?.cropped_image_version?.url ??
+      t?.cover_media?.image_versions2?.candidates?.[0]?.url ??
+      "",
+  })).filter((a) => a.cover);
+
+  if (albums.length === 0) {
+    throw new ExtractError(
+      `@${profile.username} has no highlights, or they aren't publicly accessible.`,
+      "NO_HIGHLIGHTS"
+    );
+  }
+  return {
+    username: profile.username,
+    fullName: profile.fullName,
+    profilePicHd: profile.profilePicHd,
+    albums,
+  };
+}
+
+/** Fetch the stories inside a single highlight album (by highlight id). */
+export async function extractHighlightItems(highlightId: string): Promise<StoryItem[]> {
+  const id = highlightId.replace(/[^0-9]/g, "");
+  if (!id) throw new ExtractError("Invalid highlight id.", "INVALID_USERNAME");
+  const json = await fetchJson(
+    IG_CONFIG.reelsMediaUrl + encodeURIComponent(`highlight:${id}`)
+  );
+  const reel = json?.reels?.[`highlight:${id}`] ?? json?.reels_media?.[0];
+  const rawItems: any[] = reel?.items ?? [];
+  return rawItems.map(reelItemToStory).filter((i) => i.url);
 }
