@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Signature Tool · Hashtag Extractor"
       variant="url"
       currentHref="/hashtag-extractor"
-      h1={<><span className="accent">Instagram Hashtag</span> Extractor</>}
+      h1={<><span className="gold-text">Instagram Hashtag</span> Extractor</>}
       sub="See exactly which hashtags any viral reel or post used — extracted, separated, and ready to copy all at once."
       placeholder="Paste Instagram post or reel link…"
       steps={[
@@ -30,9 +30,9 @@ export default function Page() {
       ]}
     >
       <h2>Turn viral posts into your hashtag strategy</h2>
-      <div className="feature-grid">
-        <div className="feature"><div className="emoji">📊</div><b>Research competitors</b><p>Extract the exact tag sets top accounts use on their best-performing posts.</p></div>
-        <div className="feature"><div className="emoji">📋</div><b>Build tag banks</b><p>Copy all hashtags in one click and organize them into reusable sets for your content.</p></div>
+      <div className="cards reveal" style={{ padding: 0 }}>
+        <div className="card"><span className="ic">📊</span><h3>Research competitors</h3><p>Extract the exact tag sets top accounts use on their best-performing posts.</p></div>
+        <div className="card"><span className="ic">📋</span><h3>Build tag banks</h3><p>Copy all hashtags in one click and organize them into reusable sets for your content.</p></div>
       </div>
     </ToolPage>
   );

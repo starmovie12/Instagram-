@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Photo Downloader"
       variant="url"
       currentHref="/photo-downloader"
-      h1={<><span className="accent">Instagram Photo</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Photo</span> Downloader</>}
       sub="Save any public photo or full carousel post in original resolution — every slide gets its own download button."
       placeholder="Paste Instagram photo or carousel link…"
       steps={[

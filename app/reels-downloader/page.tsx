@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Reels Downloader"
       variant="url"
       currentHref="/reels-downloader"
-      h1={<><span className="accent">Instagram Reels</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Reels</span> Downloader</>}
       sub="Save any public reel as an HD MP4 — no watermark, no login. Bonus: copy its caption and hashtags in one click."
       placeholder="Paste Instagram reel link here…"
       steps={[

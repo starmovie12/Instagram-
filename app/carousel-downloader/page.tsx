@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Carousel Downloader"
       variant="url"
       currentHref="/carousel-downloader"
-      h1={<><span className="accent">Instagram Carousel</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Carousel</span> Downloader</>}
       sub="Grab every slide of a multi-photo/video post at once — each in HD, each with its own download button."
       placeholder="Paste Instagram carousel post link…"
       steps={[

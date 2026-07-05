@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Highlights Downloader"
       variant="highlights"
       currentHref="/highlights-downloader"
-      h1={<><span className="accent">Instagram Highlights</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Highlights</span> Downloader</>}
       sub="Save whole highlight collections from any public profile — covers plus the stories inside each album, all in HD."
       placeholder="Enter @username (e.g. natgeo)…"
       steps={[
@@ -30,9 +30,9 @@ export default function Page() {
       ]}
     >
       <h2>Why save highlights separately</h2>
-      <div className="feature-grid">
-        <div className="feature"><div className="emoji">🔬</div><b>Study brand structure</b><p>Review how brands organize highlights — messaging, themes, and repeat structure.</p></div>
-        <div className="feature"><div className="emoji">🗄️</div><b>Archive &amp; review</b><p>Keep tutorials, menus, portfolios, or event recaps available offline.</p></div>
+      <div className="cards reveal" style={{ padding: 0 }}>
+        <div className="card"><span className="ic">🔬</span><h3>Study brand structure</h3><p>Review how brands organize highlights — messaging, themes, and repeat structure.</p></div>
+        <div className="card"><span className="ic">🗄️</span><h3>Archive &amp; review</h3><p>Keep tutorials, menus, portfolios, or event recaps available offline.</p></div>
       </div>
     </ToolPage>
   );

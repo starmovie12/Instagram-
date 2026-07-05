@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Signature Tool · Caption Extractor"
       variant="url"
       currentHref="/caption-extractor"
-      h1={<><span className="accent">Instagram Caption</span> Extractor</>}
+      h1={<><span className="gold-text">Instagram Caption</span> Extractor</>}
       sub="Instagram won't let you select caption text — we will. Paste any post or reel link and copy the full caption in one click."
       placeholder="Paste Instagram post or reel link…"
       steps={[
@@ -30,9 +30,9 @@ export default function Page() {
       ]}
     >
       <h2>Why creators love this</h2>
-      <div className="feature-grid">
-        <div className="feature"><div className="emoji">🔍</div><b>Study viral posts</b><p>Analyze exactly how top creators structure captions — hooks, line breaks, CTAs, emoji use.</p></div>
-        <div className="feature"><div className="emoji">⚡</div><b>One-click copy</b><p>No manual retyping or screenshot-to-text tricks. Full caption on your clipboard instantly.</p></div>
+      <div className="cards reveal" style={{ padding: 0 }}>
+        <div className="card"><span className="ic">🔍</span><h3>Study viral posts</h3><p>Analyze exactly how top creators structure captions — hooks, line breaks, CTAs, emoji use.</p></div>
+        <div className="card"><span className="ic">⚡</span><h3>One-click copy</h3><p>No manual retyping or screenshot-to-text tricks. Full caption on your clipboard instantly.</p></div>
       </div>
     </ToolPage>
   );
