@@ -260,14 +260,21 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
     );
   }
 
-  // Instagram tells us to log in / checkpoint = our server IP is being blocked.
-  const blocked =
+  // Combine every message Instagram sent so we can classify the failure.
+  const errMsg = [
+    json?.message,
+    ...(Array.isArray(json?.errors) ? json.errors.map((e: any) => e?.message) : []),
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  // "please wait / rate / login / checkpoint" = our data-center IP is blocked,
+  // NOT a doc_id problem. This is the PRD's #1 risk.
+  const looksBlocked =
     json?.require_login === true ||
     json?.status === "fail" ||
-    (typeof json?.message === "string" && /login|checkpoint|challenge/i.test(json.message));
-  if (blocked) {
+    /wait a few|rate limit|too many|login|checkpoint|challenge|try again|temporarily/.test(errMsg);
+  if (looksBlocked) {
     throw new ExtractError(
-      "Instagram is blocking our server right now (it wants a login for this request). This is usually a temporary data-center block — please try again shortly.",
+      "Instagram is blocking our server right now (data-center IP) — this is temporary, not a broken link. Please try again in a minute.",
       "UPSTREAM_BLOCKED"
     );
   }
@@ -284,17 +291,17 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
         "PRIVATE"
       );
     }
-    // errors block present → the doc_id/query really is stale.
-    if (Array.isArray(json?.errors) && json.errors.length) {
+    // A genuine query/doc_id error (errors present, but not a block message).
+    if (errMsg) {
       throw new ExtractError(
-        "The extractor is temporarily out of date (Instagram rotated its internal IDs). We'll patch it shortly.",
+        "The extractor needs a doc_id refresh (Instagram rejected the query). We'll patch it shortly.",
         "EXTRACTOR_DOWN"
       );
     }
-    // data === null with no media field and no errors → empty response to our
+    // data === null with no media field and no message → empty response to our
     // server = the classic data-center IP block, NOT a doc_id problem.
     throw new ExtractError(
-      "Instagram returned an empty response to our server — this is usually a temporary data-center IP block, not a broken link. Please try again in a minute.",
+      "Instagram returned an empty response to our server — usually a temporary data-center IP block, not a broken link. Please try again in a minute.",
       "UPSTREAM_BLOCKED"
     );
   }
