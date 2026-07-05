@@ -4,15 +4,73 @@
  */
 import { IG_CONFIG } from "./instagram-config";
 
+export type Quality = {
+  /** Human label, e.g. "1080p", "720p", "480p" */
+  label: string;
+  url: string;
+  width?: number;
+  height?: number;
+};
+
 export type MediaItem = {
   type: "video" | "image";
-  /** Direct CDN URL of the media */
+  /** Direct CDN URL of the best-quality media (preview + default download) */
   url: string;
   /** Poster/preview image */
   thumbnail: string;
   width?: number;
   height?: number;
+  /** Every available quality (video_versions / display_resources), best first */
+  qualities?: Quality[];
 };
+
+/** Resolution label from dimensions (the shorter side, so portrait reels read 1080p). */
+function labelForDims(w?: number, h?: number): string {
+  const q = Math.min(w || 0, h || 0);
+  if (q >= 2160) return "4K";
+  if (q >= 1440) return "1440p";
+  if (q >= 1080) return "1080p";
+  if (q >= 720) return "720p";
+  if (q >= 640) return "640p";
+  if (q >= 480) return "480p";
+  if (q >= 360) return "360p";
+  if (q > 0) return `${q}p`;
+  return "HD";
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Build a de-duplicated, best-first list of video qualities from video_versions. */
+function videoQualities(versions: any[]): Quality[] {
+  const seen = new Set<string>();
+  const out: Quality[] = [];
+  for (const v of versions ?? []) {
+    const url = v?.url;
+    if (!url || typeof url !== "string") continue;
+    const label = labelForDims(v?.width, v?.height);
+    if (seen.has(label)) continue;
+    seen.add(label);
+    out.push({ label, url, width: v?.width, height: v?.height });
+  }
+  out.sort((a, b) => (b.height ?? 0) - (a.height ?? 0));
+  return out;
+}
+
+/** Build image size options from GraphQL display_resources. */
+function imageQualities(resources: any[]): Quality[] {
+  const seen = new Set<string>();
+  const out: Quality[] = [];
+  for (const r of resources ?? []) {
+    const url = r?.src;
+    if (!url) continue;
+    const w = r?.config_width, h = r?.config_height;
+    const label = w ? `${w}px` : "HD";
+    if (seen.has(label)) continue;
+    seen.add(label);
+    out.push({ label, url, width: w, height: h });
+  }
+  out.sort((a, b) => (b.width ?? 0) - (a.width ?? 0));
+  return out;
+}
 
 export type ExtractResult = {
   type: "video" | "image" | "carousel";
@@ -93,22 +151,32 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
   const fullName: string = media?.owner?.full_name ?? "";
   const thumbnail: string = media?.thumbnail_src ?? media?.display_url ?? "";
 
-  const toItem = (node: any): MediaItem =>
-    node?.is_video
-      ? {
-          type: "video",
-          url: node.video_url,
-          thumbnail: node.display_url ?? node.thumbnail_src ?? "",
-          width: node?.dimensions?.width,
-          height: node?.dimensions?.height,
-        }
-      : {
-          type: "image",
-          url: node?.display_url ?? "",
-          thumbnail: node?.display_url ?? "",
-          width: node?.dimensions?.width,
-          height: node?.dimensions?.height,
-        };
+  const toItem = (node: any): MediaItem => {
+    if (node?.is_video) {
+      const qualities = Array.isArray(node?.video_versions) && node.video_versions.length
+        ? videoQualities(node.video_versions)
+        : node?.video_url
+          ? [{ label: labelForDims(node?.dimensions?.width, node?.dimensions?.height), url: node.video_url, width: node?.dimensions?.width, height: node?.dimensions?.height }]
+          : [];
+      return {
+        type: "video",
+        url: qualities[0]?.url ?? node.video_url,
+        thumbnail: node.display_url ?? node.thumbnail_src ?? "",
+        width: node?.dimensions?.width,
+        height: node?.dimensions?.height,
+        qualities,
+      };
+    }
+    const imgQ = Array.isArray(node?.display_resources) ? imageQualities(node.display_resources) : [];
+    return {
+      type: "image",
+      url: node?.display_url ?? imgQ[0]?.url ?? "",
+      thumbnail: node?.display_url ?? "",
+      width: node?.dimensions?.width,
+      height: node?.dimensions?.height,
+      qualities: imgQ.length > 1 ? imgQ : undefined,
+    };
+  };
 
   let items: MediaItem[];
   let type: ExtractResult["type"];
@@ -331,8 +399,24 @@ function normalizeFallback(json: any, shortcode: string): ExtractResult {
   const username: string = root?.username ?? root?.owner?.username ?? root?.author ?? "";
   const fullName: string = root?.full_name ?? root?.owner?.full_name ?? "";
 
-  const pushItem = (out: MediaItem[], type: "video" | "image", url?: string, thumb?: string) => {
-    if (url && typeof url === "string") out.push({ type, url, thumbnail: thumb ?? "" });
+  // Pull a quality list from whatever array a provider used for versions.
+  const provQualities = (m: any): Quality[] | undefined => {
+    const vers = m?.video_versions ?? m?.qualities ?? m?.resources ?? m?.formats ?? m?.links;
+    if (Array.isArray(vers) && vers.length > 1) {
+      const q = vers
+        .map((v: any) => {
+          const url = typeof v === "string" ? v : v?.url ?? v?.src ?? v?.download_url;
+          if (!url) return null;
+          return { label: v?.quality ?? v?.label ?? labelForDims(v?.width, v?.height), url, width: v?.width, height: v?.height };
+        })
+        .filter(Boolean) as Quality[];
+      return q.length > 1 ? q : undefined;
+    }
+    return undefined;
+  };
+
+  const pushItem = (out: MediaItem[], type: "video" | "image", url?: string, thumb?: string, qualities?: Quality[]) => {
+    if (url && typeof url === "string") out.push({ type, url, thumbnail: thumb ?? "", qualities });
   };
   const items: MediaItem[] = [];
 
@@ -346,16 +430,18 @@ function normalizeFallback(json: any, shortcode: string): ExtractResult {
   if (arr) {
     for (const m of arr) {
       const isVid = m?.type === "video" || m?.is_video || !!m?.video_url || m?.media_type === 2;
-      const url = m?.video_url ?? m?.url ?? m?.download_url ?? m?.src ?? m?.display_url ?? m?.image ?? m?.thumbnail;
-      pushItem(items, isVid ? "video" : "image", typeof m === "string" ? m : url, m?.thumbnail ?? m?.display_url ?? m?.cover);
+      const q = provQualities(m);
+      const url = q?.[0]?.url ?? m?.video_url ?? m?.url ?? m?.download_url ?? m?.src ?? m?.display_url ?? m?.image ?? m?.thumbnail;
+      pushItem(items, isVid ? "video" : "image", typeof m === "string" ? m : url, m?.thumbnail ?? m?.display_url ?? m?.cover, q);
     }
   }
 
   // 3 — flat single-media fields
   if (items.length === 0) {
-    const video = root?.video_url ?? root?.videoUrl ?? root?.video ?? root?.download_url;
+    const q = provQualities(root);
+    const video = q?.[0]?.url ?? root?.video_url ?? root?.videoUrl ?? root?.video ?? root?.download_url;
     const image = root?.image_url ?? root?.display_url ?? root?.thumbnail_url ?? root?.image ?? root?.url;
-    if (video) pushItem(items, "video", video, root?.thumbnail ?? root?.display_url ?? image);
+    if (video) pushItem(items, "video", video, root?.thumbnail ?? root?.display_url ?? image, q);
     else if (image) pushItem(items, "image", image, image);
   }
 
@@ -465,6 +551,7 @@ export type StoryItem = {
   url: string;
   thumbnail: string;
   takenAt: number;
+  qualities?: Quality[];
 };
 
 export type StoriesResult = {
@@ -585,12 +672,13 @@ export async function extractProfile(rawUsername: string): Promise<ProfileResult
 function reelItemToStory(item: any): StoryItem {
   const isVideo = item?.media_type === 2 || Array.isArray(item?.video_versions);
   if (isVideo) {
-    const v = item.video_versions?.[0];
+    const qualities = videoQualities(item?.video_versions ?? []);
     return {
       type: "video",
-      url: v?.url ?? "",
+      url: qualities[0]?.url ?? item?.video_versions?.[0]?.url ?? "",
       thumbnail: item?.image_versions2?.candidates?.[0]?.url ?? "",
       takenAt: item?.taken_at ?? 0,
+      qualities,
     };
   }
   return {

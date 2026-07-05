@@ -4,7 +4,8 @@ import { useState } from "react";
 import { LinkIcon, DownloadIcon } from "./Icons";
 import { AdSlot } from "./Ads";
 
-type MediaItem = { type: "video" | "image"; url: string; thumbnail: string };
+type Quality = { label: string; url: string; width?: number; height?: number };
+type MediaItem = { type: "video" | "image"; url: string; thumbnail: string; qualities?: Quality[] };
 type ExtractResult = {
   type: "video" | "image" | "carousel";
   shortcode: string;
@@ -37,8 +38,36 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
         setTimeout(() => setCopied(false), 2000);
       }}
     >
-      {copied ? "✓ Copied!" : label}
+      {copied ? "✓ Copied" : label}
     </button>
+  );
+}
+
+/** Renders a per-quality download row (or a single button if only one quality). */
+export function DownloadButtons({ item, base, index }: { item: MediaItem; base: string; index: number }) {
+  const ext = item.type === "video" ? "mp4" : "jpg";
+  const qs = item.qualities && item.qualities.length ? item.qualities : [{ label: item.type === "video" ? "HD" : "Original", url: item.url }];
+
+  if (qs.length === 1) {
+    return (
+      <a className="btn btn-solid" href={downloadHref(qs[0].url, `${base}-${index + 1}.${ext}`)}>
+        <DownloadIcon size={14} /> Download {item.type === "video" ? "Video" : "Photo"} · {qs[0].label}
+      </a>
+    );
+  }
+  return (
+    <>
+      <span className="q-label">Choose {item.type === "video" ? "video" : "image"} quality</span>
+      {qs.map((q, qi) => (
+        <a
+          key={q.label + qi}
+          className={`btn qbtn ${qi === 0 ? "btn-solid" : ""}`}
+          href={downloadHref(q.url, `${base}-${index + 1}-${q.label}.${ext}`)}
+        >
+          <DownloadIcon size={13} /> {q.label}{qi === 0 ? " · Best" : ""}
+        </a>
+      ))}
+    </>
   );
 }
 
@@ -75,34 +104,36 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
   return (
     <div className="tool">
       <form className="urlbar" onSubmit={handleSubmit}>
-        <span className="link-ic"><LinkIcon /></span>
-        <input
-          type="url" inputMode="url" aria-label="Instagram URL"
-          placeholder={placeholder ?? "Paste Instagram reel or post link here…"}
-          value={url} onChange={(e) => setUrl(e.target.value)} required
-        />
-        <button type="button" className="btn-paste" onClick={handlePaste}>Paste</button>
-        <button className="btn-gold btn-dl" type="submit" disabled={loading}>
-          {loading ? "Fetching…" : (<><DownloadIcon /> Download</>)}
+        <div className="urlbar-field">
+          <span className="link-ic"><LinkIcon size={16} /></span>
+          <input
+            type="url" inputMode="url" aria-label="Instagram URL"
+            placeholder={placeholder ?? "Paste an Instagram reel or post link"}
+            value={url} onChange={(e) => setUrl(e.target.value)} required
+          />
+          <button type="button" className="btn-paste" onClick={handlePaste}>Paste</button>
+        </div>
+        <button className="btn-primary" type="submit" disabled={loading}>
+          {loading ? (<><span className="mini-spinner" />Fetching</>) : "Download"}
         </button>
       </form>
 
-      <p className="tool-hint">🔒 No login · Public content only · We never store your links</p>
+      <p className="tool-hint">No login · Public content only · We never store your links</p>
 
       {loading && (
         <div className="panel">
           <div className="row">
-            <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="rgba(198,162,75,.25)" strokeWidth="3" />
-              <path d="M21 12a9 9 0 00-9-9" stroke="#B8912F" strokeWidth="3" strokeLinecap="round" />
+            <svg className="spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="#dddddd" strokeWidth="3" />
+              <path d="M21 12a9 9 0 00-9-9" stroke="#181d26" strokeWidth="3" strokeLinecap="round" />
             </svg>
-            Fetching media in HD…
+            Fetching media…
           </div>
           <div className="track"><div className="indet" /></div>
         </div>
       )}
 
-      {error && <div className="tool-error" role="alert">⚠️ {error}</div>}
+      {error && <div className="tool-error" role="alert">{error}</div>}
 
       {result && (
         <>
@@ -129,25 +160,23 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
                   <img className="media-preview" src={downloadHref(item.url, "")} alt="Instagram media preview" />
                 )}
                 <div className="media-actions">
-                  <a className="btn btn-gold" href={downloadHref(item.url, `${base}-${i + 1}.${item.type === "video" ? "mp4" : "jpg"}`)}>
-                    <DownloadIcon size={14} /> Download {item.type === "video" ? "Video HD" : "Photo HD"}
-                  </a>
+                  <DownloadButtons item={item} base={base} index={i} />
                   {item.type === "video" && item.thumbnail && (
-                    <a className="btn" href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}>🖼️ Thumbnail</a>
+                    <a className="btn" href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}>Thumbnail</a>
                   )}
                 </div>
               </div>
             ))}
 
             <div className="section">
-              <h3>📋 Caption{result.caption && <CopyButton text={result.caption} label="Copy Caption" />}</h3>
+              <h3>Caption{result.caption && <CopyButton text={result.caption} label="Copy caption" />}</h3>
               {result.caption ? <p className="caption-text">{result.caption}</p> : <p className="muted">No caption on this post.</p>}
             </div>
 
             <div className="section">
               <h3>
-                <span>#️⃣ Hashtags {result.hashtags.length > 0 && <span className="num">({result.hashtags.length})</span>}</span>
-                {result.hashtags.length > 0 && <CopyButton text={result.hashtags.join(" ")} label="Copy All Hashtags" />}
+                <span>Hashtags {result.hashtags.length > 0 && `(${result.hashtags.length})`}</span>
+                {result.hashtags.length > 0 && <CopyButton text={result.hashtags.join(" ")} label="Copy all" />}
               </h3>
               {result.hashtags.length > 0
                 ? <div className="tags">{result.hashtags.map((t) => <span key={t}>{t}</span>)}</div>
@@ -156,8 +185,8 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
 
             {result.mentions.length > 0 && (
               <div className="section">
-                <h3><span>@ Mentions <span className="num">({result.mentions.length})</span></span>
-                  <CopyButton text={result.mentions.join(" ")} label="Copy Mentions" /></h3>
+                <h3><span>Mentions ({result.mentions.length})</span>
+                  <CopyButton text={result.mentions.join(" ")} label="Copy" /></h3>
                 <div className="tags">{result.mentions.map((m) => <span className="mention" key={m}>{m}</span>)}</div>
               </div>
             )}
