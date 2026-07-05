@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Highlights Downloader"
       variant="highlights"
       currentHref="/highlights-downloader"
-      h1={<><span className="accent">Instagram Highlights</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Highlights</span> Downloader</>}
       sub="Save whole highlight collections from any public profile — covers plus the stories inside each album, all in HD."
       placeholder="Enter @username (e.g. natgeo)…"
       steps={[

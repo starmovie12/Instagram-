@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Signature Tool · Hashtag Extractor"
       variant="url"
       currentHref="/hashtag-extractor"
-      h1={<><span className="accent">Instagram Hashtag</span> Extractor</>}
+      h1={<><span className="gold-text">Instagram Hashtag</span> Extractor</>}
       sub="See exactly which hashtags any viral reel or post used — extracted, separated, and ready to copy all at once."
       placeholder="Paste Instagram post or reel link…"
       steps={[

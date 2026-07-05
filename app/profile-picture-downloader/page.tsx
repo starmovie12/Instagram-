@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Profile Picture Downloader"
       variant="dp"
       currentHref="/profile-picture-downloader"
-      h1={<><span className="accent">Profile Picture</span> Downloader</>}
+      h1={<><span className="gold-text">Profile Picture</span> Downloader</>}
       sub="Instagram shrinks profile photos to a tiny circle. Enter any public username to view and download the full-size HD original."
       placeholder="Enter @username (e.g. cristiano)…"
       steps={[

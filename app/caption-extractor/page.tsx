@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Signature Tool · Caption Extractor"
       variant="url"
       currentHref="/caption-extractor"
-      h1={<><span className="accent">Instagram Caption</span> Extractor</>}
+      h1={<><span className="gold-text">Instagram Caption</span> Extractor</>}
       sub="Instagram won't let you select caption text — we will. Paste any post or reel link and copy the full caption in one click."
       placeholder="Paste Instagram post or reel link…"
       steps={[

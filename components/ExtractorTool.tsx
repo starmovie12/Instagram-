@@ -1,13 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { LinkIcon, DownloadIcon } from "./Icons";
+import { AdSlot } from "./Ads";
 
-type MediaItem = {
-  type: "video" | "image";
-  url: string;
-  thumbnail: string;
-};
-
+type MediaItem = { type: "video" | "image"; url: string; thumbnail: string };
 type ExtractResult = {
   type: "video" | "image" | "carousel";
   shortcode: string;
@@ -30,15 +27,11 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
     <button
       className={`btn ${copied ? "btn-copied" : ""}`}
       onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
+        try { await navigator.clipboard.writeText(text); }
+        catch {
           const ta = document.createElement("textarea");
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          ta.remove();
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); ta.remove();
         }
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -58,13 +51,10 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!url.trim() || loading) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
+    setLoading(true); setError(null); setResult(null);
     try {
       const res = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
       const data = await res.json();
@@ -72,121 +62,108 @@ export default function ExtractorTool({ placeholder }: { placeholder?: string })
       else setResult(data);
     } catch {
       setError("Network error — please check your connection and try again.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   async function handlePaste() {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) setUrl(text.trim());
-    } catch {
-      /* clipboard denied — paste manually */
-    }
+    try { const t = await navigator.clipboard.readText(); if (t) setUrl(t.trim()); }
+    catch { /* paste manually */ }
   }
 
   const base = result ? `instagrab-${result.shortcode}` : "instagrab";
 
   return (
     <div className="tool">
-      <form className="tool-form" onSubmit={handleSubmit}>
-        <div className="tool-input-wrap">
-          <input
-            className="tool-input"
-            type="url"
-            inputMode="url"
-            placeholder={placeholder ?? "Paste Instagram link here… (reel, post, carousel)"}
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            aria-label="Instagram URL"
-            required
-          />
-          <button type="button" className="paste-btn" onClick={handlePaste}>📋 Paste</button>
-        </div>
-        <button className="go-btn" type="submit" disabled={loading}>
-          {loading ? (<><span className="spinner" />Fetching…</>) : "Download"}
+      <form className="urlbar" onSubmit={handleSubmit}>
+        <span className="link-ic"><LinkIcon /></span>
+        <input
+          type="url" inputMode="url" aria-label="Instagram URL"
+          placeholder={placeholder ?? "Paste Instagram reel or post link here…"}
+          value={url} onChange={(e) => setUrl(e.target.value)} required
+        />
+        <button type="button" className="btn-paste" onClick={handlePaste}>Paste</button>
+        <button className="btn-gold btn-dl" type="submit" disabled={loading}>
+          {loading ? "Fetching…" : (<><DownloadIcon /> Download</>)}
         </button>
       </form>
 
-      <p className="tool-hint">🔒 No login • Public content only • We never store your links</p>
+      <p className="tool-hint">🔒 No login · Public content only · We never store your links</p>
+
+      {loading && (
+        <div className="panel">
+          <div className="row">
+            <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="rgba(198,162,75,.25)" strokeWidth="3" />
+              <path d="M21 12a9 9 0 00-9-9" stroke="#B8912F" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            Fetching media in HD…
+          </div>
+          <div className="track"><div className="indet" /></div>
+        </div>
+      )}
 
       {error && <div className="tool-error" role="alert">⚠️ {error}</div>}
 
       {result && (
-        <div className="result">
-          {(result.username || result.fullName) && (
-            <div className="result-head">
-              <div className="avatar">{(result.username || "?").charAt(0).toUpperCase()}</div>
-              <div className="who">
-                <b>@{result.username || "unknown"}</b>
-                {result.fullName && <span>{result.fullName}</span>}
+        <>
+          <div className="result">
+            {(result.username || result.fullName) && (
+              <div className="result-head">
+                <div className="avatar">{(result.username || "?").charAt(0).toUpperCase()}</div>
+                <div className="who">
+                  <b>@{result.username || "unknown"}</b>
+                  {result.fullName && <span>{result.fullName}</span>}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {result.media.map((item, i) => (
-            <div className="media-item" key={i}>
-              {result.media.length > 1 && (
-                <div className="slide-label">Slide {i + 1} of {result.media.length}</div>
-              )}
-              {item.type === "video" ? (
-                <video
-                  className="media-preview"
-                  src={downloadHref(item.url, "")}
-                  poster={item.thumbnail ? downloadHref(item.thumbnail, "") : undefined}
-                  controls playsInline preload="metadata"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="media-preview" src={downloadHref(item.url, "")} alt="Instagram media preview" />
-              )}
-              <div className="media-actions">
-                <a
-                  className="btn btn-gold"
-                  href={downloadHref(item.url, `${base}-${i + 1}.${item.type === "video" ? "mp4" : "jpg"}`)}
-                >
-                  ⬇️ Download {item.type === "video" ? "Video HD" : "Photo HD"}
-                </a>
-                {item.type === "video" && item.thumbnail && (
-                  <a className="btn" href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}>🖼️ Thumbnail</a>
+            {result.media.map((item, i) => (
+              <div className="media-item" key={i}>
+                {result.media.length > 1 && <div className="slide-label">Slide {i + 1} of {result.media.length}</div>}
+                {item.type === "video" ? (
+                  <video className="media-preview" src={downloadHref(item.url, "")}
+                    poster={item.thumbnail ? downloadHref(item.thumbnail, "") : undefined}
+                    controls playsInline preload="metadata" />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="media-preview" src={downloadHref(item.url, "")} alt="Instagram media preview" />
                 )}
+                <div className="media-actions">
+                  <a className="btn btn-gold" href={downloadHref(item.url, `${base}-${i + 1}.${item.type === "video" ? "mp4" : "jpg"}`)}>
+                    <DownloadIcon size={14} /> Download {item.type === "video" ? "Video HD" : "Photo HD"}
+                  </a>
+                  {item.type === "video" && item.thumbnail && (
+                    <a className="btn" href={downloadHref(item.thumbnail, `${base}-thumbnail.jpg`)}>🖼️ Thumbnail</a>
+                  )}
+                </div>
               </div>
+            ))}
+
+            <div className="section">
+              <h3>📋 Caption{result.caption && <CopyButton text={result.caption} label="Copy Caption" />}</h3>
+              {result.caption ? <p className="caption-text">{result.caption}</p> : <p className="muted">No caption on this post.</p>}
             </div>
-          ))}
 
-          <div className="section">
-            <h3>
-              📋 Caption
-              {result.caption && <CopyButton text={result.caption} label="Copy Caption" />}
-            </h3>
-            {result.caption
-              ? <p className="caption-text">{result.caption}</p>
-              : <p className="muted">No caption on this post.</p>}
-          </div>
-
-          <div className="section">
-            <h3>
-              <span>#️⃣ Hashtags {result.hashtags.length > 0 && <span className="num">({result.hashtags.length})</span>}</span>
-              {result.hashtags.length > 0 && (
-                <CopyButton text={result.hashtags.join(" ")} label="Copy All Hashtags" />
-              )}
-            </h3>
-            {result.hashtags.length > 0
-              ? <div className="tags">{result.hashtags.map((t) => <span key={t}>{t}</span>)}</div>
-              : <p className="muted">No hashtags on this post.</p>}
-          </div>
-
-          {result.mentions.length > 0 && (
             <div className="section">
               <h3>
-                <span>@ Mentions <span className="num">({result.mentions.length})</span></span>
-                <CopyButton text={result.mentions.join(" ")} label="Copy Mentions" />
+                <span>#️⃣ Hashtags {result.hashtags.length > 0 && <span className="num">({result.hashtags.length})</span>}</span>
+                {result.hashtags.length > 0 && <CopyButton text={result.hashtags.join(" ")} label="Copy All Hashtags" />}
               </h3>
-              <div className="tags">{result.mentions.map((m) => <span className="mention" key={m}>{m}</span>)}</div>
+              {result.hashtags.length > 0
+                ? <div className="tags">{result.hashtags.map((t) => <span key={t}>{t}</span>)}</div>
+                : <p className="muted">No hashtags on this post.</p>}
             </div>
-          )}
-        </div>
+
+            {result.mentions.length > 0 && (
+              <div className="section">
+                <h3><span>@ Mentions <span className="num">({result.mentions.length})</span></span>
+                  <CopyButton text={result.mentions.join(" ")} label="Copy Mentions" /></h3>
+                <div className="tags">{result.mentions.map((m) => <span className="mention" key={m}>{m}</span>)}</div>
+              </div>
+            )}
+          </div>
+          <AdSlot label="below-result" />
+        </>
       )}
     </div>
   );

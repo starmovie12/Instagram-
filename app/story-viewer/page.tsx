@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Anonymous Story Viewer"
       variant="viewer"
       currentHref="/story-viewer"
-      h1={<><span className="accent">Anonymous</span> Story Viewer</>}
+      h1={<><span className="gold-text">Anonymous</span> Story Viewer</>}
       sub="Watch public Instagram stories without leaving a trace. No login, no view registered — the account owner never knows you looked."
       placeholder="Enter @username to view stories…"
       steps={[

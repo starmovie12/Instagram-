@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Story Downloader"
       variant="stories"
       currentHref="/story-downloader"
-      h1={<><span className="accent">Instagram Story</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Story</span> Downloader</>}
       sub="Stories disappear in 24 hours — save the ones that matter. Enter a public username and download every active story in HD."
       placeholder="Enter @username (e.g. nasa)…"
       steps={[

@@ -14,7 +14,7 @@ export default function Page() {
       eyebrow="Video Downloader"
       variant="url"
       currentHref="/video-downloader"
-      h1={<><span className="accent">Instagram Video</span> Downloader</>}
+      h1={<><span className="gold-text">Instagram Video</span> Downloader</>}
       sub="Save any public Instagram video, reel or IGTV in HD MP4 — fast, free, anonymous, no watermark."
       placeholder="Paste Instagram video / reel / IGTV link…"
       steps={[
