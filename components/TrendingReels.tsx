@@ -30,8 +30,8 @@ export default function TrendingReels() {
   return (
     <section id="trending" className="trending reveal">
       <div className="sect-head">
-        <h2>Trending Reels</h2>
-        <span className="live"><span className="dot" /> LIVE NOW</span>
+        <h2>Trending <span className="serif gold-text">right now.</span></h2>
+        <span className="live"><span className="dot" /> LIVE</span>
       </div>
       <div className="marquee">
         <div className="mtrack">

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import ExtractorTool from "./ExtractorTool";
 import UsernameTool from "./UsernameTool";
-import { StarIcon } from "./Icons";
 import { TOOLS } from "@/lib/tools";
 
 export type Faq = { q: string; a: string };
@@ -24,10 +23,9 @@ export default function ToolPage({ eyebrow, h1, sub, variant, placeholder, steps
   return (
     <>
       <header className="hero">
-        <div className="blob blob-1" /><div className="blob blob-2" /><div className="blob blob-3" />
         <div className="hero-in">
-          <div className="badge"><StarIcon /> {eyebrow}</div>
-          <h1>{h1}</h1>
+          <div className="badge"><span className="dot" /> {eyebrow}</div>
+          <h1 style={{ fontSize: "clamp(38px, 6vw, 68px)" }}>{h1}</h1>
           <p className="sub">{sub}</p>
 
           {variant === "url"
@@ -44,31 +42,31 @@ export default function ToolPage({ eyebrow, h1, sub, variant, placeholder, steps
       </header>
 
       <section className="content">
-        <h2>How it works</h2>
+        <h2>How it <span className="serif gold-text">works.</span></h2>
         <ol className="landing-steps reveal">
           {steps.map((s, i) => <li key={i}><span><b>{s.title}.</b> {s.body}</span></li>)}
         </ol>
 
         {children}
 
-        <h2>Frequently asked questions</h2>
+        <h2>Questions, <span className="serif gold-text">answered.</span></h2>
         <div className="faq reveal">
           {faqs.map((f) => (
             <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>
           ))}
         </div>
 
-        <h2>More InstaGrab tools</h2>
-        <div className="tools-grid reveal">
-          {others.map((t) => (
-            <Link className="tool-card" href={t.href} key={t.href}>
-              <span className="ic">{t.icon}</span>
-              <b>{t.name}</b>
-              <p>{t.desc}</p>
-            </Link>
-          ))}
-        </div>
+        <h2>More from the <span className="serif gold-text">collection.</span></h2>
       </section>
+      <div className="tools-grid reveal" style={{ marginTop: 26 }}>
+        {others.map((t) => (
+          <Link className="tool-card" href={t.href} key={t.href}>
+            <span className="ic">{t.icon}</span>
+            <b>{t.name}</b>
+            <p>{t.desc}</p>
+          </Link>
+        ))}
+      </div>
     </>
   );
 }

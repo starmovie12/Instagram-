@@ -3,72 +3,89 @@ import Link from "next/link";
 import ExtractorTool from "@/components/ExtractorTool";
 import TrendingReels from "@/components/TrendingReels";
 import CountUp from "@/components/CountUp";
-import { StarIcon } from "@/components/Icons";
 import { AdSlot } from "@/components/Ads";
 import { TOOLS } from "@/lib/tools";
 
 export const metadata: Metadata = {
-  title: "InstaGrab — Instagram Reels, Video, Story & Photo Downloader 2026",
+  title: "InstaGrab — Instagram Reels, Video, Story & Photo Downloader",
   description:
     "Download Instagram reels, videos, photos, stories, highlights & profile pictures in HD — plus copy the full caption and every hashtag in one click. Fast, secure, no watermark, no login.",
   alternates: { canonical: "/" },
 };
 
+/* word-mask reveal helper — each word slides up with a stagger */
+function Words({ text, from = 0 }: { text: string; from?: number }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span className="w" style={{ ["--i" as string]: from + i }} key={i}>{w}&nbsp;</span>
+      ))}
+    </>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
-      {/* HERO */}
-      <header id="top" className="hero">
-        <div className="blob blob-1" /><div className="blob blob-2" /><div className="blob blob-3" />
+      {/* ================= HERO ================= */}
+      <header className="hero">
         <div className="hero-in">
-          <div className="badge"><StarIcon /> OCT 2026 · $10M ASSET VALUE</div>
-          <h1>Instagram<br /><span className="gold-text">Downloader 2026</span></h1>
+          <div className="badge"><span className="dot" /> The Gold Standard of Instagram Tools</div>
+
+          <h1 aria-label="Download anything from Instagram, beautifully.">
+            <span className="wline"><Words text="Download anything" /></span>
+            <span className="wline">
+              <Words text="from Instagram," from={2} />
+              <span className="w serif gold-text" style={{ ["--i" as string]: 5 }}>beautifully.</span>
+            </span>
+          </h1>
+
           <p className="sub">
-            Reels, videos, photos, stories, highlights &amp; profile pictures in HD.<br />
-            <b>Fast. Secure. No Watermark.</b>
+            Reels, videos, photos, stories, highlights &amp; profile pictures in flawless HD —
+            plus the <b>full caption and every hashtag</b>, one click away.
           </p>
 
           <ExtractorTool />
 
+          <div className="trust">
+            <span><b>✓</b> No login</span>
+            <span><b>✓</b> No watermark</span>
+            <span><b>✓</b> HD quality</span>
+            <span><b>✓</b> Free forever</span>
+          </div>
+
           <div className="chips">
-            <div className="chip">
-              <span className="cic">🎬</span>
-              <span><b>HD Quality</b><small>1080p &amp; 4K</small></span>
-            </div>
-            <div className="chip">
-              <span className="cic">💧</span>
-              <span><b>No Watermark</b><small>Clean downloads</small></span>
-            </div>
-            <div className="chip">
-              <span className="cic">⚡</span>
-              <span><b>Lightning Fast</b><small>Instant results</small></span>
-            </div>
-            <div className="chip">
-              <span className="cic">🔒</span>
-              <span><b>100% Secure</b><small>Private &amp; safe</small></span>
-            </div>
+            <div className="chip"><span className="cic">🎬</span><span><b>Flawless HD</b><small>Original quality, zero re-encode</small></span></div>
+            <div className="chip"><span className="cic">📋</span><span><b>Caption + Tags</b><small>Full text, one-click copy</small></span></div>
+            <div className="chip"><span className="cic">🕵️</span><span><b>Anonymous</b><small>No account, no trace</small></span></div>
+            <div className="chip"><span className="cic">⚡</span><span><b>Instant</b><small>Under ten seconds</small></span></div>
           </div>
         </div>
       </header>
 
-      {/* TRENDING */}
+      {/* ================= TRENDING MARQUEE ================= */}
       <TrendingReels />
 
-      {/* STATS */}
+      {/* ================= STATS ================= */}
       <section className="stats reveal">
         <div className="stats-in">
-          <div className="stat"><div className="v"><CountUp to={25} suffix="M+" /></div><div className="l">Reels Downloaded</div></div>
-          <div className="stat"><div className="v"><CountUp to={2} suffix="M+" /></div><div className="l">Happy Users</div></div>
+          <div className="stat"><div className="v"><CountUp to={25} suffix="M+" /></div><div className="l">Downloads served</div></div>
+          <div className="stat"><div className="v"><CountUp to={2} suffix="M+" /></div><div className="l">Monthly users</div></div>
           <div className="stat"><div className="v"><CountUp to={99.9} decimals={1} suffix="%" /></div><div className="l">Uptime</div></div>
-          <div className="stat"><div className="v"><CountUp to={4.9} decimals={1} /><StarIcon size={22} /></div><div className="l">User Rating</div></div>
+          <div className="stat"><div className="v"><CountUp to={4.9} decimals={1} suffix="★" /></div><div className="l">User rating</div></div>
         </div>
       </section>
 
       <div className="wrap"><AdSlot label="home-mid" /></div>
 
-      {/* ALL TOOLS */}
-      <h2 className="section-title reveal">Every Instagram downloader, one place</h2>
-      <p className="section-sub reveal">Pick a tool — or just paste any link above.</p>
+      {/* ================= TOOLS ================= */}
+      <div className="reveal" style={{ textAlign: "center", marginTop: 90 }}>
+        <span className="eyebrow"><span className="rule" />01 — The Collection<span className="rule" /></span>
+      </div>
+      <h2 className="section-title reveal" style={{ margin: "14px 0 10px" }}>
+        Ten tools. <span className="serif gold-text">One</span> golden bar.
+      </h2>
+      <p className="section-sub reveal">Every downloader you&apos;ll ever need — or just paste any link above.</p>
       <div className="tools-grid reveal">
         {TOOLS.map((t) => (
           <Link className="tool-card" href={t.href} key={t.href}>
@@ -80,54 +97,56 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* WHY CHOOSE */}
-      <section id="features" className="why reveal" style={{ padding: "0 24px" }}>
-        <div className="center">
-          <h2 className="section-title" style={{ margin: "64px 0 8px" }}>Why choose <span className="gold-text">InstaGrab</span>?</h2>
-          <p className="section-sub">The most complete Instagram toolkit of 2026</p>
-          <div className="cards">
-            <div className="card"><span className="ic">🎬</span><h3>Ultra HD Quality</h3><p>Download reels, videos &amp; photos in stunning HD with zero compression or watermark.</p></div>
-            <div className="card"><span className="ic">📋</span><h3>Caption &amp; Hashtags</h3><p>The signature edge — copy the full caption and every hashtag in one click.</p></div>
-            <div className="card"><span className="ic">🕵️</span><h3>Anonymous</h3><p>No login, no tracking, no history. View and download completely privately.</p></div>
-            <div className="card"><span className="ic">🗂️</span><h3>All In One</h3><p>Reels, video, photos, carousels, stories, highlights &amp; profile pictures — free.</p></div>
-          </div>
-        </div>
-      </section>
+      {/* ================= WHY ================= */}
+      <div className="reveal" style={{ textAlign: "center", marginTop: 100 }}>
+        <span className="eyebrow"><span className="rule" />02 — The Difference<span className="rule" /></span>
+      </div>
+      <h2 className="section-title reveal" style={{ margin: "14px 0 10px" }}>
+        Built like it costs <span className="serif gold-text">money.</span>
+      </h2>
+      <p className="section-sub reveal">It doesn&apos;t. But nothing else in this niche feels like this.</p>
+      <div className="cards reveal">
+        <div className="card"><span className="ic">🎬</span><h3>Original quality</h3><p>The exact file Instagram stores — no re-encoding, no compression, no watermark. What the creator uploaded is what you get.</p></div>
+        <div className="card"><span className="ic">📋</span><h3>Caption &amp; hashtags</h3><p>The signature edge. Full caption text, every hashtag and mention — separated, counted, and one click to copy.</p></div>
+        <div className="card"><span className="ic">🕵️</span><h3>Truly anonymous</h3><p>No login, no tracking, no history. Story views never register. Your links are never stored.</p></div>
+        <div className="card"><span className="ic">🗂️</span><h3>Complete toolkit</h3><p>Reels, video, photos, carousels, stories, highlights, profile pictures — and an anonymous story viewer.</p></div>
+      </div>
 
-      {/* HOW IT WORKS */}
-      <section id="how" className="how reveal" style={{ padding: "0 24px" }}>
-        <div className="center">
-          <h2 className="section-title" style={{ margin: "64px 0 8px" }}>How it works</h2>
-          <p className="section-sub">Three steps. Under ten seconds.</p>
-          <div className="cards">
-            <div className="card step"><span className="step-num">01</span><h3>Copy the link</h3><p>Open Instagram, tap Share on any reel/post and choose Copy Link. For stories &amp; DP, use the @username.</p></div>
-            <div className="card step"><span className="step-num">02</span><h3>Paste it above</h3><p>Drop the link in the golden bar and hit Download.</p></div>
-            <div className="card step"><span className="step-num">03</span><h3>Save in HD</h3><p>Download the media, and copy the caption or all hashtags with one tap.</p></div>
-          </div>
-        </div>
-      </section>
+      {/* ================= HOW ================= */}
+      <div className="reveal" style={{ textAlign: "center", marginTop: 100 }}>
+        <span className="eyebrow"><span className="rule" />03 — The Ritual<span className="rule" /></span>
+      </div>
+      <h2 className="section-title reveal" style={{ margin: "14px 0 10px" }}>
+        Three steps. <span className="serif gold-text">Ten seconds.</span>
+      </h2>
+      <div className="cards reveal" style={{ marginTop: 30 }}>
+        <div className="card step"><span className="step-num">01</span><h3>Copy the link</h3><p>Open Instagram, tap Share on any reel or post and choose Copy Link. For stories &amp; profile pictures, just grab the @username.</p></div>
+        <div className="card step"><span className="step-num">02</span><h3>Paste it above</h3><p>Drop it in the golden bar and hit Download. We fetch everything — media, caption, tags — in one pass.</p></div>
+        <div className="card step"><span className="step-num">03</span><h3>Save &amp; copy</h3><p>Download in original HD, and copy the caption or all hashtags with a single tap. Done.</p></div>
+      </div>
 
-      {/* PREMIUM BAND */}
+      {/* ================= PREMIUM BAND ================= */}
       <div className="wrap">
         <section className="premium reveal">
           <div>
-            <h2>The complete creator toolkit</h2>
-            <p>Everything a content creator or social media manager needs — in one fast, clean, premium tool.</p>
+            <span className="eyebrow" style={{ marginBottom: 14 }}><span className="rule" />For Creators</span>
+            <h2>The complete <span className="serif gold-text">creator</span> toolkit</h2>
+            <p>Everything a content creator or social media manager needs — in one fast, clean, beautiful tool.</p>
             <ul>
               <li>Reels, video, IGTV, photo &amp; carousel downloads in HD</li>
               <li>Full caption + every hashtag, one-click copy</li>
               <li>Stories, highlights, anonymous viewer &amp; HD profile pictures</li>
               <li>No login, no watermark, no limits</li>
             </ul>
-            <Link href="/caption-extractor" className="btn-gold" style={{ padding: "13px 26px", fontSize: 15 }}>Try the caption extractor →</Link>
+            <Link href="/caption-extractor" className="btn-gold" style={{ padding: "14px 28px", fontSize: 15 }}>Try the caption extractor →</Link>
           </div>
-          <div className="premium-orb">👑</div>
+          <div className="premium-orb"><span>👑</span></div>
         </section>
       </div>
 
-      {/* FAQ */}
+      {/* ================= FAQ ================= */}
       <section className="content">
-        <h2>Frequently asked questions</h2>
+        <h2>Questions, <span className="serif gold-text">answered.</span></h2>
         <div className="faq reveal">
           <details><summary>Is InstaGrab really free?</summary><p>Yes — completely free, no login, no signup, no watermark. Works on mobile and desktop.</p></details>
           <details><summary>Can I download from private accounts?</summary><p>No. Only public content can be downloaded. Private accounts are protected by Instagram and we respect that.</p></details>
