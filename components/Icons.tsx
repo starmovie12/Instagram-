@@ -1,5 +1,5 @@
 export const LogoMark = ({ size = 20, stroke = 1.8 }: { size?: number; stroke?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ color: "var(--gold-ink, #fffdf6)" }}>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ color: "#ffffff" }}>
     <rect x="3" y="3" width="18" height="18" rx="5.5" stroke="currentColor" strokeWidth={stroke} />
     <path d="M10 8.8l5.2 3.2L10 15.2V8.8z" fill="currentColor" />
   </svg>

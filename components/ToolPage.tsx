@@ -22,16 +22,15 @@ export default function ToolPage({ eyebrow, h1, sub, variant, placeholder, steps
   const others = TOOLS.filter((t) => t.href !== currentHref).slice(0, 6);
   return (
     <>
+      {/* hero — white canvas, calm */}
       <header className="hero">
         <div className="hero-in">
-          <div className="badge"><span className="dot" /> {eyebrow}</div>
-          <h1 style={{ fontSize: "clamp(38px, 6vw, 68px)" }}>{h1}</h1>
+          <p className="eyebrow">{eyebrow}</p>
+          <h1>{h1}</h1>
           <p className="sub">{sub}</p>
-
           {variant === "url"
             ? <ExtractorTool placeholder={placeholder} />
             : <UsernameTool mode={variant} placeholder={placeholder} />}
-
           <div className="trust">
             <span><b>✓</b> No login</span>
             <span><b>✓</b> Free forever</span>
@@ -41,32 +40,55 @@ export default function ToolPage({ eyebrow, h1, sub, variant, placeholder, steps
         </div>
       </header>
 
-      <section className="content">
-        <h2>How it <span className="serif gold-text">works.</span></h2>
-        <ol className="landing-steps reveal">
-          {steps.map((s, i) => <li key={i}><span><b>{s.title}.</b> {s.body}</span></li>)}
-        </ol>
-
-        {children}
-
-        <h2>Questions, <span className="serif gold-text">answered.</span></h2>
-        <div className="faq reveal">
-          {faqs.map((f) => (
-            <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>
-          ))}
+      {/* how it works */}
+      <section className="band-tight reveal">
+        <div className="wrap">
+          <div className="section-head"><h2>How it works</h2></div>
+          <div className="steps">
+            {steps.map((s, i) => (
+              <div className="step" key={i}>
+                <span className="n">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
-
-        <h2>More from the <span className="serif gold-text">collection.</span></h2>
       </section>
-      <div className="tools-grid reveal" style={{ marginTop: 26 }}>
-        {others.map((t) => (
-          <Link className="tool-card" href={t.href} key={t.href}>
-            <span className="ic">{t.icon}</span>
-            <b>{t.name}</b>
-            <p>{t.desc}</p>
-          </Link>
-        ))}
-      </div>
+
+      {children && (
+        <section className="band-tight reveal">
+          <div className="wrap child-content">{children}</div>
+        </section>
+      )}
+
+      {/* faq */}
+      <section className="band-tight reveal">
+        <div className="wrap">
+          <div className="section-head"><h2>Frequently asked questions</h2></div>
+          <div className="faq">
+            {faqs.map((f) => (
+              <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* more tools */}
+      <section className="band-tight reveal">
+        <div className="wrap">
+          <div className="section-head"><h2>More InstaGrab tools</h2></div>
+          <div className="demo-grid">
+            {others.map((t) => (
+              <Link className="demo-card" href={t.href} key={t.href}>
+                <span className="ic">{t.icon}</span>
+                <b>{t.name}</b>
+                <p>{t.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }
