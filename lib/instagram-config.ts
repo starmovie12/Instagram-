@@ -10,7 +10,7 @@
  */
 export const IG_CONFIG = {
   /** GraphQL query document ID — ye har 2-4 hafte badal sakta hai */
-  docId: "10015901848480474",
+  docId: "20565867659069524",
 
   /** Instagram web app ID (X-IG-App-ID header) — rarely changes */
   appId: "936619743392459",
