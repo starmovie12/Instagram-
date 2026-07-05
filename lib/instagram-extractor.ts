@@ -141,8 +141,52 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
   };
 }
 
+/**
+ * Session priming — the fix for the PRD's #1 risk (serverless IP block).
+ * Instagram serves logged-out datacenter requests EMPTY data unless the call
+ * carries a real csrftoken cookie. We fetch the homepage once, harvest the
+ * cookies Instagram sets, and reuse them (cached ~15 min) on every extraction.
+ */
+let sessionCache: { cookie: string; csrf: string; at: number } | null = null;
+
+async function getSession(): Promise<{ cookie: string; csrf: string }> {
+  if (sessionCache && Date.now() - sessionCache.at < 15 * 60_000) {
+    return { cookie: sessionCache.cookie, csrf: sessionCache.csrf };
+  }
+  try {
+    const res = await fetch("https://www.instagram.com/", {
+      headers: {
+        "User-Agent": IG_CONFIG.userAgent,
+        Accept: "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      cache: "no-store",
+    });
+    // undici exposes getSetCookie(); fall back to the combined header.
+    const setCookies: string[] =
+      (res.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ??
+      (res.headers.get("set-cookie") ? [res.headers.get("set-cookie")!] : []);
+    const jar: Record<string, string> = {};
+    for (const c of setCookies) {
+      const [pair] = c.split(";");
+      const eq = pair.indexOf("=");
+      if (eq > 0) jar[pair.slice(0, eq).trim()] = pair.slice(eq + 1).trim();
+    }
+    const csrf = jar["csrftoken"] ?? "";
+    const cookie = Object.entries(jar).map(([k, v]) => `${k}=${v}`).join("; ");
+    if (cookie) {
+      sessionCache = { cookie, csrf, at: Date.now() };
+      return { cookie, csrf };
+    }
+  } catch {
+    /* fall through — try without a primed session */
+  }
+  return { cookie: "", csrf: "" };
+}
+
 /** Primary method: Instagram's own public GraphQL endpoint. */
 async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
+  const session = await getSession();
   const variables = JSON.stringify({
     shortcode,
     fetch_tagged_user_count: null,
@@ -175,9 +219,13 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
         "X-IG-App-ID": IG_CONFIG.appId,
         "X-FB-LSD": IG_CONFIG.lsd,
         "X-ASBD-ID": "129477",
+        "X-IG-WWW-Claim": "0",
+        "X-Requested-With": "XMLHttpRequest",
         "Sec-Fetch-Site": "same-origin",
         Origin: "https://www.instagram.com",
         Referer: `https://www.instagram.com/p/${shortcode}/`,
+        ...(session.csrf ? { "X-CSRFToken": session.csrf } : {}),
+        ...(session.cookie ? { Cookie: session.cookie } : {}),
       },
       body: body.toString(),
       cache: "no-store",
@@ -212,18 +260,42 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
     );
   }
 
+  // Instagram tells us to log in / checkpoint = our server IP is being blocked.
+  const blocked =
+    json?.require_login === true ||
+    json?.status === "fail" ||
+    (typeof json?.message === "string" && /login|checkpoint|challenge/i.test(json.message));
+  if (blocked) {
+    throw new ExtractError(
+      "Instagram is blocking our server right now (it wants a login for this request). This is usually a temporary data-center block — please try again shortly.",
+      "UPSTREAM_BLOCKED"
+    );
+  }
+
+  const hasMediaField =
+    json?.data && ("xdt_shortcode_media" in json.data || "shortcode_media" in json.data);
   const media = json?.data?.xdt_shortcode_media ?? json?.data?.shortcode_media;
+
   if (!media) {
-    // Either the post is private/deleted, or doc_id rotated.
-    if (json?.errors || json?.data === null) {
+    // data present + media field explicitly null → the post is private/deleted.
+    if (hasMediaField) {
+      throw new ExtractError(
+        "This post is private or was deleted. Only public content can be downloaded.",
+        "PRIVATE"
+      );
+    }
+    // errors block present → the doc_id/query really is stale.
+    if (Array.isArray(json?.errors) && json.errors.length) {
       throw new ExtractError(
         "The extractor is temporarily out of date (Instagram rotated its internal IDs). We'll patch it shortly.",
         "EXTRACTOR_DOWN"
       );
     }
+    // data === null with no media field and no errors → empty response to our
+    // server = the classic data-center IP block, NOT a doc_id problem.
     throw new ExtractError(
-      "This post is private or was deleted. Only public content can be downloaded.",
-      "PRIVATE"
+      "Instagram returned an empty response to our server — this is usually a temporary data-center IP block, not a broken link. Please try again in a minute.",
+      "UPSTREAM_BLOCKED"
     );
   }
 
@@ -332,15 +404,19 @@ export function parseUsername(raw: string): string {
   return candidate;
 }
 
-function igHeaders(referer = "https://www.instagram.com/") {
+async function igHeaders(referer = "https://www.instagram.com/") {
+  const session = await getSession();
   return {
     "User-Agent": IG_CONFIG.userAgent,
     "X-IG-App-ID": IG_CONFIG.appId,
     "X-ASBD-ID": "129477",
+    "X-IG-WWW-Claim": "0",
     "X-Requested-With": "XMLHttpRequest",
     "Sec-Fetch-Site": "same-origin",
     Referer: referer,
     Accept: "*/*",
+    ...(session.csrf ? { "X-CSRFToken": session.csrf } : {}),
+    ...(session.cookie ? { Cookie: session.cookie } : {}),
   };
 }
 
@@ -348,16 +424,16 @@ function igHeaders(referer = "https://www.instagram.com/") {
 async function fetchJson(url: string, referer?: string): Promise<any> {
   let res: Response;
   try {
-    res = await fetch(url, { headers: igHeaders(referer), cache: "no-store" });
+    res = await fetch(url, { headers: await igHeaders(referer), cache: "no-store" });
   } catch {
     throw new ExtractError("Couldn't reach Instagram. Please try again.", "UPSTREAM_BLOCKED");
   }
   if (res.status === 404) {
     throw new ExtractError("No account found with that username.", "NOT_FOUND");
   }
-  if (res.status === 429 || res.status === 403) {
+  if (res.status === 401 || res.status === 429 || res.status === 403) {
     throw new ExtractError(
-      "Instagram is rate-limiting our server right now. Please try again in a minute.",
+      "Instagram is blocking our server right now (data-center IP). Please try again in a minute.",
       "UPSTREAM_BLOCKED"
     );
   }
@@ -368,8 +444,8 @@ async function fetchJson(url: string, referer?: string): Promise<any> {
     return await res.json();
   } catch {
     throw new ExtractError(
-      "Instagram changed its response format — the extractor needs a patch.",
-      "EXTRACTOR_DOWN"
+      "Instagram returned an empty/non-JSON response — usually a temporary data-center IP block. Please try again shortly.",
+      "UPSTREAM_BLOCKED"
     );
   }
 }
