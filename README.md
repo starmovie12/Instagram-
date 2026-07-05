@@ -66,7 +66,46 @@ Instagram rotates its internal `doc_id` deliberately. When extractions start fai
 3. Find the `graphql` request → copy the new `doc_id` from its form data
 4. Paste it into **`lib/instagram-config.ts`** → commit → push (Vercel auto-deploys)
 
-That's the whole fix. If breakage gets frequent, set `useFallbackApi: true` in the same file and configure `FALLBACK_API_URL` (+ optional `FALLBACK_API_KEY`) in Vercel env vars.
+That's the whole fix for a rotated `doc_id`.
+
+## 🛡️ Reliable extraction on Vercel (fallback API)
+
+Instagram frequently blocks **data-center IPs** (Vercel/Cloudflare shared IPs) and returns
+empty data no matter how fresh the `doc_id` is — this is the PRD's #1 technical risk, and
+self-scraping from a free serverless IP is *not* reliable on its own. The extractor already
+primes a session cookie to reduce this, but the guaranteed fix is a **fallback API**.
+
+It's wired in and **automatic**: try Instagram directly first, and if that gets blocked,
+fall back to a third-party API — but only once you configure it (otherwise nothing changes).
+
+**Setup (Vercel → Project → Settings → Environment Variables):**
+
+| Variable | Value |
+|---|---|
+| `FALLBACK_API_URL` | provider endpoint with a `{url}` or `{shortcode}` placeholder |
+| `FALLBACK_API_KEY` | your API key |
+| `FALLBACK_API_KEY_HEADER` | header name for the key (default `x-api-key`) |
+| `USE_FALLBACK_API` | *(optional)* `true` to skip the direct attempt and always use the API |
+
+**Example — ScrapeCreators** (free credits, named in the PRD):
+
+```
+FALLBACK_API_URL = https://api.scrapecreators.com/v1/instagram/post?url={url}
+FALLBACK_API_KEY = <your key>
+FALLBACK_API_KEY_HEADER = x-api-key
+```
+
+**Example — a RapidAPI Instagram downloader:**
+
+```
+FALLBACK_API_URL = https://<host>/media?shortcode={shortcode}
+FALLBACK_API_KEY = <your rapidapi key>
+FALLBACK_API_KEY_HEADER = x-rapidapi-key
+```
+
+The response normalizer in `lib/instagram-extractor.ts` understands the common provider
+shapes (Instagram GraphQL, `{ media:[…] }`, and flat `video_url`/`image_url` fields), so most
+providers work with no code change. Redeploy after setting the vars.
 
 ## Develop & deploy
 

@@ -309,36 +309,137 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
   return parseGraphqlMedia(media, shortcode);
 }
 
-/** Fallback: a third-party API configured via env (see instagram-config.ts). */
-async function extractViaFallback(shortcode: string): Promise<ExtractResult> {
-  if (!IG_CONFIG.fallbackApiUrl) {
+/**
+ * Normalize whatever JSON a third-party provider returns into our shape.
+ * Handles the common patterns so most providers work without code changes:
+ *  1. Instagram's own GraphQL shape (many providers proxy it verbatim)
+ *  2. A generic { media:[{type,url,thumbnail}], caption, username } shape
+ *  3. Flat fields (video_url / image_url / display_url / download_url …)
+ */
+function normalizeFallback(json: any, shortcode: string): ExtractResult {
+  // 1 — GraphQL shape (reuse the exact same parser as the direct method)
+  const gql =
+    json?.data?.xdt_shortcode_media ?? json?.data?.shortcode_media ??
+    json?.xdt_shortcode_media ?? json?.shortcode_media;
+  if (gql && (gql.is_video !== undefined || gql.edge_sidecar_to_children || gql.display_url)) {
+    return parseGraphqlMedia(gql, shortcode);
+  }
+
+  const root = json?.data ?? json?.result ?? json;
+  const caption: string =
+    root?.caption?.text ?? root?.caption ?? root?.title ?? root?.description ?? "";
+  const username: string = root?.username ?? root?.owner?.username ?? root?.author ?? "";
+  const fullName: string = root?.full_name ?? root?.owner?.full_name ?? "";
+
+  const pushItem = (out: MediaItem[], type: "video" | "image", url?: string, thumb?: string) => {
+    if (url && typeof url === "string") out.push({ type, url, thumbnail: thumb ?? "" });
+  };
+  const items: MediaItem[] = [];
+
+  // 2 — array of media (carousel or single) under common keys
+  const arr =
+    (Array.isArray(root?.media) && root.media) ||
+    (Array.isArray(root?.medias) && root.medias) ||
+    (Array.isArray(root?.items) && root.items) ||
+    (Array.isArray(root?.url) && root.url) ||
+    null;
+  if (arr) {
+    for (const m of arr) {
+      const isVid = m?.type === "video" || m?.is_video || !!m?.video_url || m?.media_type === 2;
+      const url = m?.video_url ?? m?.url ?? m?.download_url ?? m?.src ?? m?.display_url ?? m?.image ?? m?.thumbnail;
+      pushItem(items, isVid ? "video" : "image", typeof m === "string" ? m : url, m?.thumbnail ?? m?.display_url ?? m?.cover);
+    }
+  }
+
+  // 3 — flat single-media fields
+  if (items.length === 0) {
+    const video = root?.video_url ?? root?.videoUrl ?? root?.video ?? root?.download_url;
+    const image = root?.image_url ?? root?.display_url ?? root?.thumbnail_url ?? root?.image ?? root?.url;
+    if (video) pushItem(items, "video", video, root?.thumbnail ?? root?.display_url ?? image);
+    else if (image) pushItem(items, "image", image, image);
+  }
+
+  if (items.length === 0) {
     throw new ExtractError(
-      "Fallback API is enabled but FALLBACK_API_URL is not configured.",
+      "The fallback API responded but no media URL could be found in it. Its response format may need a small adapter.",
       "EXTRACTOR_DOWN"
     );
   }
-  const url = IG_CONFIG.fallbackApiUrl.replace("{shortcode}", shortcode);
-  const res = await fetch(url, {
-    headers: IG_CONFIG.fallbackApiKey
-      ? { "x-api-key": IG_CONFIG.fallbackApiKey }
-      : undefined,
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new ExtractError("Fallback API request failed.", "EXTRACTOR_DOWN");
+
+  const thumbnail = items[0].thumbnail || (items[0].type === "image" ? items[0].url : "");
+  return {
+    type: items.length > 1 ? "carousel" : items[0].type,
+    shortcode,
+    username,
+    fullName,
+    caption,
+    hashtags: extractHashtags(caption),
+    mentions: extractMentions(caption),
+    thumbnail,
+    media: items,
+  };
+}
+
+/** Fallback: a third-party API configured via env (see instagram-config.ts). */
+async function extractViaFallback(rawUrl: string, shortcode: string): Promise<ExtractResult> {
+  if (!IG_CONFIG.fallbackApiUrl) {
+    throw new ExtractError(
+      "Instagram blocked our server and no fallback API is configured. Set FALLBACK_API_URL in the environment to enable reliable extraction.",
+      "UPSTREAM_BLOCKED"
+    );
   }
-  const json: any = await res.json();
-  // Expect the fallback to return the same GraphQL media shape, or adapt here.
-  const media = json?.data?.xdt_shortcode_media ?? json?.data?.shortcode_media ?? json;
-  return parseGraphqlMedia(media, shortcode);
+  const postUrl = `https://www.instagram.com/p/${shortcode}/`;
+  const endpoint = IG_CONFIG.fallbackApiUrl
+    .replace("{shortcode}", encodeURIComponent(shortcode))
+    .replace("{url}", encodeURIComponent(rawUrl || postUrl));
+
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
+      headers: IG_CONFIG.fallbackApiKey
+        ? { [IG_CONFIG.fallbackApiKeyHeader]: IG_CONFIG.fallbackApiKey }
+        : undefined,
+      cache: "no-store",
+    });
+  } catch {
+    throw new ExtractError("Couldn't reach the fallback API. Please try again.", "UPSTREAM_BLOCKED");
+  }
+  if (!res.ok) {
+    throw new ExtractError(
+      `The fallback API returned an error (HTTP ${res.status}). Check your FALLBACK_API_URL / key.`,
+      "EXTRACTOR_DOWN"
+    );
+  }
+  let json: any;
+  try {
+    json = await res.json();
+  } catch {
+    throw new ExtractError("The fallback API returned a non-JSON response.", "EXTRACTOR_DOWN");
+  }
+  return normalizeFallback(json, shortcode);
 }
 
 export async function extract(rawUrl: string): Promise<ExtractResult> {
   const shortcode = parseShortcode(rawUrl);
-  if (IG_CONFIG.useFallbackApi) {
-    return extractViaFallback(shortcode);
+
+  // Force fallback-first if explicitly configured.
+  if (IG_CONFIG.useFallbackApi && IG_CONFIG.fallbackApiUrl) {
+    return extractViaFallback(rawUrl, shortcode);
   }
-  return extractViaGraphql(shortcode);
+
+  try {
+    return await extractViaGraphql(shortcode);
+  } catch (err) {
+    // AUTO-fallback: if the direct method got blocked / went stale and a
+    // fallback API is configured, try it before giving up.
+    const recoverable =
+      err instanceof ExtractError &&
+      (err.code === "UPSTREAM_BLOCKED" || err.code === "EXTRACTOR_DOWN");
+    if (recoverable && IG_CONFIG.fallbackApiUrl) {
+      return extractViaFallback(rawUrl, shortcode);
+    }
+    throw err;
+  }
 }
 
 /* ============================================================

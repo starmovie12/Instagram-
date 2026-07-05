@@ -43,14 +43,35 @@ export const IG_CONFIG = {
   highlightsTrayUrl:
     "https://www.instagram.com/api/v1/highlights/{userId}/highlights_tray/",
 
-  /**
-   * FALLBACK PLAN — agar khud ka scraper bahut tootne lage to `true` karo
-   * aur Vercel env me FALLBACK_API_URL set karo (e.g. koi RapidAPI /
-   * ScrapeCreators endpoint jo shortcode lekar media JSON deta ho).
-   */
-  useFallbackApi: false,
+  /* ==========================================================
+   * FALLBACK API — the reliable fix when Instagram blocks
+   * Vercel's data-center IP (PRD §6, the #1 technical risk).
+   *
+   * How it works:
+   *  - Leave `useFallbackApi` false and it runs AUTOMATICALLY: we try
+   *    Instagram directly first, and only if that gets blocked do we call
+   *    the fallback API. Set it `true` to force the fallback first.
+   *  - It stays OFF until you set FALLBACK_API_URL, so nothing breaks
+   *    without config.
+   *
+   * Vercel setup (Project → Settings → Environment Variables):
+   *   FALLBACK_API_URL   = the provider endpoint, with {url} or {shortcode}
+   *   FALLBACK_API_KEY   = your API key
+   *   FALLBACK_API_KEY_HEADER = header name for the key (default x-api-key)
+   *
+   * Example — ScrapeCreators (free credits, named in the PRD):
+   *   FALLBACK_API_URL = https://api.scrapecreators.com/v1/instagram/post?url={url}
+   *   FALLBACK_API_KEY = <your key>
+   *   FALLBACK_API_KEY_HEADER = x-api-key
+   * Example — a RapidAPI Instagram downloader:
+   *   FALLBACK_API_URL = https://<host>/media?shortcode={shortcode}
+   *   FALLBACK_API_KEY = <your rapidapi key>
+   *   FALLBACK_API_KEY_HEADER = x-rapidapi-key
+   * ========================================================== */
+  useFallbackApi: process.env.USE_FALLBACK_API === "true",
   fallbackApiUrl: process.env.FALLBACK_API_URL ?? "",
   fallbackApiKey: process.env.FALLBACK_API_KEY ?? "",
+  fallbackApiKeyHeader: process.env.FALLBACK_API_KEY_HEADER ?? "x-api-key",
 
   /** Rate limit: per IP per minute */
   rateLimitPerMinute: 10,
