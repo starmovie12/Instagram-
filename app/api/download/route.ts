@@ -25,7 +25,10 @@ export async function GET(req: NextRequest) {
   }
 
   const src = req.nextUrl.searchParams.get("url") ?? "";
-  const requestedName = req.nextUrl.searchParams.get("filename") ?? "";
+  const requestedName =
+    req.nextUrl.searchParams.get("filename") ??
+    req.nextUrl.searchParams.get("name") ??
+    "";
 
   let target: URL;
   try {
@@ -50,7 +53,8 @@ export async function GET(req: NextRequest) {
 
   const contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
   const ext = contentType.includes("video") ? "mp4" : "jpg";
-  const filename = safeFilename(requestedName, `instagrab-${Date.now()}.${ext}`);
+  let filename = safeFilename(requestedName, `instagrab-${Date.now()}.${ext}`);
+  if (!/\.(mp4|jpe?g|png|webp|heic)$/i.test(filename)) filename += `.${ext}`;
 
   return new NextResponse(upstream.body, {
     headers: {

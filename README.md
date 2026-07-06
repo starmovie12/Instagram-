@@ -2,7 +2,7 @@
 
 The **premium** Instagram toolkit — every downloader plus **caption + hashtag extraction** (the wedge that makes this more than another downloader).
 
-Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed on the **"Warm Light Regalia"** system (CROWN): white-first canvas, warm-cream gold cards, a five-tier gold palette, and Syne / Space Mono / Inter type — gold-tinted shadows, zero glass. Way more premium than the plain competitor clones.
+Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed on the **gold editorial** system: warm paper canvas with a full dark mode, a seven-tier gold palette with one molten CTA gradient, and a three-font contract — **Fraunces** (display serif with gilded italics), **Instrument Sans** (body), **JetBrains Mono** (labels & numbers). Silk-smooth motion (golden-thread loading bar, mask reveals, coin-pop chips) with `prefers-reduced-motion` fallbacks.
 
 ## Features / Tools
 
@@ -39,23 +39,31 @@ app/
   api/download/route.ts   → CDN download proxy (Instagram-CDN-only, not open)
   api/profile/route.ts    → username-based tools (dp/stories/highlights)
 components/
-  ExtractorTool.tsx       → URL tool UI (link → result card)
-  UsernameTool.tsx        → username tool UI (dp/stories/viewer/highlights)
-  ToolPage.tsx            → shared landing page shell (both variants)
+  GoldenBar.tsx           → the one paste bar (URL tools, whole site)
+  ResultCard.tsx          → media + caption + hashtags + mentions ceremony
+  UsernameTool.tsx        → @username bar + results (dp/stories/viewer/highlights)
+  ToolLanding.tsx         → shared landing shell for URL-based tool pages
+  UsernameLanding.tsx     → shared landing shell for username-based tool pages
+  Nav / Footer / FAQ / HowItWorks / ToolCard / AdFrame / …
 lib/
   instagram-config.ts     → ⚠️ THE swappable config — patch doc_id/endpoints here
   instagram-extractor.ts  → all Instagram-specific logic
-  tools.ts                → central tool registry (drives nav/grid/footer)
+  extract-ui.ts           → UI-facing result shapes + mappers from the extractor
+  copy.ts                 → central tool registry (drives grid/footer/sitemap)
   rate-limit.ts
+app/tokens.css            → design tokens (light + dark)
+app/motion.css            → the motion system
 ```
 
 ## Design system
 
-The whole UI follows **CROWN "Warm Light Regalia"** (see the design doc): pure-white
-canvas (`#ffffff`), warm-cream cards (`#f7ecd0`), a locked five-tier gold palette where
-`#f59e0b` gold-orange is reserved **only** for the primary CTA, gold-tinted shadows, and a
-three-font contract — **Syne** (display), **Space Mono** (every number), **Inter** (body).
-Tokens live as CSS variables at the top of `app/globals.css`. No dark mode — light *is* the brand.
+Warm paper canvas (`#FBFAF7`) with a full dark theme (`#0A0906`), toggled via the sun/moon
+button and saved in `localStorage` (`ig-theme`) — a FOUC-proof inline script applies it before
+paint. A seven-tier gold palette (`--gold-100…700`) where the **molten gradient** is reserved
+for the primary CTA, plus `--gold-ink` for accessible gold text. Type contract: **Fraunces**
+(display, gilded italic for the one emphasized word), **Instrument Sans** (body),
+**JetBrains Mono** (labels, numbers, chips). Tokens live in `app/tokens.css`; the motion
+system (golden-thread loading, mask reveals, coin-pop) lives in `app/motion.css`.
 
 ## 🔧 When the extractor breaks (every 2–4 weeks — expected!)
 
@@ -119,7 +127,7 @@ Deploy: push to GitHub → import repo in [Vercel](https://vercel.com) → done.
 
 ## Monetization notes (from PRD)
 
-- Day 1: Adsterra / Monetag (they approve downloader sites). Add their script in `app/layout.tsx`.
+- Day 1: Adsterra / Monetag (they approve downloader sites). Drop their script tag inside `<AdFrame>…</AdFrame>` (`components/AdFrame.tsx`) — every ad sits in a labeled, fixed-height frame so CLS stays 0. Slots: below the result card (280px) and on the homepage (110px).
 - Later: AdSense **only on `/blog`** — never on tool pages.
 - Keep popunders off initially; protect repeat traffic.
 

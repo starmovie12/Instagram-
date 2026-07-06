@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import ToolPage from "@/components/ToolPage";
+import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Highlights Downloader — Save Highlight Covers & Stories",
+  title: "Instagram Highlights Downloader — Covers & Stories | InstaGrab",
   description:
     "Download Instagram story highlights from any public profile — save highlight covers and the stories inside them in HD. Free, no login, username-based.",
   alternates: { canonical: "/highlights-downloader" },
@@ -10,30 +10,25 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <ToolPage
-      eyebrow="Highlights Downloader"
-      variant="highlights"
-      currentHref="/highlights-downloader"
-      h1={<><span className="gold-text">Instagram Highlights</span> Downloader</>}
-      sub="Save whole highlight collections from any public profile — covers plus the stories inside each album, all in HD."
+    <UsernameLanding
+      eyebrow="Highlights downloader"
+      h1={<>Highlights — whole collections, <em className="gilded">saved</em>.</>}
+      lead="Covers plus the stories inside each highlight album, from any public profile."
+      mode="highlights"
       placeholder="Enter @username (e.g. natgeo)…"
-      steps={[
-        { title: "Enter the username", body: "Type the public account's @handle or paste their profile URL — not a single post link." },
-        { title: "Browse the highlights", body: "Every highlight album loads with its cover image." },
-        { title: "Download covers & stories", body: "Save any highlight cover, or tap Load stories to download the clips inside." },
-      ]}
-      faqs={[
+      faq={[
         { q: "What exactly can I save?", a: "Both the highlight cover images and the individual stories inside each highlight album — in HD." },
         { q: "Why use a username instead of a link?", a: "Highlights live on the profile, not on a single post. A username lets us list the full collection at once." },
         { q: "Does it work for private accounts?", a: "No — only public profiles with publicly visible highlights." },
         { q: "Why are some highlights empty?", a: "If an album's stories aren't publicly accessible, only the cover will be available." },
       ]}
     >
+      <h2>How to download highlights</h2>
+      <p>Enter the public account&apos;s <strong>@handle</strong> and press Search. Every highlight album loads with its cover image — save any cover directly, or tap <strong>Load stories</strong> to list and download the clips inside.</p>
       <h2>Why save highlights separately</h2>
-      <div className="cards reveal" style={{ padding: 0 }}>
-        <div className="card"><span className="ic">🔬</span><h3>Study brand structure</h3><p>Review how brands organize highlights — messaging, themes, and repeat structure.</p></div>
-        <div className="card"><span className="ic">🗄️</span><h3>Archive &amp; review</h3><p>Keep tutorials, menus, portfolios, or event recaps available offline.</p></div>
-      </div>
-    </ToolPage>
+      <p>Highlights are the stories an account chose to keep — tutorials, menus, portfolios, event recaps. Saving them gives you an offline archive of exactly the content the creator considered worth pinning.</p>
+      <h2>Tip: paste a highlight link too</h2>
+      <p>Got a direct <code>instagram.com/stories/highlights/…</code> link? Paste it into the bar on the home page — it works there as well.</p>
+    </UsernameLanding>
   );
 }

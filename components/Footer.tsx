@@ -1,0 +1,52 @@
+import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
+
+const COLS = [
+  { h: "Downloaders", links: [
+    ["Reels downloader", "/reels-downloader"],
+    ["Video downloader", "/video-downloader"],
+    ["Story downloader", "/story-downloader"],
+    ["Photo downloader", "/photo-downloader"],
+    ["Carousel downloader", "/carousel-downloader"],
+  ]},
+  { h: "More tools", links: [
+    ["Anonymous story viewer", "/story-viewer"],
+    ["Highlights downloader", "/highlights-downloader"],
+    ["Profile picture downloader", "/profile-picture-downloader"],
+    ["Caption extractor", "/caption-extractor"],
+    ["Hashtag extractor", "/hashtag-extractor"],
+  ]},
+  { h: "Company", links: [["About", "/about"], ["Blog", "/blog"], ["Contact", "/contact"]] },
+  { h: "Legal", links: [["Privacy", "/privacy-policy"], ["Terms", "/terms"], ["DMCA", "/dmca"]] },
+];
+
+export default function Footer() {
+  return (
+    <footer style={{ background: "var(--surface-2)", borderTop: "1px solid var(--line)", marginTop: 40 }}>
+      <div className="container" style={{ padding: "56px 24px 32px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32 }}>
+          {COLS.map(c => (
+            <div key={c.h} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <span className="label">{c.h}</span>
+              {c.links.map(([label, href]) => (
+                <Link key={href} href={href} style={{
+                  textDecoration: "none", color: "var(--ink-3)", fontSize: "var(--t-small)",
+                  transition: "color 200ms var(--ease-silk)",
+                }} className="footlink">{label}</Link>
+              ))}
+            </div>
+          ))}
+        </div>
+        <p className="mono" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 40, maxWidth: "70ch", lineHeight: 1.7 }}>
+          InstaGrab is not affiliated with Instagram™ or Meta. We do not host any content.
+          All content belongs to its respective owners. Download only content you own or have
+          permission to use.
+        </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--line)" }}>
+          <span className="mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>© 2026 InstaGrab · Made for creators</span>
+          <ThemeToggle />
+        </div>
+      </div>
+    </footer>
+  );
+}

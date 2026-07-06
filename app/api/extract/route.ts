@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extract, ExtractError } from "@/lib/instagram-extractor";
+import {
+  extract,
+  extractStories,
+  extractHighlightItems,
+  ExtractError,
+} from "@/lib/instagram-extractor";
+import {
+  coreToUi,
+  storyItemsToUi,
+  toUiErrorCode,
+  statusForUiError,
+} from "@/lib/extract-ui";
 import { isRateLimited } from "@/lib/rate-limit";
 import { IG_CONFIG } from "@/lib/instagram-config";
 
@@ -14,42 +25,54 @@ function clientIp(req: NextRequest): string {
   );
 }
 
+function errorResponse(code: ReturnType<typeof toUiErrorCode> | "RATE_LIMITED", message: string) {
+  return NextResponse.json({ error: { code, message } }, { status: statusForUiError(code) });
+}
+
+/** instagram.com/stories/<username>/<id?> and instagram.com/stories/highlights/<id> */
+const STORY_RE = /instagram\.com\/stories\/([\w.]+)(?:\/(\d+))?/i;
+
 export async function POST(req: NextRequest) {
   const ip = clientIp(req);
   if (isRateLimited(ip, IG_CONFIG.rateLimitPerMinute)) {
-    return NextResponse.json(
-      { error: "Too many requests — please wait a minute and try again." },
-      { status: 429 }
-    );
+    return errorResponse("RATE_LIMITED", "Too many requests — please wait a minute and try again.");
   }
 
   let url: string;
   try {
     const body = await req.json();
-    url = String(body?.url ?? "");
+    url = String(body?.url ?? "").trim();
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    return errorResponse("INVALID_URL", "Invalid request body.");
   }
-
   if (!url) {
-    return NextResponse.json({ error: "Please paste an Instagram link." }, { status: 400 });
+    return errorResponse("INVALID_URL", "Please paste an Instagram link.");
   }
 
   try {
+    const storyMatch = url.match(STORY_RE);
+    if (storyMatch) {
+      const [, segment, id] = storyMatch;
+      if (segment.toLowerCase() === "highlights" && id) {
+        const items = await extractHighlightItems(id);
+        if (!items.length) {
+          return errorResponse("STORY_EXPIRED", "This highlight has no items or doesn't exist.");
+        }
+        return NextResponse.json({ data: storyItemsToUi(items, "", `highlight-${id}`) });
+      }
+      const stories = await extractStories(segment);
+      return NextResponse.json({
+        data: storyItemsToUi(stories.items, stories.username, `story-${stories.username}`),
+      });
+    }
+
     const result = await extract(url);
-    return NextResponse.json(result);
+    return NextResponse.json({ data: coreToUi(result) });
   } catch (err) {
     if (err instanceof ExtractError) {
-      const status =
-        err.code === "INVALID_URL" ? 400 :
-        err.code === "PRIVATE" || err.code === "NOT_FOUND" ? 404 :
-        err.code === "STORY_UNSUPPORTED" ? 422 : 503;
-      return NextResponse.json({ error: err.message, code: err.code }, { status });
+      return errorResponse(toUiErrorCode(err.code), err.message);
     }
     console.error("extract failed:", err);
-    return NextResponse.json(
-      { error: "Something went wrong on our side. Please try again." },
-      { status: 500 }
-    );
+    return errorResponse("EXTRACTOR_DOWN", "Something went wrong on our side. Please try again.");
   }
 }
