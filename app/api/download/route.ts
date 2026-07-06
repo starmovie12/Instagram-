@@ -20,7 +20,7 @@ function safeFilename(name: string, fallback: string): string {
 export async function GET(req: NextRequest) {
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (isRateLimited("dl:" + ip, 30)) {
+  if (isRateLimited("dl:" + ip, 60)) {
     return NextResponse.json({ error: "Too many downloads — slow down a bit." }, { status: 429 });
   }
 

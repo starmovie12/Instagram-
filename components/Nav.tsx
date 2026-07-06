@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/photo-downloader", label: "Photos" },
   { href: "/caption-extractor", label: "Captions" },
   { href: "/hashtag-extractor", label: "Hashtags" },
+  { href: "/#tools", label: "All tools" },
   { href: "/blog", label: "Blog" },
 ];
 

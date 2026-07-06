@@ -1,17 +1,18 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import ResultCard from "./ResultCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
 
-const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|stories)\/([\w-]+)/i;
+const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
 type Phase = "idle" | "loading" | "success" | "error";
 const KIND_META: Record<string, { Icon: React.ElementType; label: string }> = {
   p: { Icon: ImageIcon, label: "post" },
   reel: { Icon: Clapperboard, label: "reel" },
   reels: { Icon: Clapperboard, label: "reel" },
+  tv: { Icon: Clapperboard, label: "video" },
   stories: { Icon: CircleDashed, label: "story" },
 };
 
@@ -26,7 +27,10 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
 
   const match = value.match(URL_RE);
   const kind = match ? KIND_META[match[1].toLowerCase()] : null;
-  const canPaste = typeof navigator !== "undefined" && !!navigator.clipboard?.readText;
+  // Clipboard support is only knowable in the browser — resolve it after mount
+  // so the server and first client render agree (avoids hydration mismatch).
+  const [canPaste, setCanPaste] = useState(false);
+  useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
 
   async function paste() {
     try { const t = await navigator.clipboard.readText(); if (t) setValue(t.trim()); } catch {}

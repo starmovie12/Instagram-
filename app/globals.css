@@ -135,6 +135,13 @@ section[id]{ scroll-margin-top:96px; }
   padding-top:1em; border-top:1px solid var(--line); }
 .article p{ margin:0 0 1em; color:var(--ink-2); }
 .article strong{ color:var(--ink); }
+.article ul, .article ol{ margin:0 0 1.2em; padding-left:1.3em; color:var(--ink-2); }
+.article li{ margin-bottom:.55em; }
+.article li::marker{ color:var(--gold-ink); }
+.article a{ color:var(--gold-ink); text-decoration-color:var(--gold-400); text-underline-offset:3px; }
+.article a:hover{ text-decoration-thickness:2px; }
+.article code{ font-family:var(--font-mono), monospace; font-size:.88em; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:6px; padding:1px 6px; white-space:nowrap; }
 
 /* Focus for inputs */
 input{ font:inherit; color:inherit; }

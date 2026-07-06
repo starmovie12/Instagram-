@@ -56,6 +56,7 @@ function MediaPreview({ slide, kind }: { slide: Slide; kind: ExtractResult["kind
 export default function ResultCard({ data }: { data: ExtractResult }) {
   const KindIcon = KIND_ICON[data.kind];
   const main = data.slides[0];
+  if (!main) return null;
   const dur = fmtDur(data.durationSeconds);
   const base = `instagrab-${data.shortcode}`;
 
