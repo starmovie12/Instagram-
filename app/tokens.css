@@ -1,0 +1,58 @@
+/* ── GOLD STANDARD tokens — Design Bible §3. Values are FINAL. ── */
+:root {
+  --gold-100:#F5E9CF;
+  --gold-200:#EBD6A4;
+  --gold-300:#DFC183;
+  --gold-400:#D2AC64;
+  --gold-500:#BE9548;
+  --gold-600:#A67C35;
+  --gold-700:#7E5D26;
+
+  /* The ONLY sanctioned gradient. One element per screen. */
+  --molten: linear-gradient(120deg,#EBD6A4 0%,#D2AC64 45%,#A67C35 100%);
+
+  /* Porcelain (light) */
+  --bg:#FBFAF7;
+  --surface:#FFFFFF;
+  --surface-2:#F5F3EC;
+  --surface-3:#EDEAE0;
+  --ink:#16130E;
+  --ink-2:#5C564B;
+  --ink-3:#8E8778;
+  --line:#E8E4D9;
+  --line-strong:#D9D3C2;
+  --gold-ink:#8A6320;
+  --ok:#2E7D4F;  --err:#B3492D;  --warn:#A97B1E;
+  --grain:.03;
+  --focus-ring: 0 0 0 3px rgba(210,172,100,.35);
+
+  --shadow-1: 0 1px 2px rgba(22,18,8,.05), 0 8px 24px -12px rgba(22,18,8,.10);
+  --shadow-2: 0 24px 48px -24px rgba(22,18,8,.18);
+
+  /* Type scale */
+  --t-hero:  clamp(2.85rem, 1.1rem + 6.6vw, 5.5rem);
+  --t-h2:    clamp(1.95rem, 1.2rem + 2.6vw, 3.15rem);
+  --t-h3:    clamp(1.3rem, 1.15rem + .8vw, 1.65rem);
+  --t-lead:  clamp(1.06rem, 1rem + .45vw, 1.2rem);
+  --t-body:  1.03rem;
+  --t-small: .9rem;
+  --t-label: .72rem;
+}
+
+[data-theme="dark"] {
+  /* Obsidian (dark) */
+  --bg:#0A0906;
+  --surface:#12100B;
+  --surface-2:#191611;
+  --surface-3:#211D16;
+  --ink:#F4F1E8;
+  --ink-2:#B4AC9B;
+  --ink-3:#7A7263;
+  --line:rgba(235,214,164,.08);
+  --line-strong:rgba(235,214,164,.16);
+  --gold-ink:#DFC183;
+  --ok:#6FBE8B;  --err:#E2765A;  --warn:#D9A94E;
+  --grain:.05;
+  --shadow-1: 0 0 0 1px var(--line-strong), 0 16px 48px -16px rgba(0,0,0,.6);
+  --shadow-2: 0 0 0 1px var(--line-strong), 0 16px 48px -16px rgba(0,0,0,.6);
+}

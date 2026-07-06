@@ -1,23 +1,23 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { NAV_TOOLS, TOOLS } from "@/lib/tools";
-import { LogoMark } from "@/components/Icons";
-import ScrollAnimations from "@/components/ScrollAnimations";
-import { AdScripts } from "@/components/Ads";
 import "./globals.css";
 
-const sans = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
+const display = Fraunces({
+  subsets: ["latin"], style: ["normal", "italic"],
+  axes: ["opsz", "SOFT", "WONK"], variable: "--font-display", display: "swap",
+});
+const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrab.vercel.app"),
   title: {
-    default: "InstaGrab — Instagram Reels, Video, Story & Photo Downloader",
+    default: "InstaGrab — Download anything from Instagram, beautifully",
     template: "%s · InstaGrab",
   },
   description:
-    "Download Instagram reels, videos, photos, stories, highlights & profile pictures in HD — choose the exact quality, and copy the full caption and every hashtag in one click. Free, no login, no watermark.",
+    "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
   keywords: [
     "instagram downloader", "reels download", "instagram video downloader",
     "instagram story downloader", "instagram highlights downloader",
@@ -27,66 +27,26 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FBFAF7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0906" },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={sans.variable}>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* FOUC-proof theme — runs before paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('ig-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body>
-        <nav className="nav">
-          <div className="nav-in">
-            <Link href="/" className="logo" aria-label="InstaGrab home">
-              <span className="logo-mark"><LogoMark size={17} /></span>
-              <span className="logo-txt"><b>InstaGrab</b><small>Instagram toolkit</small></span>
-            </Link>
-            <div className="nav-links">
-              {NAV_TOOLS.map((t) => <Link key={t.href} href={t.href}>{t.label}</Link>)}
-              <Link href="/blog">Blog</Link>
-            </div>
-            <div className="nav-cta">
-              <Link href="/caption-extractor" className="btn-primary">Get started</Link>
-            </div>
-          </div>
-        </nav>
-
-        <main>{children}</main>
-
-        <footer className="site-footer">
-          <div className="site-footer-inner">
-            <div className="footer-cols">
-              <div>
-                <div className="footer-brand">
-                  <span className="logo-mark"><LogoMark size={17} /></span>
-                  <span className="logo-txt"><b>InstaGrab</b><small>Instagram toolkit</small></span>
-                </div>
-                <p className="footer-tag">
-                  The complete Instagram toolkit — HD downloads with quality choice,
-                  plus caption &amp; hashtag extraction. Free, no login, no watermark.
-                </p>
-              </div>
-              <div>
-                <h4>Downloaders</h4>
-                {TOOLS.slice(0, 6).map((t) => <Link key={t.href} href={t.href}>{t.name}</Link>)}
-              </div>
-              <div>
-                <h4>Company</h4>
-                <Link href="/about">About</Link>
-                <Link href="/blog">Blog</Link>
-                <Link href="/contact">Contact</Link>
-                <Link href="/privacy-policy">Privacy Policy</Link>
-                <Link href="/terms">Terms</Link>
-                <Link href="/dmca">DMCA</Link>
-              </div>
-            </div>
-            <p className="disclaimer">
-              InstaGrab is not affiliated with Instagram™ or Meta. We do not host
-              any content — all media is fetched from Instagram&apos;s public servers
-              and belongs to its respective owners. Download only content you own
-              or have permission to use. © {new Date().getFullYear()} InstaGrab.
-            </p>
-          </div>
-        </footer>
-
-        <ScrollAnimations />
-        <AdScripts />
+        {children}
         <Analytics />
       </body>
     </html>

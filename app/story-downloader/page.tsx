@@ -1,33 +1,29 @@
 import type { Metadata } from "next";
-import ToolPage from "@/components/ToolPage";
+import ToolLanding from "@/components/ToolLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Story Downloader — Save Stories Before They Disappear",
-  description:
-    "Save public Instagram stories before they vanish in 24 hours. Enter a username, download story videos and photos in HD — free, no login, anonymous.",
-  alternates: { canonical: "/story-downloader" },
+  title: "Instagram Story Downloader — Save Before They Vanish | InstaGrab",
+  description: "Save public Instagram stories as video or photo before they disappear at 24 hours. Anonymous — no login, no view notification.",
 };
 
 export default function Page() {
   return (
-    <ToolPage
-      eyebrow="Story Downloader"
-      variant="stories"
-      currentHref="/story-downloader"
-      h1={<><span className="gold-text">Instagram Story</span> Downloader</>}
-      sub="Stories disappear in 24 hours — save the ones that matter. Enter a public username and download every active story in HD."
-      placeholder="Enter @username (e.g. nasa)…"
-      steps={[
-        { title: "Enter the username", body: "Type the public account's @handle or paste their profile URL." },
-        { title: "Press Search", body: "InstaGrab pulls every active story from the last 24 hours." },
-        { title: "Download", body: "Save each story video or photo in HD before it disappears." },
+    <ToolLanding
+      eyebrow="Story downloader"
+      h1={<>Story downloader — saved <em className="gilded">before they vanish</em>.</>}
+      lead="Public stories disappear in 24 hours. Save them as video or photo, anonymously."
+      faq={[
+        { q: "Will they know I viewed their story?", a: "No. InstaGrab fetches stories server-side without your account, so no view is registered against your name." },
+        { q: "Why does it say the story expired?", a: "Stories live for exactly 24 hours. Once gone, no downloader can retrieve them." },
+        { q: "Can I save private-account stories?", a: "No — public accounts only. Private stays private." },
       ]}
-      faqs={[
-        { q: "Can I download stories from private accounts?", a: "No — only public accounts. Private content is protected by Instagram and cannot be accessed." },
-        { q: "Why did it say no stories?", a: "Stories expire after 24 hours. If the account has none active right now, there's nothing to fetch." },
-        { q: "Will the person know I downloaded their story?", a: "No. You never log in, so your download doesn't register as a story view." },
-        { q: "Can I save story highlights instead?", a: "Yes — use our Highlights Downloader for saved highlight albums and their covers." },
-      ]}
-    />
+    >
+      <h2>How to save a story</h2>
+      <p>Open the profile, tap the story, then copy the story link (share icon → Copy link) and paste it above. Videos save as MP4, photos as full-resolution JPG.</p>
+      <h2>Anonymous by design</h2>
+      <p>Because we fetch the story without any Instagram account, <strong>no view notification</strong> is ever sent. The uploader&apos;s view list never shows you.</p>
+      <h2>The 24-hour rule</h2>
+      <p>Stories expire exactly 24 hours after posting. If you get an &ldquo;expired&rdquo; message, the content is genuinely gone from Instagram&apos;s servers — save early.</p>
+    </ToolLanding>
   );
 }

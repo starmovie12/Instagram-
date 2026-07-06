@@ -1,75 +1,22 @@
 import type { Metadata } from "next";
+import QuietPage from "@/components/QuietPage";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "How InstaGrab handles your data — spoiler: we collect almost nothing.",
-  alternates: { canonical: "/privacy-policy" },
-};
+export const metadata: Metadata = { title: "Privacy Policy — InstaGrab" };
 
-export default function PrivacyPolicyPage() {
+export default function Page() {
   return (
-    <main className="page">
-      <h1>Privacy Policy</h1>
-      <p>Last updated: July 4, 2026</p>
-
-      <h2>The short version</h2>
-      <p>
-        InstaGrab requires no account, no login, and no personal information.
-        We do not store the links you paste, and we do not store any downloaded
-        media on our servers.
-      </p>
-
+    <QuietPage title="Privacy Policy" updated="January 2026">
+      <p>InstaGrab is built to know as little about you as possible.</p>
       <h2>What we process</h2>
-      <ul>
-        <li>
-          <strong>Instagram URLs you paste:</strong> sent to our server only to
-          fetch the public media and caption from Instagram, then discarded.
-          They are not saved to any database.
-        </li>
-        <li>
-          <strong>IP address:</strong> used transiently for rate limiting
-          (preventing abuse) and appears in standard hosting logs kept by our
-          hosting provider for a limited period.
-        </li>
-        <li>
-          <strong>Anonymous analytics:</strong> we may use privacy-friendly,
-          aggregate analytics (page views, country) to understand traffic. No
-          personal profiles are built.
-        </li>
-      </ul>
-
-      <h2>Cookies and advertising</h2>
-      <p>
-        InstaGrab is supported by advertising. Ad networks (such as Adsterra or
-        Monetag) may use cookies or similar technologies to serve and measure
-        ads. These third parties have their own privacy policies governing the
-        data they collect. You can control cookies through your browser
-        settings.
-      </p>
-
-      <h2>Your Instagram account</h2>
-      <p>
-        We never ask for, receive, or store Instagram usernames or passwords.
-        InstaGrab only accesses content that Instagram serves publicly.
-      </p>
-
-      <h2>Children</h2>
-      <p>
-        InstaGrab is not directed at children under 13 and we do not knowingly
-        collect information from them.
-      </p>
-
-      <h2>Changes</h2>
-      <p>
-        We may update this policy; the &quot;last updated&quot; date will change
-        accordingly. Continued use of the site means you accept the current
-        policy.
-      </p>
-
+      <p>When you paste an Instagram link, it is sent to our server, used once to fetch the public media and text, and discarded. <strong>Links are never written to a database.</strong> We keep no download history and have no user accounts.</p>
+      <h2>What we log</h2>
+      <p>Standard, short-lived server logs (IP address, timestamp, status code) for abuse prevention and rate limiting. These rotate automatically.</p>
+      <h2>Cookies &amp; ads</h2>
+      <p>We set one localStorage key for your theme preference. Advertising partners may set their own cookies subject to their policies; ads are clearly labeled <em>Sponsored</em>.</p>
+      <h2>Your content</h2>
+      <p>We host nothing. Media is streamed from Instagram's CDN directly to your device.</p>
       <h2>Contact</h2>
-      <p>
-        Privacy questions? Reach us via the contact page.
-      </p>
-    </main>
+      <p>Questions: see the <a href="/contact">contact page</a>.</p>
+    </QuietPage>
   );
 }

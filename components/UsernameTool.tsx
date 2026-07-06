@@ -1,44 +1,48 @@
 "use client";
-
 import { useState } from "react";
-import { DownloadIcon } from "./Icons";
-import { AdSlot } from "./Ads";
+import {
+  AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye,
+} from "lucide-react";
+import AdFrame from "./AdFrame";
 
 type Mode = "dp" | "stories" | "viewer" | "highlights";
 type Quality = { label: string; url: string };
 type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[] };
 type HighlightAlbum = { id: string; title: string; cover: string };
 
-function dl(url: string, filename: string): string {
-  return `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights" };
+
+function dl(url: string, name: string) {
+  return `/api/download?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
 }
 function fmt(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   return String(n);
 }
-const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights" };
 
-function StoryDownloads({ item, name, index }: { item: StoryItem; name: string; index: number }) {
+function StoryCard({ item, name, index }: { item: StoryItem; name: string; index: number }) {
   const ext = item.type === "video" ? "mp4" : "jpg";
-  const qs = item.qualities && item.qualities.length ? item.qualities : [{ label: item.type === "video" ? "HD" : "Original", url: item.url }];
-  if (qs.length === 1) {
-    return (
-      <a className="btn btn-solid" href={dl(qs[0].url, `instagrab-${name}-story-${index + 1}.${ext}`)}>
-        <DownloadIcon size={14} /> Download {item.type === "video" ? "Video" : "Photo"} · {qs[0].label}
-      </a>
-    );
-  }
+  const qs = item.qualities?.length
+    ? item.qualities
+    : [{ label: item.type === "video" ? "HD" : "Original", url: item.url }];
   return (
-    <>
-      <span className="q-label">Choose quality</span>
-      {qs.map((q, qi) => (
-        <a key={q.label + qi} className={`btn qbtn ${qi === 0 ? "btn-solid" : ""}`}
-          href={dl(q.url, `instagrab-${name}-story-${index + 1}-${q.label}.${ext}`)}>
-          <DownloadIcon size={13} /> {q.label}{qi === 0 ? " · Best" : ""}
-        </a>
-      ))}
-    </>
+    <div className="card intro-rise" style={{ padding: 16, ["--dl" as string]: `${index * 60}ms` }}>
+      <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--line)", aspectRatio: "9/16", background: "var(--surface-2)" }}>
+        {item.type === "video"
+          ? <video src={dl(item.url, "preview")} poster={item.thumbnail ? dl(item.thumbnail, "thumb") : undefined} controls playsInline preload="metadata" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          : /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={dl(item.url, "photo")} alt={`Story ${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+        {qs.map((q, qi) => (
+          <a key={q.label + qi} href={dl(q.url, `instagrab-${name}-story-${index + 1}-${q.label.replace(/\W+/g, "")}.${ext}`)}
+            className={`btn btn-secondary ${qi === 0 ? "gold" : ""}`} download style={{ fontSize: 13 }}>
+            <Download size={14} strokeWidth={1.5} /> {qi === 0 ? `${item.type === "video" ? "Video" : "Photo"} ${q.label}` : q.label}
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -49,18 +53,22 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [items, setItems] = useState<Record<string, StoryItem[]>>({});
+  const [invalid, setInvalid] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!username.trim() || loading) return;
+  async function go() {
+    if (loading) return;
+    if (!username.trim()) {
+      setInvalid(true); setTimeout(() => setInvalid(false), 300);
+      return;
+    }
     setLoading(true); setError(null); setData(null); setItems({});
     try {
       const res = await fetch("/api/profile", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: REQUEST_TYPE[mode], username }),
       });
-      const json = await res.json();
-      if (!res.ok) setError(json.error ?? "Something went wrong. Please try again.");
+      const json = await res.json().catch(() => null);
+      if (!res.ok) setError(json?.error ?? "Something went wrong. Please try again.");
       else setData(json);
     } catch {
       setError("Network error — please check your connection and try again.");
@@ -79,129 +87,154 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
     } catch { /* ignore */ }
   }
 
+  const name = data?.username ?? "user";
+
   return (
-    <div className="tool">
-      <form className="urlbar" onSubmit={handleSubmit}>
-        <div className="urlbar-field">
-          <span className="link-ic" style={{ fontWeight: 500 }}>@</span>
-          <input
-            type="text" aria-label="Instagram username"
-            placeholder={placeholder ?? "Enter @username or profile URL"}
-            value={username} onChange={(e) => setUsername(e.target.value)}
-            autoCapitalize="none" autoCorrect="off" spellCheck={false} required
-          />
-        </div>
-        <button className="btn-primary" type="submit" disabled={loading}>
-          {loading ? (<><span className="mini-spinner" />Fetching</>) : mode === "viewer" ? "View" : "Search"}
+    <div style={{ width: "100%" }}>
+      <div className={`bar ubar ${loading ? "loading" : ""} ${invalid ? "shake" : ""}`} style={{ maxWidth: 720, margin: "0 auto" }}>
+        <span className="ubar-icon" aria-hidden="true"><AtSign size={20} strokeWidth={1.5} /></span>
+        <input
+          value={username} disabled={loading}
+          onChange={e => setUsername(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && go()}
+          placeholder={placeholder ?? "Enter @username or profile URL"}
+          aria-label="Instagram username"
+          autoCapitalize="none" autoCorrect="off" spellCheck={false}
+          className="ubar-input"
+        />
+        <button className="btn btn-molten ubar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
+          {mode === "viewer" ? <Eye size={20} strokeWidth={1.5} /> : <Search size={20} strokeWidth={1.5} />}
+          <span>{loading ? "Fetching…" : mode === "viewer" ? "View" : "Search"}</span>
         </button>
-      </form>
+      </div>
 
-      <p className="tool-hint">No login · Public accounts only · 100% anonymous</p>
-
-      {loading && (
-        <div className="panel">
-          <div className="row">
-            <svg className="spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="#dddddd" strokeWidth="3" />
-              <path d="M21 12a9 9 0 00-9-9" stroke="#181d26" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-            Fetching profile…
-          </div>
-          <div className="track"><div className="indet" /></div>
+      {error && (
+        <div className="card intro-rise" role="alert" style={{
+          display: "flex", gap: 16, alignItems: "flex-start", padding: 20, maxWidth: 720, margin: "24px auto 0",
+          textAlign: "left", borderColor: "color-mix(in srgb, var(--err) 40%, var(--line))", borderWidth: 1.5,
+        }}>
+          <span className="medallion" style={{ flexShrink: 0, color: "var(--err)" }}>
+            <AlertTriangle size={24} strokeWidth={1.5} />
+          </span>
+          <span style={{ color: "var(--ink-2)", fontSize: "var(--t-small)" }}>{error}</span>
         </div>
       )}
 
-      {error && <div className="tool-error" role="alert">{error}</div>}
-
       {data && (
-        <>
-          <div className="result">
-            <div className="result-head">
-              <div className="avatar">
+        <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
+          <div className="card intro-rise" style={{ padding: 24, maxWidth: 920, margin: "0 auto", width: "100%", textAlign: "left" }}>
+            {/* Profile header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+              <span style={{ width: 52, height: 52, borderRadius: "50%", overflow: "hidden", border: "1px solid var(--gold-300)", flexShrink: 0, background: "var(--surface-2)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
                 {data.profilePicHd
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={dl(data.profilePicHd, "")} alt={`@${data.username} profile`} />
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  ? <img src={dl(data.profilePicHd, "avatar")} alt={`@${data.username} profile`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   : (data.username || "?").charAt(0).toUpperCase()}
-              </div>
-              <div className="who">
-                <b>@{data.username} {data.isVerified && "✓"}</b>
-                {data.fullName && <span>{data.fullName}</span>}
-              </div>
+              </span>
+              <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                <b style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  @{data.username}
+                  {data.isVerified && <BadgeCheck size={16} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />}
+                </b>
+                {data.fullName && <span className="mono" style={{ fontSize: 13, color: "var(--ink-3)" }}>{data.fullName}</span>}
+              </span>
             </div>
 
             {mode === "dp" && (
-              <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {data.followers != null && (
-                  <div className="dp-stats">
-                    <div className="stat"><div className="v">{fmt(data.posts)}</div><div className="l">Posts</div></div>
-                    <div className="stat"><div className="v">{fmt(data.followers)}</div><div className="l">Followers</div></div>
-                    <div className="stat"><div className="v">{fmt(data.following)}</div><div className="l">Following</div></div>
+                  <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> posts</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> followers</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> following</span>
                   </div>
                 )}
-                <div className="media-item">
+                <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--line)", maxWidth: 360 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="media-preview" src={dl(data.profilePicHd, "")} alt={`@${data.username} full-size profile picture`} style={{ maxHeight: 400 }} />
-                  <div className="media-actions">
-                    <a className="btn btn-solid" href={dl(data.profilePicHd, `instagrab-${data.username}-dp.jpg`)}>
-                      <DownloadIcon size={14} /> Download Profile Picture HD
-                    </a>
-                  </div>
+                  <img src={dl(data.profilePicHd, "dp-preview")} alt={`@${data.username} full-size profile picture`} style={{ width: "100%", display: "block" }} />
+                </div>
+                <div>
+                  <a className="btn btn-secondary gold" href={dl(data.profilePicHd, `instagrab-${data.username}-dp.jpg`)} download>
+                    <ImageDown size={16} strokeWidth={1.5} /> Download HD profile picture
+                  </a>
                 </div>
                 {data.biography && (
-                  <div className="section"><h3>Bio</h3><p className="caption-text">{data.biography}</p></div>
+                  <div>
+                    <span className="label" style={{ display: "block", marginBottom: 10 }}>Bio</span>
+                    <div className="well" style={{ padding: 16, whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)" }}>{data.biography}</div>
+                  </div>
                 )}
-              </>
+              </div>
             )}
 
             {(mode === "stories" || mode === "viewer") && Array.isArray(data.items) && (
-              <>
-                <div className="slide-label" style={{ padding: "13px 18px 0" }}>
+              <div>
+                <span className="label" style={{ display: "block", marginBottom: 14 }}>
                   {data.items.length} active {data.items.length === 1 ? "story" : "stories"}
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+                  {data.items.map((item: StoryItem, i: number) => (
+                    <StoryCard key={i} item={item} name={name} index={i} />
+                  ))}
                 </div>
-                {data.items.map((item: StoryItem, i: number) => (
-                  <div className="media-item" key={i}>
-                    {item.type === "video"
-                      ? <video className="media-preview" src={dl(item.url, "")} poster={item.thumbnail ? dl(item.thumbnail, "") : undefined} controls playsInline preload="metadata" />
-                      // eslint-disable-next-line @next/next/no-img-element
-                      : <img className="media-preview" src={dl(item.url, "")} alt="Story preview" />}
-                    <div className="media-actions">
-                      <StoryDownloads item={item} name={data.username} index={i} />
-                    </div>
-                  </div>
-                ))}
-              </>
+              </div>
             )}
 
             {mode === "highlights" && Array.isArray(data.albums) && (
-              <div className="hl-grid">
-                {data.albums.map((a: HighlightAlbum) => (
-                  <div className="hl-item" key={a.id}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="hl-cover" src={dl(a.cover, "")} alt={a.title} />
-                    <span className="hl-title">{a.title}</span>
-                    <a className="hl-dl" href={dl(a.cover, `instagrab-${data.username}-${a.title}-cover.jpg`)}>Cover</a>
-                    <br />
-                    <button className="hl-dl" style={{ background: "none", border: "none", cursor: "pointer" }} onClick={() => loadHighlight(a.id)}>
-                      {items[a.id] ? `${items[a.id].length} stories` : "Load stories"}
-                    </button>
-                    {items[a.id] && items[a.id].length > 0 && (
-                      <div className="media-actions" style={{ padding: "8px 0", justifyContent: "center" }}>
-                        {items[a.id].map((it, j) => (
-                          <a key={j} className="btn" style={{ padding: "6px 10px", fontSize: "12px" }}
-                            href={dl(it.qualities?.[0]?.url ?? it.url, `instagrab-${data.username}-${a.title}-${j + 1}.${it.type === "video" ? "mp4" : "jpg"}`)}>
-                            {it.type === "video" ? "▶" : "🖼"} {j + 1}
-                          </a>
-                        ))}
+              <div>
+                <span className="label" style={{ display: "block", marginBottom: 14 }}>
+                  {data.albums.length} {data.albums.length === 1 ? "highlight" : "highlights"}
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+                  {data.albums.map((a: HighlightAlbum) => (
+                    <div key={a.id} className="card" style={{ padding: 14 }}>
+                      <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--line)", aspectRatio: "1/1", background: "var(--surface-2)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={dl(a.cover, "cover")} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <b style={{ display: "block", marginTop: 10, fontSize: 15 }}>{a.title}</b>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+                        <a className="btn btn-secondary" href={dl(a.cover, `instagrab-${name}-${a.title}-cover.jpg`)} download style={{ fontSize: 13 }}>
+                          <ImageDown size={14} strokeWidth={1.5} /> Cover
+                        </a>
+                        <button className="btn btn-secondary" style={{ fontSize: 13, cursor: "pointer" }} onClick={() => loadHighlight(a.id)}>
+                          {items[a.id] ? `${items[a.id].length} stories` : "Load stories"}
+                        </button>
+                      </div>
+                      {items[a.id] && items[a.id].length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                          {items[a.id].map((it, j) => (
+                            <a key={j} className="chip" href={dl(it.qualities?.[0]?.url ?? it.url, `instagrab-${name}-${a.title}-${j + 1}.${it.type === "video" ? "mp4" : "jpg"}`)} download>
+                              <Download size={12} strokeWidth={1.5} /> {it.type === "video" ? "video" : "photo"} {j + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-          <AdSlot label="below-result" />
-        </>
+
+          {/* Ad slot — only after success, never inside the card */}
+          <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
+        </div>
       )}
+
+      <style jsx>{`
+        .ubar{ display:flex; align-items:center; gap:8px; height:64px; padding:8px 8px 8px 20px; }
+        .ubar-icon{ color:var(--ink-3); display:inline-flex; flex-shrink:0; }
+        .ubar-input{ flex:1; min-width:0; background:none; border:none; font-size:15px; color:var(--ink); }
+        .ubar-input::placeholder{ color:var(--ink-3); }
+        .ubar:focus-within{ border-color:var(--gold-400); box-shadow:var(--focus-ring); }
+        .ubar.loading:focus-within{ box-shadow:none; }
+        @media (max-width:639px){
+          .ubar{ flex-wrap:wrap; height:auto; border-radius:24px; padding:12px; }
+          .ubar-input{ flex:1 1 60%; height:44px; }
+          .ubar-go{ width:100%; }
+        }
+      `}</style>
     </div>
   );
 }
