@@ -2,8 +2,10 @@ import Nav from "./Nav";
 import Footer from "./Footer";
 import UsernameTool from "./UsernameTool";
 import TrustLine from "./TrustLine";
-import FAQ, { QA } from "./FAQ";
+import FAQ from "./FAQ";
 import Reveal from "./Reveal";
+import JsonLd from "./JsonLd";
+import { DEFAULT_FAQ, faqJsonLd, type QA } from "@/lib/seo";
 
 const STEPS = [
   { n: "01", t: "Enter the username", d: "Type the public account's @handle or paste their profile URL." },
@@ -25,6 +27,7 @@ export default function UsernameLanding({
 }) {
   return (
     <>
+      <JsonLd data={faqJsonLd(faq ?? DEFAULT_FAQ)} />
       <Nav />
       <main>
         <section style={{ position: "relative", padding: "88px 0 64px", textAlign: "center", overflow: "hidden" }}>

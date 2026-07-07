@@ -14,6 +14,7 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 📋 Caption extractor — full text, one-click copy *(signature)*
 - #️⃣ Hashtag extractor — all tags separated, copy-all *(signature)*
 - @ Mentions + 🖼️ video thumbnail download
+- 🎵 Reel/story audio-only download (M4A, via Instagram's DASH manifest — no transcoding)
 
 **Username-based** (enter an @handle):
 - ⭕ Story downloader (active 24h stories)

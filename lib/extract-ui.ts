@@ -16,6 +16,8 @@ export type Slide = {
   url: string; // best media url
   thumbnail: string;
   versions: MediaVersion[];
+  /** Audio-only track (M4A) when Instagram exposes one for the video */
+  audioUrl?: string;
 };
 
 export type ExtractResult = {
@@ -43,7 +45,7 @@ function mediaToSlide(m: MediaItem): Slide {
     m.qualities && m.qualities.length
       ? m.qualities
       : [{ label: m.type === "video" ? "HD" : "Original", url: m.url, width: m.width, height: m.height }];
-  return { type: m.type, url: m.url, thumbnail: m.thumbnail, versions };
+  return { type: m.type, url: m.url, thumbnail: m.thumbnail, versions, audioUrl: m.audioUrl };
 }
 
 function storyToSlide(s: StoryItem): Slide {
@@ -51,7 +53,7 @@ function storyToSlide(s: StoryItem): Slide {
     s.qualities && s.qualities.length
       ? s.qualities
       : [{ label: s.type === "video" ? "HD" : "Original", url: s.url }];
-  return { type: s.type, url: s.url, thumbnail: s.thumbnail, versions };
+  return { type: s.type, url: s.url, thumbnail: s.thumbnail, versions, audioUrl: s.audioUrl };
 }
 
 export function coreToUi(r: CoreResult): ExtractResult {

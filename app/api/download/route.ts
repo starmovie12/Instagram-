@@ -52,9 +52,12 @@ export async function GET(req: NextRequest) {
   }
 
   const contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
-  const ext = contentType.includes("video") ? "mp4" : "jpg";
+  const ext =
+    contentType.includes("video") ? "mp4" :
+    contentType.includes("audio") ? "m4a" :
+    contentType.includes("png") ? "png" : "jpg";
   let filename = safeFilename(requestedName, `instagrab-${Date.now()}.${ext}`);
-  if (!/\.(mp4|jpe?g|png|webp|heic)$/i.test(filename)) filename += `.${ext}`;
+  if (!/\.(mp4|m4a|mp3|jpe?g|png|webp|heic)$/i.test(filename)) filename += `.${ext}`;
 
   return new NextResponse(upstream.body, {
     headers: {

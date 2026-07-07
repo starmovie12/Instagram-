@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
 import {
-  AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye,
+  AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye, Music,
 } from "lucide-react";
 import AdFrame from "./AdFrame";
 
 type Mode = "dp" | "stories" | "viewer" | "highlights";
 type Quality = { label: string; url: string };
-type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[] };
+type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[]; audioUrl?: string };
 type HighlightAlbum = { id: string; title: string; cover: string };
 
 const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights" };
@@ -41,6 +41,12 @@ function StoryCard({ item, name, index }: { item: StoryItem; name: string; index
             <Download size={14} strokeWidth={1.5} /> {qi === 0 ? `${item.type === "video" ? "Video" : "Photo"} ${q.label}` : q.label}
           </a>
         ))}
+        {item.audioUrl && (
+          <a href={dl(item.audioUrl, `instagrab-${name}-story-${index + 1}-audio.m4a`)}
+            className="btn btn-secondary" download style={{ fontSize: 13 }}>
+            <Music size={14} strokeWidth={1.5} /> Audio
+          </a>
+        )}
       </div>
     </div>
   );

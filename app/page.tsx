@@ -9,7 +9,9 @@ import FAQ from "@/components/FAQ";
 import AdFrame from "@/components/AdFrame";
 import ToolCard from "@/components/ToolCard";
 import Reveal from "@/components/Reveal";
+import JsonLd from "@/components/JsonLd";
 import { TOOLS, QUARTET } from "@/lib/copy";
+import { DEFAULT_FAQ, faqJsonLd, webAppJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "InstaGrab — Download anything from Instagram, beautifully",
@@ -23,6 +25,8 @@ const QUARTET_ICONS: Record<string, React.ElementType> = {
 export default function Home() {
   return (
     <>
+      <JsonLd data={webAppJsonLd()} />
+      <JsonLd data={faqJsonLd(DEFAULT_FAQ)} />
       <Nav />
       <main>
         {/* ── Hero ── */}

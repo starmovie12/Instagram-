@@ -22,7 +22,25 @@ export type MediaItem = {
   height?: number;
   /** Every available quality (video_versions / display_resources), best first */
   qualities?: Quality[];
+  /** Audio-only track (M4A) when Instagram exposes a DASH manifest for the video */
+  audioUrl?: string;
 };
+
+/**
+ * Pull the audio-only track URL out of Instagram's DASH manifest (reels/videos
+ * ship one in `dash_info.video_dash_manifest`). Lets users download just the
+ * audio without any server-side transcoding.
+ */
+function audioFromDashManifest(manifest?: string): string | undefined {
+  if (!manifest || typeof manifest !== "string") return undefined;
+  const scope =
+    manifest.match(/<AdaptationSet[^>]*mimeType="audio\/[^"]*"[\s\S]*?<\/AdaptationSet>/i)?.[0] ??
+    manifest.match(/<Representation[^>]*mimeType="audio\/[^"]*"[\s\S]*?<\/Representation>/i)?.[0];
+  const base = scope?.match(/<BaseURL[^>]*>([\s\S]*?)<\/BaseURL>/i)?.[1];
+  if (!base) return undefined;
+  const url = base.replace(/&amp;/g, "&").trim();
+  return /^https:\/\//.test(url) ? url : undefined;
+}
 
 /** Resolution label from dimensions (the shorter side, so portrait reels read 1080p). */
 function labelForDims(w?: number, h?: number): string {
@@ -165,6 +183,7 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
         width: node?.dimensions?.width,
         height: node?.dimensions?.height,
         qualities,
+        audioUrl: audioFromDashManifest(node?.dash_info?.video_dash_manifest),
       };
     }
     const imgQ = Array.isArray(node?.display_resources) ? imageQualities(node.display_resources) : [];
@@ -552,6 +571,8 @@ export type StoryItem = {
   thumbnail: string;
   takenAt: number;
   qualities?: Quality[];
+  /** Audio-only track (M4A) when the story video ships a DASH manifest */
+  audioUrl?: string;
 };
 
 export type StoriesResult = {
@@ -679,6 +700,7 @@ function reelItemToStory(item: any): StoryItem {
       thumbnail: item?.image_versions2?.candidates?.[0]?.url ?? "",
       takenAt: item?.taken_at ?? 0,
       qualities,
+      audioUrl: audioFromDashManifest(item?.video_dash_manifest),
     };
   }
   return {

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Clapperboard, CirclePlay, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check } from "lucide-react";
+import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check, Music } from "lucide-react";
 import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
 
@@ -89,6 +89,11 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
                   {i === 0 ? `Download ${v.label}` : v.label}
                 </a>
               ))}
+              {main.audioUrl && (
+                <a href={dl(main.audioUrl, `${base}-audio`)} className="btn btn-secondary" download>
+                  <Music size={16} strokeWidth={1.5} /> Audio M4A
+                </a>
+              )}
               {data.thumbnail && (
                 <a href={dl(data.thumbnail, `${base}-thumbnail`)} className="btn btn-secondary" download>
                   <ImageDown size={16} strokeWidth={1.5} /> Thumbnail JPG
