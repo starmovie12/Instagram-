@@ -24,6 +24,14 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
 
+**🌍 Multi-language:** the tool UI (paste bar, buttons, errors, result card) speaks
+21 languages — English, हिन्दी, Español, Português, Bahasa Indonesia, العربية, Türkçe,
+Français, Deutsch, Italiano, Русский, 日本語, 한국어, Tiếng Việt, ไทย, বাংলা, اردو, فارسی,
+Bahasa Melayu, Polski, Nederlands. Picker in the nav (globe icon); choice persists in
+`localStorage` (`ig-lang`) and auto-detects from the browser on first visit. Strings live
+in `lib/i18n.tsx` (missing keys fall back to English). SEO prose stays English-first per
+the PRD.
+
 ## Project structure
 
 ```

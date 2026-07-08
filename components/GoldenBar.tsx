@@ -5,6 +5,7 @@ import type { ExtractResult } from "@/lib/extract-ui";
 import ResultCard from "./ResultCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
+import { useI18n } from "@/lib/i18n";
 
 const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
 type Phase = "idle" | "loading" | "success" | "error";
@@ -17,6 +18,7 @@ const KIND_META: Record<string, { Icon: React.ElementType; label: string }> = {
 };
 
 export default function GoldenBar({ intro = false }: { intro?: boolean }) {
+  const { t } = useI18n();
   const [value, setValue] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [invalid, setInvalid] = useState(false);
@@ -97,21 +99,21 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
             ref={inputRef} value={value} disabled={loading}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => e.key === "Enter" && go()}
-            placeholder="Paste an Instagram link — reel, post, story…"
+            placeholder={t("linkPlaceholder")}
             aria-label="Instagram link"
             className="gbar-input"
           />
         )}
 
         {canPaste && !kind && !loading && (
-          <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40 }}>
-            <ClipboardPaste size={16} strokeWidth={1.5} /> PASTE
+          <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40, textTransform: "uppercase" }}>
+            <ClipboardPaste size={16} strokeWidth={1.5} /> {t("paste")}
           </button>
         )}
 
         <button className="btn btn-molten gbar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
           <Download size={20} strokeWidth={1.5} />
-          <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? "Fetching…" : "Download"}</span>
+          <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? t("fetching") : t("download")}</span>
         </button>
       </div>
 
@@ -120,7 +122,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
       )}
       {phase === "error" && error === "INVALID_URL" && (
         <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
-          That doesn&apos;t look like an Instagram link. Paste one like instagram.com/reel/…
+          {t("invalidLink")}
         </p>
       )}
 

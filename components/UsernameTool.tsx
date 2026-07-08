@@ -4,6 +4,7 @@ import {
   AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye, Music,
 } from "lucide-react";
 import AdFrame from "./AdFrame";
+import { useI18n } from "@/lib/i18n";
 
 type Mode = "dp" | "stories" | "viewer" | "highlights";
 type Quality = { label: string; url: string };
@@ -53,6 +54,10 @@ function StoryCard({ item, name, index }: { item: StoryItem; name: string; index
 }
 
 export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeholder?: string }) {
+  const { t, lang } = useI18n();
+  // Bespoke per-page placeholders are English; fall back to the translated
+  // generic one whenever another language is active.
+  const hint = lang === "en" && placeholder ? placeholder : t("userPlaceholder");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,14 +108,14 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
           value={username} disabled={loading}
           onChange={e => setUsername(e.target.value)}
           onKeyDown={e => e.key === "Enter" && go()}
-          placeholder={placeholder ?? "Enter @username or profile URL"}
+          placeholder={hint}
           aria-label="Instagram username"
           autoCapitalize="none" autoCorrect="off" spellCheck={false}
           className="ubar-input"
         />
         <button className="btn btn-molten ubar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
           {mode === "viewer" ? <Eye size={20} strokeWidth={1.5} /> : <Search size={20} strokeWidth={1.5} />}
-          <span>{loading ? "Fetching…" : mode === "viewer" ? "View" : "Search"}</span>
+          <span>{loading ? t("fetching") : mode === "viewer" ? t("view") : t("search")}</span>
         </button>
       </div>
 
@@ -161,12 +166,12 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                 </div>
                 <div>
                   <a className="btn btn-secondary gold" href={dl(data.profilePicHd, `instagrab-${data.username}-dp.jpg`)} download>
-                    <ImageDown size={16} strokeWidth={1.5} /> Download HD profile picture
+                    <ImageDown size={16} strokeWidth={1.5} /> {t("dpDownload")}
                   </a>
                 </div>
                 {data.biography && (
                   <div>
-                    <span className="label" style={{ display: "block", marginBottom: 10 }}>Bio</span>
+                    <span className="label" style={{ display: "block", marginBottom: 10 }}>{t("bio")}</span>
                     <div className="well" style={{ padding: 16, whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)" }}>{data.biography}</div>
                   </div>
                 )}
@@ -176,7 +181,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
             {(mode === "stories" || mode === "viewer") && Array.isArray(data.items) && (
               <div>
                 <span className="label" style={{ display: "block", marginBottom: 14 }}>
-                  {data.items.length} active {data.items.length === 1 ? "story" : "stories"}
+                  {data.items.length} {t("activeStories")}
                 </span>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
                   {data.items.map((item: StoryItem, i: number) => (
@@ -189,7 +194,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
             {mode === "highlights" && Array.isArray(data.albums) && (
               <div>
                 <span className="label" style={{ display: "block", marginBottom: 14 }}>
-                  {data.albums.length} {data.albums.length === 1 ? "highlight" : "highlights"}
+                  {data.albums.length} {t("highlights")}
                 </span>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
                   {data.albums.map((a: HighlightAlbum) => (
@@ -201,10 +206,10 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                       <b style={{ display: "block", marginTop: 10, fontSize: 15 }}>{a.title}</b>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
                         <a className="btn btn-secondary" href={dl(a.cover, `instagrab-${name}-${a.title}-cover.jpg`)} download style={{ fontSize: 13 }}>
-                          <ImageDown size={14} strokeWidth={1.5} /> Cover
+                          <ImageDown size={14} strokeWidth={1.5} /> {t("cover")}
                         </a>
                         <button className="btn btn-secondary" style={{ fontSize: 13, cursor: "pointer" }} onClick={() => loadHighlight(a.id)}>
-                          {items[a.id] ? `${items[a.id].length} stories` : "Load stories"}
+                          {items[a.id] ? `${items[a.id].length} ✓` : t("loadStories")}
                         </button>
                       </div>
                       {items[a.id] && items[a.id].length > 0 && (

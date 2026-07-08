@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check, Music } from "lucide-react";
 import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
+import { useI18n } from "@/lib/i18n";
 
 const KIND_ICON: Record<ExtractResult["kind"], React.ElementType> = {
   reel: Clapperboard, post: ImageIcon, carousel: GalleryHorizontalEnd, story: CircleDashed,
@@ -54,6 +55,7 @@ function MediaPreview({ slide, kind }: { slide: Slide; kind: ExtractResult["kind
 }
 
 export default function ResultCard({ data }: { data: ExtractResult }) {
+  const { t } = useI18n();
   const KindIcon = KIND_ICON[data.kind];
   const main = data.slides[0];
   if (!main) return null;
@@ -80,23 +82,23 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 20, minWidth: 0 }}>
           {/* Downloads */}
           <div className="intro-rise" style={{ ["--dl" as string]: "200ms" }}>
-            <span className="label" style={{ display: "block", marginBottom: 10 }}>Download</span>
+            <span className="label" style={{ display: "block", marginBottom: 10 }}>{t("dlLabel")}</span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {main.versions.map((v, i) => (
                 <a key={i} href={dl(v.url, `${base}-${v.label.replace(/\W+/g, "")}`)}
                   className={`btn btn-secondary ${i === 0 ? "gold" : ""}`} download>
                   <Download size={16} strokeWidth={1.5} />
-                  {i === 0 ? `Download ${v.label}` : v.label}
+                  {i === 0 ? `${t("dlLabel")} ${v.label}` : v.label}
                 </a>
               ))}
               {main.audioUrl && (
                 <a href={dl(main.audioUrl, `${base}-audio`)} className="btn btn-secondary" download>
-                  <Music size={16} strokeWidth={1.5} /> Audio M4A
+                  <Music size={16} strokeWidth={1.5} /> {t("audio")}
                 </a>
               )}
               {data.thumbnail && (
                 <a href={dl(data.thumbnail, `${base}-thumbnail`)} className="btn btn-secondary" download>
-                  <ImageDown size={16} strokeWidth={1.5} /> Thumbnail JPG
+                  <ImageDown size={16} strokeWidth={1.5} /> {t("thumbnail")}
                 </a>
               )}
             </div>
@@ -105,7 +107,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
           {/* Carousel strip */}
           {data.slides.length > 1 && (
             <div className="intro-rise" style={{ ["--dl" as string]: "260ms" }}>
-              <span className="label" style={{ display: "block", marginBottom: 10 }}>Slides ({data.slides.length})</span>
+              <span className="label" style={{ display: "block", marginBottom: 10 }}>{t("slides")} ({data.slides.length})</span>
               <div style={{ display: "flex", gap: 10, overflowX: "auto", scrollSnapType: "x mandatory", paddingBottom: 6, WebkitMaskImage: "linear-gradient(90deg,#000 92%,transparent)" }}>
                 {data.slides.map((s, i) => (
                   <div key={i} style={{ flexShrink: 0, scrollSnapAlign: "start", width: 96 }}>
@@ -130,8 +132,8 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
           {data.caption && (
             <div className="intro-rise" style={{ ["--dl" as string]: "300ms" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <span className="label">Caption</span>
-                <CopyButton text={data.caption} label="Copy" className="btn btn-secondary" />
+                <span className="label">{t("caption")}</span>
+                <CopyButton text={data.caption} className="btn btn-secondary" />
               </div>
               <div className="well" style={{ padding: 16, maxHeight: 180, overflowY: "auto", whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)", userSelect: "all" }}>
                 {data.caption}
@@ -143,8 +145,8 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
           {data.hashtags.length > 0 && (
             <div className="intro-rise" style={{ ["--dl" as string]: "380ms" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <span className="label">Hashtags ({data.hashtags.length})</span>
-                <CopyButton text={data.hashtags.join(" ")} label="Copy all" className="btn btn-secondary" />
+                <span className="label">{t("hashtags")} ({data.hashtags.length})</span>
+                <CopyButton text={data.hashtags.join(" ")} label={t("copyAll")} className="btn btn-secondary" />
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {data.hashtags.map(t => <TagChip key={t} tag={t} />)}
@@ -156,7 +158,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
           {data.mentions.length > 0 && (
             <div className="intro-rise" style={{ ["--dl" as string]: "460ms", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <span className="label" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <AtSign size={14} strokeWidth={1.5} /> Mentions
+                <AtSign size={14} strokeWidth={1.5} /> {t("mentions")}
               </span>
               {data.mentions.map(m => <Mention key={m} handle={m} />)}
             </div>
