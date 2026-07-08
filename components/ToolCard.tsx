@@ -2,23 +2,36 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Reveal from "./Reveal";
 
+export type Badge = "Signature" | "New" | "Hot";
+
 export type Tool = {
   href: string; title: string; desc: string;
-  Icon: React.ElementType; signature?: boolean;
+  Icon: React.ElementType; signature?: boolean; badge?: Badge;
 };
 
+const BADGE_STYLE: Record<Badge, React.CSSProperties> = {
+  Signature: { color: "var(--gold-ink)", background: "rgba(245,233,207,.35)", borderColor: "var(--line)" },
+  New: { color: "var(--gold-ink)", background: "color-mix(in srgb, var(--gold-300) 22%, transparent)", borderColor: "var(--gold-300)" },
+  Hot: { color: "#fff", background: "var(--molten)", borderColor: "transparent" },
+};
+
+export function ToolBadge({ badge }: { badge: Badge }) {
+  return (
+    <span className="label" style={{
+      borderStyle: "solid", borderWidth: 1, borderRadius: 999, padding: "4px 10px", fontSize: 10,
+      ...BADGE_STYLE[badge],
+    }}>{badge}</span>
+  );
+}
+
 export default function ToolCard({ tool, index }: { tool: Tool; index: number }) {
+  const badge = tool.badge ?? (tool.signature ? "Signature" : undefined);
   return (
     <Reveal index={index}>
       <Link href={tool.href} className="card tool-card">
         <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span className="medallion"><tool.Icon size={24} strokeWidth={1.5} /></span>
-          {tool.signature && (
-            <span className="label" style={{
-              color: "var(--gold-ink)", background: "rgba(245,233,207,.35)",
-              border: "1px solid var(--line)", borderRadius: 999, padding: "4px 10px", fontSize: 10,
-            }}>Signature</span>
-          )}
+          {badge && <ToolBadge badge={badge} />}
         </span>
         <span>
           <h3 style={{ fontSize: 18, marginBottom: 4 }}>{tool.title}</h3>
