@@ -2,16 +2,19 @@
 import { useState } from "react";
 import {
   AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye, Music,
+  Clapperboard, GalleryHorizontalEnd, Heart, MessageCircle, Pin, ExternalLink,
 } from "lucide-react";
 import AdFrame from "./AdFrame";
 import { useI18n } from "@/lib/i18n";
 
-type Mode = "dp" | "stories" | "viewer" | "highlights";
+type Mode = "dp" | "stories" | "viewer" | "highlights" | "feed";
 type Quality = { label: string; url: string };
 type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[]; audioUrl?: string };
 type HighlightAlbum = { id: string; title: string; cover: string };
+type FeedPost = { shortcode: string; type: "image" | "video" | "carousel"; thumbnail: string; caption: string; likes: number; comments: number; takenAt: number; isPinned?: boolean };
 
-const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights" };
+const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights", feed: "feed" };
+const POST_ICON = { image: ImageDown, video: Clapperboard, carousel: GalleryHorizontalEnd } as const;
 
 function dl(url: string, name: string) {
   return `/api/download?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
@@ -155,9 +158,9 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {data.followers != null && (
                   <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> posts</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> followers</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> following</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> {t("posts")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> {t("followers")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> {t("following")}</span>
                   </div>
                 )}
                 <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--line)", maxWidth: 360 }}>
@@ -226,6 +229,63 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                 </div>
               </div>
             )}
+
+            {mode === "feed" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> {t("posts")}</span>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> {t("followers")}</span>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> {t("following")}</span>
+                </div>
+                {data.biography && (
+                  <div className="well" style={{ padding: 16, whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)" }}>{data.biography}</div>
+                )}
+                <div>
+                  <span className="label" style={{ display: "block", marginBottom: 14 }}>{t("recentPosts")}</span>
+                  {Array.isArray(data.postsList) && data.postsList.length > 0 ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12 }}>
+                      {data.postsList.map((p: FeedPost) => {
+                        const PIcon = POST_ICON[p.type];
+                        return (
+                          <div key={p.shortcode} className="card feed-cell" style={{ padding: 0, overflow: "hidden", position: "relative" }}>
+                            <div style={{ position: "relative", aspectRatio: "1/1", background: "var(--surface-2)" }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={dl(p.thumbnail, "post")} alt={p.caption ? p.caption.slice(0, 60) : `@${name} post`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                              <span style={{ position: "absolute", top: 8, right: 8, color: "#fff", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }}>
+                                <PIcon size={16} strokeWidth={1.75} />
+                              </span>
+                              {p.isPinned && (
+                                <span style={{ position: "absolute", top: 8, left: 8, color: "var(--gold-200)", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }} aria-label={t("pinned")}>
+                                  <Pin size={14} strokeWidth={1.75} />
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 8 }}>
+                              <div className="mono" style={{ display: "flex", gap: 12, fontSize: 12, color: "var(--ink-3)" }}>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Heart size={12} strokeWidth={1.5} /> {fmt(p.likes)}</span>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><MessageCircle size={12} strokeWidth={1.5} /> {fmt(p.comments)}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <a className="btn btn-secondary gold" href={dl(p.thumbnail, `instagrab-${name}-${p.shortcode}.jpg`)} download
+                                  style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "6px 8px" }} aria-label="Download image">
+                                  <Download size={13} strokeWidth={1.5} />
+                                </a>
+                                <a className="btn btn-secondary" href={`https://www.instagram.com/p/${p.shortcode}/`} target="_blank" rel="noopener noreferrer"
+                                  style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "6px 8px" }} aria-label="Open on Instagram">
+                                  <ExternalLink size={13} strokeWidth={1.5} />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="mono" style={{ fontSize: 13, color: "var(--ink-3)" }}>{t("noPosts")}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Ad slot — only after success, never inside the card */}
@@ -240,6 +300,8 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
         .ubar-input::placeholder{ color:var(--ink-3); }
         .ubar:focus-within{ border-color:var(--gold-400); box-shadow:var(--focus-ring); }
         .ubar.loading:focus-within{ box-shadow:none; }
+        .feed-cell{ transition:transform 200ms var(--ease-silk), box-shadow 200ms var(--ease-silk); }
+        .feed-cell:hover{ transform:translateY(-3px); box-shadow:var(--shadow-1); }
         @media (max-width:639px){
           .ubar{ flex-wrap:wrap; height:auto; border-radius:24px; padding:12px; }
           .ubar-input{ flex:1 1 60%; height:44px; }

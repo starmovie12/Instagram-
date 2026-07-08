@@ -90,7 +90,7 @@ export default function Home() {
           <div className="container">
             <Reveal>
               <span className="label">Tools</span>
-              <h2 style={{ marginTop: 12, marginBottom: 40 }}>One bar, ten tools.</h2>
+              <h2 style={{ marginTop: 12, marginBottom: 40 }}>One bar, every tool.</h2>
             </Reveal>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
               {TOOLS.map((t, i) => <ToolCard key={t.href} tool={t} index={i} />)}

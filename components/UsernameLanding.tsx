@@ -20,7 +20,7 @@ export default function UsernameLanding({
   eyebrow: string;
   h1: React.ReactNode; // pass spans with .gilded on one word
   lead: string;
-  mode: "dp" | "stories" | "viewer" | "highlights";
+  mode: "dp" | "stories" | "viewer" | "highlights" | "feed";
   placeholder?: string;
   children: React.ReactNode; // SEO article prose
   faq?: QA[];

@@ -10,6 +10,7 @@ const COLS = [
     ["Carousel downloader", "/carousel-downloader"],
   ]},
   { h: "More tools", links: [
+    ["Profile viewer", "/profile-viewer"],
     ["Anonymous story viewer", "/story-viewer"],
     ["Highlights downloader", "/highlights-downloader"],
     ["Profile picture downloader", "/profile-picture-downloader"],

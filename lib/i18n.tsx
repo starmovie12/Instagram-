@@ -45,7 +45,8 @@ type Keys =
   | "dlLabel" | "caption" | "hashtags" | "mentions" | "slides"
   | "copy" | "copied" | "copyAll" | "thumbnail" | "audio"
   | "activeStories" | "dpDownload" | "cover" | "loadStories" | "bio"
-  | "highlights" | "language";
+  | "highlights" | "language"
+  | "posts" | "followers" | "following" | "recentPosts" | "pinned" | "noPosts";
 
 type Dict = Partial<Record<Keys, string>>;
 
@@ -66,6 +67,8 @@ const EN: Record<Keys, string> = {
   copy: "Copy", copied: "Copied", copyAll: "Copy all", thumbnail: "Thumbnail JPG", audio: "Audio M4A",
   activeStories: "active stories", dpDownload: "Download HD profile picture", cover: "Cover",
   loadStories: "Load stories", bio: "Bio", highlights: "highlights", language: "Language",
+  posts: "posts", followers: "followers", following: "following",
+  recentPosts: "Recent posts", pinned: "Pinned", noPosts: "No public posts to show.",
 };
 
 const STRINGS: Record<Locale, Dict> = {
@@ -87,6 +90,8 @@ const STRINGS: Record<Locale, Dict> = {
     copy: "कॉपी", copied: "कॉपी हो गया", copyAll: "सभी कॉपी करें", thumbnail: "थंबनेल JPG", audio: "ऑडियो M4A",
     activeStories: "एक्टिव स्टोरीज़", dpDownload: "HD प्रोफ़ाइल फोटो डाउनलोड करें", cover: "कवर",
     loadStories: "स्टोरीज़ लोड करें", bio: "बायो", highlights: "हाइलाइट्स", language: "भाषा",
+    posts: "पोस्ट", followers: "फॉलोअर्स", following: "फॉलोइंग",
+    recentPosts: "हाल की पोस्ट्स", pinned: "पिन्ड", noPosts: "दिखाने के लिए कोई पब्लिक पोस्ट नहीं।",
   },
   es: {
     linkPlaceholder: "Pega un enlace de Instagram — reel, post, historia…",

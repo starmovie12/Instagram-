@@ -17,6 +17,7 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 🎵 Reel/story audio-only download (M4A, via Instagram's DASH manifest — no transcoding)
 
 **Username-based** (enter an @handle):
+- 🔲 Profile viewer (bio + stats + HD DP + a grid of recent posts, Picuki-style — anonymous)
 - ⭕ Story downloader (active 24h stories)
 - 👁️ Anonymous story viewer (no trace)
 - ✨ Highlights downloader (covers + stories inside each album)

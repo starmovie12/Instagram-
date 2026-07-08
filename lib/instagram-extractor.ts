@@ -575,6 +575,24 @@ export type StoryItem = {
   audioUrl?: string;
 };
 
+/** One post in a public profile's feed grid (Profile Viewer). */
+export type FeedPost = {
+  shortcode: string;
+  type: "image" | "video" | "carousel";
+  thumbnail: string;
+  caption: string;
+  likes: number;
+  comments: number;
+  takenAt: number;
+  isPinned?: boolean;
+};
+
+export type ProfileFeedResult = ProfileResult & {
+  postsList: FeedPost[];
+  /** Instagram only ships the first page (~12) in web_profile_info. */
+  hasMore: boolean;
+};
+
 export type StoriesResult = {
   username: string;
   fullName: string;
@@ -687,6 +705,78 @@ export async function extractProfile(rawUsername: string): Promise<ProfileResult
     following: u.edge_follow?.count ?? 0,
     posts: u.edge_owner_to_timeline_media?.count ?? 0,
     profilePicHd: u.profile_pic_url_hd ?? u.profile_pic_url ?? "",
+  };
+}
+
+/** Map a timeline-media edge node (GraphQL web_profile_info) to a FeedPost. */
+function timelineNodeToPost(node: any): FeedPost {
+  const typename: string = node?.__typename ?? "";
+  const type: FeedPost["type"] =
+    node?.edge_sidecar_to_children || typename === "GraphSidecar"
+      ? "carousel"
+      : node?.is_video || typename === "GraphVideo"
+        ? "video"
+        : "image";
+  const caption: string = node?.edge_media_to_caption?.edges?.[0]?.node?.text ?? "";
+  return {
+    shortcode: node?.shortcode ?? "",
+    type,
+    thumbnail: node?.display_url ?? node?.thumbnail_src ?? "",
+    caption,
+    likes: node?.edge_liked_by?.count ?? node?.edge_media_preview_like?.count ?? 0,
+    comments: node?.edge_media_to_comment?.count ?? node?.edge_media_preview_comment?.count ?? 0,
+    takenAt: node?.taken_at_timestamp ?? 0,
+    isPinned: !!node?.pinned_for_users?.length,
+  };
+}
+
+/**
+ * Profile Viewer: bio + stats + HD DP + the recent-posts grid, all from the
+ * one public web_profile_info call Instagram's own site uses. Public accounts
+ * only — private profiles never expose their timeline media here.
+ */
+export async function extractProfileFeed(rawUsername: string): Promise<ProfileFeedResult> {
+  const username = parseUsername(rawUsername);
+  const json = await fetchJson(
+    IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
+    `https://www.instagram.com/${username}/`
+  );
+  const u = json?.data?.user;
+  if (!u) {
+    throw new ExtractError("No account found with that username.", "NOT_FOUND");
+  }
+  const profile: ProfileResult = {
+    username: u.username ?? username,
+    fullName: u.full_name ?? "",
+    userId: u.id ?? "",
+    isPrivate: !!u.is_private,
+    isVerified: !!u.is_verified,
+    biography: u.biography ?? "",
+    followers: u.edge_followed_by?.count ?? 0,
+    following: u.edge_follow?.count ?? 0,
+    posts: u.edge_owner_to_timeline_media?.count ?? 0,
+    profilePicHd: u.profile_pic_url_hd ?? u.profile_pic_url ?? "",
+  };
+
+  const timeline = u.edge_owner_to_timeline_media;
+  const edges: any[] = Array.isArray(timeline?.edges) ? timeline.edges : [];
+  const postsList = edges
+    .map((e) => timelineNodeToPost(e?.node))
+    .filter((p) => p.shortcode && p.thumbnail);
+
+  // Private accounts (or ones with hidden feeds) return no timeline media —
+  // surface a clear, honest error rather than an empty grid.
+  if (profile.isPrivate && postsList.length === 0) {
+    throw new ExtractError(
+      `@${profile.username} is a private account — only public profiles can be viewed.`,
+      "PRIVATE"
+    );
+  }
+
+  return {
+    ...profile,
+    postsList,
+    hasMore: !!timeline?.page_info?.has_next_page,
   };
 }
 

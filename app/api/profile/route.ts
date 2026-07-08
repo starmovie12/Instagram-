@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   extractProfile,
+  extractProfileFeed,
   extractStories,
   extractHighlights,
   extractHighlightItems,
@@ -60,6 +61,9 @@ export async function POST(req: NextRequest) {
       case "dp": {
         const profile = await extractProfile(username);
         return NextResponse.json(profile);
+      }
+      case "feed": {
+        return NextResponse.json(await extractProfileFeed(username));
       }
       case "stories": {
         return NextResponse.json(await extractStories(username));
