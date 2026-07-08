@@ -3,8 +3,10 @@ import Footer from "./Footer";
 import GoldenBar from "./GoldenBar";
 import TrustLine from "./TrustLine";
 import HowItWorks from "./HowItWorks";
-import FAQ, { QA } from "./FAQ";
+import FAQ from "./FAQ";
 import Reveal from "./Reveal";
+import JsonLd from "./JsonLd";
+import { DEFAULT_FAQ, faqJsonLd, type QA } from "@/lib/seo";
 
 /** Shared shell for the five tool landing pages: hero + bar above the fold, SEO prose below. */
 export default function ToolLanding({
@@ -18,6 +20,7 @@ export default function ToolLanding({
 }) {
   return (
     <>
+      <JsonLd data={faqJsonLd(faq ?? DEFAULT_FAQ)} />
       <Nav />
       <main>
         <section style={{ position: "relative", padding: "88px 0 64px", textAlign: "center", overflow: "hidden" }}>

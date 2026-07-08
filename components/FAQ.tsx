@@ -2,17 +2,9 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Reveal from "./Reveal";
+import { DEFAULT_FAQ, type QA } from "@/lib/seo";
 
-export type QA = { q: string; a: string };
-
-export const DEFAULT_FAQ: QA[] = [
-  { q: "Is this free?", a: "Yes. InstaGrab is free to use — no account, no limits for normal use. Ads keep it running." },
-  { q: "Do I need to log in?", a: "No. We never ask for your Instagram login or password — that's a promise, and a safety feature." },
-  { q: "Does it work on private accounts?", a: "No. InstaGrab fetches public content only. Private accounts stay private." },
-  { q: "Where is my link stored?", a: "Nowhere. Links are processed in memory to fetch your media and never written to a database." },
-  { q: "Is downloading allowed?", a: "Only download content you own or have permission to use. See our Terms for details." },
-  { q: "Why did a download fail?", a: "Instagram changes things on their side from time to time; we patch fast — usually within hours. Try again soon." },
-];
+export type { QA };
 
 export default function FAQ({ items = DEFAULT_FAQ }: { items?: QA[] }) {
   const [open, setOpen] = useState<number>(-1);

@@ -14,14 +14,24 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 📋 Caption extractor — full text, one-click copy *(signature)*
 - #️⃣ Hashtag extractor — all tags separated, copy-all *(signature)*
 - @ Mentions + 🖼️ video thumbnail download
+- 🎵 Reel/story audio-only download (M4A, via Instagram's DASH manifest — no transcoding)
 
 **Username-based** (enter an @handle):
+- 🔲 Profile viewer (bio + stats + HD DP + a grid of recent posts, Picuki-style — anonymous)
 - ⭕ Story downloader (active 24h stories)
 - 👁️ Anonymous story viewer (no trace)
 - ✨ Highlights downloader (covers + stories inside each album)
 - 🪪 Profile picture / DP downloader (full HD)
 
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
+
+**🌍 Multi-language:** the tool UI (paste bar, buttons, errors, result card) speaks
+21 languages — English, हिन्दी, Español, Português, Bahasa Indonesia, العربية, Türkçe,
+Français, Deutsch, Italiano, Русский, 日本語, 한국어, Tiếng Việt, ไทย, বাংলা, اردو, فارسی,
+Bahasa Melayu, Polski, Nederlands. Picker in the nav (globe icon); choice persists in
+`localStorage` (`ig-lang`) and auto-detects from the browser on first visit. Strings live
+in `lib/i18n.tsx` (missing keys fall back to English). SEO prose stays English-first per
+the PRD.
 
 ## Project structure
 

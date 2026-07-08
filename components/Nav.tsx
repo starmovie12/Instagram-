@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import LanguagePicker from "./LanguagePicker";
 
 const LINKS = [
   { href: "/reels-downloader", label: "Reels" },
@@ -11,6 +12,8 @@ const LINKS = [
   { href: "/photo-downloader", label: "Photos" },
   { href: "/caption-extractor", label: "Captions" },
   { href: "/hashtag-extractor", label: "Hashtags" },
+  { href: "/profile-viewer", label: "Profile" },
+  { href: "/#tools", label: "All tools" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -54,6 +57,7 @@ export default function Nav() {
           ))}
         </nav>
         <div style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: "auto" }}>
+          <LanguagePicker />
           <ThemeToggle />
           <button className="btn-icon nav-burger" aria-label="Menu" onClick={() => setOpen(true)}>
             <Menu size={20} strokeWidth={1.5} />

@@ -1,21 +1,24 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import ResultCard from "./ResultCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
+import { useI18n } from "@/lib/i18n";
 
-const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|stories)\/([\w-]+)/i;
+const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
 type Phase = "idle" | "loading" | "success" | "error";
 const KIND_META: Record<string, { Icon: React.ElementType; label: string }> = {
   p: { Icon: ImageIcon, label: "post" },
   reel: { Icon: Clapperboard, label: "reel" },
   reels: { Icon: Clapperboard, label: "reel" },
+  tv: { Icon: Clapperboard, label: "video" },
   stories: { Icon: CircleDashed, label: "story" },
 };
 
 export default function GoldenBar({ intro = false }: { intro?: boolean }) {
+  const { t } = useI18n();
   const [value, setValue] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [invalid, setInvalid] = useState(false);
@@ -26,7 +29,10 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
 
   const match = value.match(URL_RE);
   const kind = match ? KIND_META[match[1].toLowerCase()] : null;
-  const canPaste = typeof navigator !== "undefined" && !!navigator.clipboard?.readText;
+  // Clipboard support is only knowable in the browser — resolve it after mount
+  // so the server and first client render agree (avoids hydration mismatch).
+  const [canPaste, setCanPaste] = useState(false);
+  useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
 
   async function paste() {
     try { const t = await navigator.clipboard.readText(); if (t) setValue(t.trim()); } catch {}
@@ -93,21 +99,21 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
             ref={inputRef} value={value} disabled={loading}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => e.key === "Enter" && go()}
-            placeholder="Paste an Instagram link — reel, post, story…"
+            placeholder={t("linkPlaceholder")}
             aria-label="Instagram link"
             className="gbar-input"
           />
         )}
 
         {canPaste && !kind && !loading && (
-          <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40 }}>
-            <ClipboardPaste size={16} strokeWidth={1.5} /> PASTE
+          <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40, textTransform: "uppercase" }}>
+            <ClipboardPaste size={16} strokeWidth={1.5} /> {t("paste")}
           </button>
         )}
 
         <button className="btn btn-molten gbar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
           <Download size={20} strokeWidth={1.5} />
-          <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? "Fetching…" : "Download"}</span>
+          <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? t("fetching") : t("download")}</span>
         </button>
       </div>
 
@@ -116,7 +122,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
       )}
       {phase === "error" && error === "INVALID_URL" && (
         <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
-          That doesn&apos;t look like an Instagram link. Paste one like instagram.com/reel/…
+          {t("invalidLink")}
         </p>
       )}
 

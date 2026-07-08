@@ -1,16 +1,20 @@
 "use client";
 import { useState } from "react";
 import {
-  AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye,
+  AtSign, Search, Download, BadgeCheck, ImageDown, AlertTriangle, Eye, Music,
+  Clapperboard, GalleryHorizontalEnd, Heart, MessageCircle, Pin, ExternalLink,
 } from "lucide-react";
 import AdFrame from "./AdFrame";
+import { useI18n } from "@/lib/i18n";
 
-type Mode = "dp" | "stories" | "viewer" | "highlights";
+type Mode = "dp" | "stories" | "viewer" | "highlights" | "feed";
 type Quality = { label: string; url: string };
-type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[] };
+type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[]; audioUrl?: string };
 type HighlightAlbum = { id: string; title: string; cover: string };
+type FeedPost = { shortcode: string; type: "image" | "video" | "carousel"; thumbnail: string; caption: string; likes: number; comments: number; takenAt: number; isPinned?: boolean };
 
-const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights" };
+const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights", feed: "feed" };
+const POST_ICON = { image: ImageDown, video: Clapperboard, carousel: GalleryHorizontalEnd } as const;
 
 function dl(url: string, name: string) {
   return `/api/download?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`;
@@ -41,12 +45,22 @@ function StoryCard({ item, name, index }: { item: StoryItem; name: string; index
             <Download size={14} strokeWidth={1.5} /> {qi === 0 ? `${item.type === "video" ? "Video" : "Photo"} ${q.label}` : q.label}
           </a>
         ))}
+        {item.audioUrl && (
+          <a href={dl(item.audioUrl, `instagrab-${name}-story-${index + 1}-audio.m4a`)}
+            className="btn btn-secondary" download style={{ fontSize: 13 }}>
+            <Music size={14} strokeWidth={1.5} /> Audio
+          </a>
+        )}
       </div>
     </div>
   );
 }
 
 export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeholder?: string }) {
+  const { t, lang } = useI18n();
+  // Bespoke per-page placeholders are English; fall back to the translated
+  // generic one whenever another language is active.
+  const hint = lang === "en" && placeholder ? placeholder : t("userPlaceholder");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,14 +111,14 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
           value={username} disabled={loading}
           onChange={e => setUsername(e.target.value)}
           onKeyDown={e => e.key === "Enter" && go()}
-          placeholder={placeholder ?? "Enter @username or profile URL"}
+          placeholder={hint}
           aria-label="Instagram username"
           autoCapitalize="none" autoCorrect="off" spellCheck={false}
           className="ubar-input"
         />
         <button className="btn btn-molten ubar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
           {mode === "viewer" ? <Eye size={20} strokeWidth={1.5} /> : <Search size={20} strokeWidth={1.5} />}
-          <span>{loading ? "Fetching…" : mode === "viewer" ? "View" : "Search"}</span>
+          <span>{loading ? t("fetching") : mode === "viewer" ? t("view") : t("search")}</span>
         </button>
       </div>
 
@@ -144,9 +158,9 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {data.followers != null && (
                   <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> posts</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> followers</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> following</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> {t("posts")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> {t("followers")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> {t("following")}</span>
                   </div>
                 )}
                 <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--line)", maxWidth: 360 }}>
@@ -155,12 +169,12 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                 </div>
                 <div>
                   <a className="btn btn-secondary gold" href={dl(data.profilePicHd, `instagrab-${data.username}-dp.jpg`)} download>
-                    <ImageDown size={16} strokeWidth={1.5} /> Download HD profile picture
+                    <ImageDown size={16} strokeWidth={1.5} /> {t("dpDownload")}
                   </a>
                 </div>
                 {data.biography && (
                   <div>
-                    <span className="label" style={{ display: "block", marginBottom: 10 }}>Bio</span>
+                    <span className="label" style={{ display: "block", marginBottom: 10 }}>{t("bio")}</span>
                     <div className="well" style={{ padding: 16, whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)" }}>{data.biography}</div>
                   </div>
                 )}
@@ -170,7 +184,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
             {(mode === "stories" || mode === "viewer") && Array.isArray(data.items) && (
               <div>
                 <span className="label" style={{ display: "block", marginBottom: 14 }}>
-                  {data.items.length} active {data.items.length === 1 ? "story" : "stories"}
+                  {data.items.length} {t("activeStories")}
                 </span>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
                   {data.items.map((item: StoryItem, i: number) => (
@@ -183,7 +197,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
             {mode === "highlights" && Array.isArray(data.albums) && (
               <div>
                 <span className="label" style={{ display: "block", marginBottom: 14 }}>
-                  {data.albums.length} {data.albums.length === 1 ? "highlight" : "highlights"}
+                  {data.albums.length} {t("highlights")}
                 </span>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
                   {data.albums.map((a: HighlightAlbum) => (
@@ -195,10 +209,10 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                       <b style={{ display: "block", marginTop: 10, fontSize: 15 }}>{a.title}</b>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
                         <a className="btn btn-secondary" href={dl(a.cover, `instagrab-${name}-${a.title}-cover.jpg`)} download style={{ fontSize: 13 }}>
-                          <ImageDown size={14} strokeWidth={1.5} /> Cover
+                          <ImageDown size={14} strokeWidth={1.5} /> {t("cover")}
                         </a>
                         <button className="btn btn-secondary" style={{ fontSize: 13, cursor: "pointer" }} onClick={() => loadHighlight(a.id)}>
-                          {items[a.id] ? `${items[a.id].length} stories` : "Load stories"}
+                          {items[a.id] ? `${items[a.id].length} ✓` : t("loadStories")}
                         </button>
                       </div>
                       {items[a.id] && items[a.id].length > 0 && (
@@ -212,6 +226,63 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
                       )}
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {mode === "feed" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> {t("posts")}</span>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> {t("followers")}</span>
+                  <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> {t("following")}</span>
+                </div>
+                {data.biography && (
+                  <div className="well" style={{ padding: 16, whiteSpace: "pre-wrap", fontSize: "var(--t-small)", color: "var(--ink-2)" }}>{data.biography}</div>
+                )}
+                <div>
+                  <span className="label" style={{ display: "block", marginBottom: 14 }}>{t("recentPosts")}</span>
+                  {Array.isArray(data.postsList) && data.postsList.length > 0 ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12 }}>
+                      {data.postsList.map((p: FeedPost) => {
+                        const PIcon = POST_ICON[p.type];
+                        return (
+                          <div key={p.shortcode} className="card feed-cell" style={{ padding: 0, overflow: "hidden", position: "relative" }}>
+                            <div style={{ position: "relative", aspectRatio: "1/1", background: "var(--surface-2)" }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={dl(p.thumbnail, "post")} alt={p.caption ? p.caption.slice(0, 60) : `@${name} post`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                              <span style={{ position: "absolute", top: 8, right: 8, color: "#fff", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }}>
+                                <PIcon size={16} strokeWidth={1.75} />
+                              </span>
+                              {p.isPinned && (
+                                <span style={{ position: "absolute", top: 8, left: 8, color: "var(--gold-200)", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }} aria-label={t("pinned")}>
+                                  <Pin size={14} strokeWidth={1.75} />
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 8 }}>
+                              <div className="mono" style={{ display: "flex", gap: 12, fontSize: 12, color: "var(--ink-3)" }}>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Heart size={12} strokeWidth={1.5} /> {fmt(p.likes)}</span>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><MessageCircle size={12} strokeWidth={1.5} /> {fmt(p.comments)}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <a className="btn btn-secondary gold" href={dl(p.thumbnail, `instagrab-${name}-${p.shortcode}.jpg`)} download
+                                  style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "6px 8px" }} aria-label="Download image">
+                                  <Download size={13} strokeWidth={1.5} />
+                                </a>
+                                <a className="btn btn-secondary" href={`https://www.instagram.com/p/${p.shortcode}/`} target="_blank" rel="noopener noreferrer"
+                                  style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "6px 8px" }} aria-label="Open on Instagram">
+                                  <ExternalLink size={13} strokeWidth={1.5} />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="mono" style={{ fontSize: 13, color: "var(--ink-3)" }}>{t("noPosts")}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -229,6 +300,8 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
         .ubar-input::placeholder{ color:var(--ink-3); }
         .ubar:focus-within{ border-color:var(--gold-400); box-shadow:var(--focus-ring); }
         .ubar.loading:focus-within{ box-shadow:none; }
+        .feed-cell{ transition:transform 200ms var(--ease-silk), box-shadow 200ms var(--ease-silk); }
+        .feed-cell:hover{ transform:translateY(-3px); box-shadow:var(--shadow-1); }
         @media (max-width:639px){
           .ubar{ flex-wrap:wrap; height:auto; border-radius:24px; padding:12px; }
           .ubar-input{ flex:1 1 60%; height:44px; }

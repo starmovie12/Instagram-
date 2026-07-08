@@ -194,6 +194,52 @@ BLOG_POSTS.push(
         "Irrelevant trending tags — they confuse categorization and hurt distribution.",
       ]},
     ],
+  },
+  {
+    slug: "copy-instagram-caption-full-text",
+    title: "How to Copy an Instagram Caption — Full Text, One Click (2026)",
+    description:
+      "Instagram blocks text selection on captions. Here are three ways to copy any caption word-for-word — and the one-click method that also grabs the hashtags.",
+    date: "2026-07-06",
+    content: [
+      { type: "p", text: "Try to long-press a caption in the Instagram app and nothing happens — text selection is deliberately disabled. For creators who study hooks, save quote posts, or credit collaborators, retyping a 200-word caption is a real time tax. Here are the three ways around it, from clumsy to clean." },
+      { type: "h2", text: "Method 1: The screenshot + OCR workaround" },
+      { type: "p", text: "Screenshot the caption, run it through a photo-to-text app, then fix the recognition errors by hand. It works, but emojis break, line breaks vanish, and hashtags come out mangled. Fine for a sentence; painful for anything longer." },
+      { type: "h2", text: "Method 2: Instagram's own copy option (sometimes)" },
+      { type: "p", text: "On some posts the ••• menu shows a Copy caption option — but it's inconsistent across app versions and regions, and it copies the caption and hashtags as one undifferentiated blob you still have to clean up." },
+      { type: "h2", text: "Method 3: The one-click extractor" },
+      { type: "ul", items: [
+        "Copy the post or reel link (Share → Copy link).",
+        "Paste it into a caption extractor and press Download.",
+        "You get the full caption in a copy-ready box — line breaks and emojis intact — plus every hashtag separated out as individual tags, and any @mentions listed.",
+      ]},
+      { type: "p", text: "The separation matters: captions and hashtags serve different jobs. The caption teaches you the hook and structure; the hashtag set feeds your tag research. A good extractor hands you both, already split." },
+      { type: "h2", text: "Is copying captions allowed?" },
+      { type: "p", text: "Copying text for study, note-taking, or crediting is normal fair use of public content. Republishing someone's caption word-for-word as your own is plagiarism — rewrite in your voice, or quote with credit." },
+    ],
+  },
+  {
+    slug: "download-instagram-profile-picture-hd",
+    title: "How to See & Download Any Instagram Profile Picture in Full HD",
+    description:
+      "Instagram locks profile photos to a tiny circle you can't zoom. Here's how to view and save the full-size HD original of any public account's DP.",
+    date: "2026-07-06",
+    content: [
+      { type: "p", text: "Tap on any Instagram profile picture and… nothing. No zoom, no full-screen view — just a small circle, even though Instagram stores a much larger original. If you need a creator's DP for a collab graphic, a fan page, or your own archived account art, here's how to get the real file." },
+      { type: "h2", text: "Why the app won't show you" },
+      { type: "p", text: "Instagram treats profile photos as UI decoration, not content — so there's no built-in viewer. But the full-resolution image (typically 320–1080px) is served publicly for every public account; the app just never gives you a button for it." },
+      { type: "h2", text: "The username method (no login)" },
+      { type: "ul", items: [
+        "Copy the account's @username or profile URL.",
+        "Paste it into a profile picture downloader and press Search.",
+        "Preview the full-size photo, then save it as a JPG in original quality.",
+      ]},
+      { type: "p", text: "Because the lookup happens server-side with no Instagram login, the account owner is never notified and no view is registered — it's the same photo their profile serves publicly, just at full size." },
+      { type: "h2", text: "What about private accounts?" },
+      { type: "p", text: "Private accounts may serve a limited version of the photo, and that's by design — tools that promise otherwise are lying or phishing for your login. Never enter your Instagram password into a downloader site; a legitimate one will never ask." },
+      { type: "h2", text: "Use it right" },
+      { type: "p", text: "A profile photo belongs to the account owner. Downloading for reference, contact cards, or collab material you have permission for is fine; impersonation is not — and it violates Instagram's rules and often the law." },
+    ],
   }
 );
 

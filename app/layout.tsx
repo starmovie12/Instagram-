@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { LangProvider } from "@/lib/i18n";
 import "./globals.css";
 
 const display = Fraunces({
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {children}
+        <LangProvider>{children}</LangProvider>
         <Analytics />
       </body>
     </html>
