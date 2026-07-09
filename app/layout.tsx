@@ -16,7 +16,7 @@ const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", disp
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrab.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app"),
   title: {
     default: "InstaGrab — Download anything from Instagram, beautifully",
     template: "%s · InstaGrab",
