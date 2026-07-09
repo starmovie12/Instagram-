@@ -11,7 +11,7 @@ export const DEFAULT_FAQ: QA[] = [
   { q: "Why did a download fail?", a: "Instagram changes things on their side from time to time; we patch fast — usually within hours. Try again soon." },
 ];
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrab.vercel.app";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app";
 
 /** schema.org FAQPage — helps tool pages surface in Google's FAQ-rich results. */
 export function faqJsonLd(items: QA[]) {
