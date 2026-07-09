@@ -23,6 +23,21 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - ✨ Highlights downloader (covers + stories inside each album)
 - 🪪 Profile picture / DP downloader (full HD)
 
+**Calculators & utilities** (Phase-1 roadmap tools):
+- 💰 Money calculator — followers + ER + niche → rate per post/story/reel (₹ India-mode & global $)
+- 🕵️ Fake follower checker — audience quality grade A+ to F from public signals
+- 🕐 Best time to post — niche + audience-region golden windows (India-first)
+- ✅ Username availability checker (+ tap-to-check suggestions)
+- 🔢 Character counter — caption/bio/username limits + "… more"-fold warning
+- 🧹 Hashtag counter & cleaner — dedupe, banned-tag drop, trim to 30
+- 🚦 Is Instagram down? — live server probe (`/api/ig-status`)
+- ▶️ YouTube thumbnail downloader — up to 1280×720, Shorts included
+
+**Retention & UX:**
+- ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K)
+- 🕘 "Pick up where you left off" — recently-used tools row on the homepage (localStorage only)
+- 📋 Auto clipboard prefill on the golden bar (only when permission already granted — never prompts)
+
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
 
 **🌍 Multi-language:** the tool UI (paste bar, buttons, errors, result card) speaks

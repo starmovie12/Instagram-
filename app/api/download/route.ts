@@ -8,9 +8,11 @@ export const dynamic = "force-dynamic";
  * Download proxy: Instagram CDN blocks cross-origin fetches, so the browser
  * can't save the file directly. This route streams the media through with a
  * Content-Disposition header so the browser downloads instead of playing it.
- * Only Instagram/Facebook CDN hosts are allowed — this is NOT an open proxy.
+ * Only Instagram/Facebook CDN hosts (plus YouTube's static thumbnail hosts,
+ * for the thumbnail tool) are allowed — this is NOT an open proxy.
  */
-const ALLOWED_HOST_RE = /(^|\.)(cdninstagram\.com|fbcdn\.net)$/;
+const ALLOWED_HOST_RE = /(^|\.)(cdninstagram\.com|fbcdn\.net|ytimg\.com)$/;
+const ALLOWED_EXACT_HOSTS = new Set(["img.youtube.com"]);
 
 function safeFilename(name: string, fallback: string): string {
   const cleaned = name.replace(/[^\w.-]+/g, "_").slice(0, 80);
@@ -36,7 +38,9 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid media URL." }, { status: 400 });
   }
-  if (target.protocol !== "https:" || !ALLOWED_HOST_RE.test(target.hostname)) {
+  const hostAllowed =
+    ALLOWED_HOST_RE.test(target.hostname) || ALLOWED_EXACT_HOSTS.has(target.hostname);
+  if (target.protocol !== "https:" || !hostAllowed) {
     return NextResponse.json({ error: "URL not allowed." }, { status: 403 });
   }
 

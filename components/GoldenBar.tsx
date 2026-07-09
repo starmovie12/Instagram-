@@ -65,6 +65,21 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   const [canPaste, setCanPaste] = useState(false);
   useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
 
+  // Auto clipboard: if clipboard-read is ALREADY granted (no prompt ever shown
+  // by us), prefill an Instagram link waiting on the clipboard — one tap saved.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const perm = await navigator.permissions?.query?.({ name: "clipboard-read" as PermissionName });
+        if (perm?.state !== "granted") return;
+        const txt = (await navigator.clipboard.readText())?.trim();
+        if (!cancelled && txt && detect(txt)) setValue((v) => v || txt);
+      } catch { /* clipboard unavailable — the paste button still works */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   async function paste() {
     try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
   }
