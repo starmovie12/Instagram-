@@ -47,7 +47,7 @@ type Keys =
   | "activeStories" | "dpDownload" | "cover" | "loadStories" | "bio"
   | "highlights" | "language"
   | "posts" | "followers" | "following" | "recentPosts" | "pinned" | "noPosts"
-  | "smartPlaceholder" | "downloadAllZip" | "resolving";
+  | "smartPlaceholder" | "downloadAllZip" | "resolving" | "copyLink";
 
 type Dict = Partial<Record<Keys, string>>;
 
@@ -71,7 +71,7 @@ const EN: Record<Keys, string> = {
   posts: "posts", followers: "followers", following: "following",
   recentPosts: "Recent posts", pinned: "Pinned", noPosts: "No public posts to show.",
   smartPlaceholder: "Paste a link or @username — reel, post, story, profile…",
-  downloadAllZip: "Download all (ZIP)", resolving: "Reading…",
+  downloadAllZip: "Download all (ZIP)", resolving: "Reading…", copyLink: "Copy link",
 };
 
 const STRINGS: Record<Locale, Dict> = {
@@ -96,7 +96,7 @@ const STRINGS: Record<Locale, Dict> = {
     posts: "पोस्ट", followers: "फॉलोअर्स", following: "फॉलोइंग",
     recentPosts: "हाल की पोस्ट्स", pinned: "पिन्ड", noPosts: "दिखाने के लिए कोई पब्लिक पोस्ट नहीं।",
     smartPlaceholder: "लिंक या @username पेस्ट करें — reel, post, story, profile…",
-    downloadAllZip: "सभी डाउनलोड (ZIP)", resolving: "पढ़ रहे हैं…",
+    downloadAllZip: "सभी डाउनलोड (ZIP)", resolving: "पढ़ रहे हैं…", copyLink: "लिंक कॉपी करें",
   },
   es: {
     linkPlaceholder: "Pega un enlace de Instagram — reel, post, historia…",

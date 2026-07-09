@@ -59,6 +59,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
   const KindIcon = KIND_ICON[data.kind];
   const main = data.slides[0];
   if (!main) return null;
+  const best = main.versions[0];
   const dur = fmtDur(data.durationSeconds);
   const base = `instagrab-${data.shortcode}`;
 
@@ -101,6 +102,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
                   <ImageDown size={16} strokeWidth={1.5} /> {t("thumbnail")}
                 </a>
               )}
+              {best && <CopyButton text={best.url} label={t("copyLink")} className="btn btn-secondary" />}
             </div>
           </div>
 

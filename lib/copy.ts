@@ -2,7 +2,7 @@ import {
   Clapperboard, CircleDashed, Image as ImageIcon, TextQuote, Hash,
   Video, GalleryHorizontalEnd, Eye, CircleUserRound, BookMarked, LayoutGrid,
   Music, ImageDown, Package, Activity, Gauge, Type, WrapText, ShieldAlert,
-  Grid3x3, Disc3,
+  Grid3x3, Disc3, ListChecks,
 } from "lucide-react";
 import type { Tool } from "@/components/ToolCard";
 
@@ -18,6 +18,7 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/carousel-downloader", title: "Carousel downloader", desc: "All ten slides, each with its own HD download.", Icon: GalleryHorizontalEnd },
       { href: "/audio-downloader", title: "Audio downloader", desc: "Rip a reel's sound as an M4A — the trending audio, alone.", Icon: Music, badge: "New" },
       { href: "/thumbnail-downloader", title: "Thumbnail downloader", desc: "Any reel or video's HD cover image.", Icon: ImageDown, badge: "New" },
+      { href: "/batch-downloader", title: "Batch downloader", desc: "Paste up to 20 links and grab them all at once.", Icon: ListChecks, badge: "Hot" },
     ],
   },
   {
