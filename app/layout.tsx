@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
+import PwaRegister from "@/components/PwaRegister";
+import InstallPrompt from "@/components/InstallPrompt";
 import "./globals.css";
 
 const display = Fraunces({
@@ -26,6 +28,8 @@ export const metadata: Metadata = {
   ],
   openGraph: { siteName: "InstaGrab", type: "website" },
   robots: { index: true, follow: true },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "InstaGrab", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
@@ -48,6 +52,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <LangProvider>{children}</LangProvider>
+        <PwaRegister />
+        <InstallPrompt />
         <Analytics />
       </body>
     </html>

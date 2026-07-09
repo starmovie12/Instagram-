@@ -10,7 +10,7 @@ import AdFrame from "@/components/AdFrame";
 import ToolCard from "@/components/ToolCard";
 import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
-import { TOOLS, QUARTET } from "@/lib/copy";
+import { TOOL_GROUPS, QUARTET } from "@/lib/copy";
 import { DEFAULT_FAQ, faqJsonLd, webAppJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -90,11 +90,19 @@ export default function Home() {
           <div className="container">
             <Reveal>
               <span className="label">Tools</span>
-              <h2 style={{ marginTop: 12, marginBottom: 40 }}>One bar, every tool.</h2>
+              <h2 style={{ marginTop: 12, marginBottom: 8 }}>One bar, every tool.</h2>
+              <p className="lead" style={{ marginBottom: 40 }}>Download anything, view any profile, and a full creator toolkit — all free.</p>
             </Reveal>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
-              {TOOLS.map((t, i) => <ToolCard key={t.href} tool={t} index={i} />)}
-            </div>
+            {TOOL_GROUPS.map((group) => (
+              <div key={group.heading} style={{ marginBottom: 48 }}>
+                <Reveal>
+                  <span className="label" style={{ display: "block", marginBottom: 20, color: "var(--gold-ink)" }}>{group.heading}</span>
+                </Reveal>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+                  {group.tools.map((t, i) => <ToolCard key={t.href} tool={t} index={i} />)}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

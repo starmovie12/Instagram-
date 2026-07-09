@@ -1,21 +1,54 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed } from "lucide-react";
+import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
+import type { ProfileFeed } from "@/lib/media";
 import ResultCard from "./ResultCard";
+import ProfileFeedCard from "./ProfileFeedCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
 import { useI18n } from "@/lib/i18n";
 
-const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
+// A media permalink (post/reel/story/tv) → extract flow.
+const MEDIA_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
+// A profile URL (instagram.com/<handle> with no media segment) → profile flow.
+const PROFILE_URL_RE = /instagram\.com\/(?!p\/|reel|reels|tv\/|stories\/|explore\/|accounts\/)([A-Za-z0-9._]{1,30})\/?(?:\?|#|$)/i;
+// A bare handle / @handle.
+const HANDLE_RE = /^@?([A-Za-z0-9._]{1,30})$/;
+
 type Phase = "idle" | "loading" | "success" | "error";
-const KIND_META: Record<string, { Icon: React.ElementType; label: string }> = {
+type Kind = { Icon: React.ElementType; label: string };
+const MEDIA_META: Record<string, Kind> = {
   p: { Icon: ImageIcon, label: "post" },
   reel: { Icon: Clapperboard, label: "reel" },
   reels: { Icon: Clapperboard, label: "reel" },
   tv: { Icon: Clapperboard, label: "video" },
   stories: { Icon: CircleDashed, label: "story" },
 };
+
+type Detected =
+  | { mode: "media"; label: string; Icon: React.ElementType; hint: string }
+  | { mode: "profile"; label: string; Icon: React.ElementType; hint: string }
+  | null;
+
+/** Decide what the user typed: a media permalink, a profile/username, or nothing yet. */
+function detect(value: string): Detected {
+  const v = value.trim();
+  if (!v) return null;
+  const media = v.match(MEDIA_RE);
+  if (media) {
+    const m = MEDIA_META[media[1].toLowerCase()] ?? MEDIA_META.p;
+    return { mode: "media", label: m.label, Icon: m.Icon, hint: media[2].slice(0, 8) };
+  }
+  if (/instagram\.com/i.test(v)) {
+    const prof = v.match(PROFILE_URL_RE);
+    if (prof) return { mode: "profile", label: "profile", Icon: AtSign, hint: prof[1] };
+    return null;
+  }
+  const handle = v.match(HANDLE_RE);
+  if (handle) return { mode: "profile", label: "profile", Icon: AtSign, hint: handle[1] };
+  return null;
+}
 
 export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   const { t } = useI18n();
@@ -24,25 +57,29 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   const [invalid, setInvalid] = useState(false);
   const [error, setError] = useState<ErrorCode | null>(null);
   const [result, setResult] = useState<ExtractResult | null>(null);
+  const [feed, setFeed] = useState<ProfileFeed | null>(null);
   const [flash, setFlash] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const match = value.match(URL_RE);
-  const kind = match ? KIND_META[match[1].toLowerCase()] : null;
-  // Clipboard support is only knowable in the browser — resolve it after mount
-  // so the server and first client render agree (avoids hydration mismatch).
+  const detected = detect(value);
   const [canPaste, setCanPaste] = useState(false);
   useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
 
   async function paste() {
-    try { const t = await navigator.clipboard.readText(); if (t) setValue(t.trim()); } catch {}
+    try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
   }
   function clear() { setValue(""); inputRef.current?.focus(); }
 
+  function mapError(code: string | undefined): ErrorCode {
+    const allowed: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
+    return (allowed.includes(code as ErrorCode) ? code : "EXTRACTOR_DOWN") as ErrorCode;
+  }
+
   async function go() {
     if (phase === "loading") return;
-    setError(null); setResult(null);
-    if (!match) {
+    setError(null); setResult(null); setFeed(null);
+    const d = detect(value);
+    if (!d) {
       setInvalid(true); setTimeout(() => setInvalid(false), 300);
       setPhase("error"); setError("INVALID_URL");
       return;
@@ -50,23 +87,33 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     if (typeof navigator !== "undefined" && !navigator.onLine) { setPhase("error"); setError("OFFLINE"); return; }
     setPhase("loading");
     try {
+      if (d.mode === "profile") {
+        // Universal box: a username / profile URL → full public profile + posts.
+        const res = await fetch("/api/profile", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "feed", username: value.trim() }),
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || json?.error) {
+          setPhase("error"); setError(mapError(json?.code));
+          return;
+        }
+        setFlash(true);
+        setTimeout(() => { setFlash(false); setFeed(json as ProfileFeed); setPhase("success"); }, 200);
+        return;
+      }
+      // Media permalink → extract flow.
       const res = await fetch("/api/extract", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: value.trim() }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.error) {
-        setPhase("error");
-        setError((json?.error?.code as ErrorCode) ?? "EXTRACTOR_DOWN");
+        setPhase("error"); setError(mapError(json?.error?.code));
         return;
       }
-      // Final lap → gold flash → ceremony
       setFlash(true);
-      setTimeout(() => {
-        setFlash(false);
-        setResult(json.data as ExtractResult);
-        setPhase("success");
-      }, 200);
+      setTimeout(() => { setFlash(false); setResult(json.data as ExtractResult); setPhase("success"); }, 200);
     } catch {
       setPhase("error");
       setError(typeof navigator !== "undefined" && !navigator.onLine ? "OFFLINE" : "EXTRACTOR_DOWN");
@@ -74,6 +121,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   }
 
   const loading = phase === "loading";
+  const showChip = detected && !loading;
 
   return (
     <div style={{ width: "100%" }}>
@@ -86,11 +134,11 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         }}>
         <span className="gbar-icon" aria-hidden="true"><Link2 size={20} strokeWidth={1.5} /></span>
 
-        {kind && !loading ? (
+        {showChip ? (
           <span className="gbar-chip mono">
-            <kind.Icon size={14} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
-            {kind.label}/{match![2].slice(0, 8)}…
-            <button onClick={clear} aria-label="Clear link" style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--ink-3)" }}>
+            <detected.Icon size={14} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
+            {detected.label}/{detected.hint}…
+            <button onClick={clear} aria-label="Clear" style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--ink-3)" }}>
               <X size={14} strokeWidth={1.5} />
             </button>
           </span>
@@ -99,13 +147,13 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
             ref={inputRef} value={value} disabled={loading}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => e.key === "Enter" && go()}
-            placeholder={t("linkPlaceholder")}
-            aria-label="Instagram link"
+            placeholder={t("smartPlaceholder")}
+            aria-label="Instagram link or username"
             className="gbar-input"
           />
         )}
 
-        {canPaste && !kind && !loading && (
+        {canPaste && !detected && !loading && (
           <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40, textTransform: "uppercase" }}>
             <ClipboardPaste size={16} strokeWidth={1.5} /> {t("paste")}
           </button>
@@ -126,9 +174,10 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         </p>
       )}
 
-      {result && (
+      {(result || feed) && (
         <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
-          <ResultCard data={result} />
+          {result && <ResultCard data={result} />}
+          {feed && <ProfileFeedCard data={feed} showBulk />}
           {/* Ad slot A — Native Banner, only after success, never inside the card */}
           <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
         </div>
