@@ -1,24 +1,11 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import { TOOL_GROUPS } from "@/lib/copy";
 
 const COLS = [
-  { h: "Downloaders", links: [
-    ["Reels downloader", "/reels-downloader"],
-    ["Video downloader", "/video-downloader"],
-    ["Story downloader", "/story-downloader"],
-    ["Photo downloader", "/photo-downloader"],
-    ["Carousel downloader", "/carousel-downloader"],
-  ]},
-  { h: "More tools", links: [
-    ["Profile viewer", "/profile-viewer"],
-    ["Anonymous story viewer", "/story-viewer"],
-    ["Highlights downloader", "/highlights-downloader"],
-    ["Profile picture downloader", "/profile-picture-downloader"],
-    ["Caption extractor", "/caption-extractor"],
-    ["Hashtag extractor", "/hashtag-extractor"],
-  ]},
-  { h: "Company", links: [["About", "/about"], ["Blog", "/blog"], ["Contact", "/contact"]] },
-  { h: "Legal", links: [["Privacy", "/privacy-policy"], ["Terms", "/terms"], ["DMCA", "/dmca"]] },
+  ...TOOL_GROUPS.map((g) => ({ h: g.heading, links: g.tools.map((t) => [t.title, t.href] as [string, string]) })),
+  { h: "Company", links: [["About", "/about"], ["Blog", "/blog"], ["Contact", "/contact"]] as [string, string][] },
+  { h: "Legal", links: [["Privacy", "/privacy-policy"], ["Terms", "/terms"], ["DMCA", "/dmca"]] as [string, string][] },
 ];
 
 export default function Footer() {
