@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
@@ -60,6 +61,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <InstallPrompt />
         <CommandPalette />
         <Analytics />
+        {/* Adsterra Social Bar — site-wide, no container needed. Loaded last
+            and lazily so it never delays or competes with the main UI. */}
+        <Script
+          src="https://pl30280133.effectivecpmnetwork.com/0c/f9/53/0cf9534424ebc32da0ad62ff5cfd5888.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );
