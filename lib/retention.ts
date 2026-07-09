@@ -36,3 +36,25 @@ export function recordToolVisit(href: string) {
 export function getRecentTools(): string[] {
   return read(RECENT_KEY);
 }
+
+const STREAK_KEY = "ig.streak";
+
+function localDay(offsetDays = 0): string {
+  const d = new Date(Date.now() + offsetDays * 86_400_000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Bump today's visit streak and return the current count (H4 — subtle gamification). */
+export function bumpStreak(): number {
+  try {
+    const today = localDay();
+    const raw = localStorage.getItem(STREAK_KEY);
+    const s: { last: string; count: number } | null = raw ? JSON.parse(raw) : null;
+    if (s?.last === today) return s.count;
+    const count = s?.last === localDay(-1) ? s.count + 1 : 1;
+    localStorage.setItem(STREAK_KEY, JSON.stringify({ last: today, count }));
+    return count;
+  } catch {
+    return 0;
+  }
+}

@@ -110,7 +110,7 @@ export default function CommandPalette() {
             ref={inputRef} value={query}
             onChange={(e) => { setQuery(e.target.value); setActive(0); }}
             onKeyDown={onInputKey}
-            placeholder="Search 30+ tools…"
+            placeholder="Search 60+ tools…"
             aria-label="Search tools"
             style={{ flex: 1, background: "none", border: "none", fontSize: 15, color: "var(--ink)", outline: "none" }}
           />

@@ -33,9 +33,26 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 🚦 Is Instagram down? — live server probe (`/api/ig-status`)
 - ▶️ YouTube thumbnail downloader — up to 1280×720, Shorts included
 
+**🤖 AI suite** (Gemini via shared `/api/ai` — set `GEMINI_API_KEY` env var; every tool speaks English/Hindi/**Hinglish**):
+- ✍️ Caption, #️⃣ hashtag (3 reach tiers), 🪪 bio, 🎬 reel script, 🧲 hook, 💡 30 content ideas,
+  @ username ideas, 🎁 giveaway caption, 💬 comment replies, 🌐 caption translator (18 langs), 🧭 30-day growth strategy
+- 🎙️ **Reel transcript extractor** (`/api/transcribe`) — reel → spoken script as text (Hindi/Hinglish faithful) *(unique)*
+- 🔁 **Reel remix studio** — viral reel's formula rewritten for YOUR niche *(unique)*
+- 🔥 **AI profile roaster** — reads a public profile, roasts it (PG-13, ends with a compliment)
+
+**Creator suite:**
+- ⚔️ Profile battle (VS mode) — two accounts, six rounds, one winner
+- 📦 Creator Pack ZIP — media + audio + thumbnail + caption.txt + hashtags.txt in one click (in ResultCard)
+- 📄 Media kit generator — gold-editorial PNG, canvas-drawn, no watermark
+- 📈 Follower growth tracker (localStorage + SVG chart), 🚀 virality score, 🪙 EMV calculator, ⚖️ ratio checker
+- 🎡 Wheel spinner (crypto-random), 📇 DM link + QR generator (`qrcode`), 🔗 UTM builder
+- 🫥 Invisible character tool, 🔠 case converter (incl. Unicode small caps)
+- 🖼️ Studio (100% on-device canvas): photo resizer (IG presets), image compressor, color palette extractor, quote post maker
+
 **Retention & UX:**
 - ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K)
 - 🕘 "Pick up where you left off" — recently-used tools row on the homepage (localStorage only)
+- 🔥 Daily-visit streak badge in the nav (appears from day 2)
 - 📋 Auto clipboard prefill on the golden bar (only when permission already granted — never prompts)
 
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.

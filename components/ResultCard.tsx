@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check, Music } from "lucide-react";
 import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
+import CreatorPack from "./CreatorPack";
 import { useI18n } from "@/lib/i18n";
 
 const KIND_ICON: Record<ExtractResult["kind"], React.ElementType> = {
@@ -103,6 +104,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
                 </a>
               )}
               {best && <CopyButton text={best.url} label={t("copyLink")} className="btn btn-secondary" />}
+              <CreatorPack data={data} />
             </div>
           </div>
 
