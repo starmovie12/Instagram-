@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "InstaGrab", statusBarStyle: "black-translucent" },
+  verification: {
+    google: "qAW2AZhiMoIodGgJHNgUVgfEBJmoS9d0zNubWAZkgHE",
+  },
 };
 
 export const viewport: Viewport = {
