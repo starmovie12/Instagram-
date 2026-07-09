@@ -2,7 +2,8 @@ import {
   Clapperboard, CircleDashed, Image as ImageIcon, TextQuote, Hash,
   Video, GalleryHorizontalEnd, Eye, CircleUserRound, BookMarked, LayoutGrid,
   Music, ImageDown, Package, Activity, Gauge, Type, WrapText, ShieldAlert,
-  Grid3x3, Disc3, ListChecks,
+  Grid3x3, Disc3, ListChecks, BadgeDollarSign, UserX, CalendarClock,
+  UserCheck, TextCursorInput, ListOrdered, ServerCrash, Youtube,
 } from "lucide-react";
 import type { Tool } from "@/components/ToolCard";
 
@@ -43,6 +44,19 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/hashtag-checker", title: "Banned hashtag checker", desc: "Spot shadowbanned tags before you post.", Icon: ShieldAlert, badge: "Hot" },
       { href: "/grid-splitter", title: "9-grid splitter", desc: "Cut one photo into a 3×3 profile grid.", Icon: Grid3x3, badge: "New" },
       { href: "/dp-ring-maker", title: "Story ring maker", desc: "Add the Instagram story gradient ring to your DP.", Icon: Disc3, badge: "New" },
+    ],
+  },
+  {
+    heading: "Calculators & utilities",
+    tools: [
+      { href: "/money-calculator", title: "Money calculator", desc: "Followers + engagement + niche → your rate per post, in ₹ or $.", Icon: BadgeDollarSign, badge: "Hot" },
+      { href: "/fake-follower-checker", title: "Fake follower checker", desc: "Grade any audience A+ to F — spot bought followers fast.", Icon: UserX, badge: "Hot" },
+      { href: "/best-time-to-post", title: "Best time to post", desc: "Golden posting windows for your niche — India-first timing.", Icon: CalendarClock, badge: "New" },
+      { href: "/username-checker", title: "Username checker", desc: "Is that @handle free? Instant check + smart alternatives.", Icon: UserCheck, badge: "New" },
+      { href: "/character-counter", title: "Character counter", desc: "Caption, bio and hashtag limits counted live — with the “more” fold.", Icon: TextCursorInput, badge: "New" },
+      { href: "/hashtag-counter", title: "Hashtag counter & cleaner", desc: "Count, dedupe and trim your tags to a clean set of 30.", Icon: ListOrdered, badge: "New" },
+      { href: "/is-instagram-down", title: "Is Instagram down?", desc: "Live server check — outage, or just you?", Icon: ServerCrash, badge: "New" },
+      { href: "/youtube-thumbnail-downloader", title: "YouTube thumbnail downloader", desc: "Any video's thumbnail in full HD — Shorts included.", Icon: Youtube, badge: "New" },
     ],
   },
 ];

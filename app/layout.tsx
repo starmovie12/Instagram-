@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
 import PwaRegister from "@/components/PwaRegister";
 import InstallPrompt from "@/components/InstallPrompt";
+import CommandPalette from "@/components/CommandPalette";
 import "./globals.css";
 
 const display = Fraunces({
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LangProvider>{children}</LangProvider>
         <PwaRegister />
         <InstallPrompt />
+        <CommandPalette />
         <Analytics />
       </body>
     </html>

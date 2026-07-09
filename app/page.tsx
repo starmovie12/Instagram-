@@ -8,6 +8,7 @@ import HowItWorks from "@/components/HowItWorks";
 import FAQ from "@/components/FAQ";
 import AdFrame from "@/components/AdFrame";
 import ToolCard from "@/components/ToolCard";
+import RecentTools from "@/components/RecentTools";
 import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
 import { TOOL_GROUPS, QUARTET } from "@/lib/copy";
@@ -57,6 +58,7 @@ export default function Home() {
             <div className="intro-rise" style={{ marginTop: 20, ["--dl" as string]: "500ms" }}>
               <TrustLine />
             </div>
+            <RecentTools />
           </div>
         </section>
 
