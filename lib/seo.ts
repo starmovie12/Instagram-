@@ -1,4 +1,5 @@
 /** SEO helpers: FAQ data + JSON-LD builders (server-safe, no client deps). */
+import { SITE_URL as BASE } from "@/lib/site-url";
 
 export type QA = { q: string; a: string };
 
@@ -10,8 +11,6 @@ export const DEFAULT_FAQ: QA[] = [
   { q: "Is downloading allowed?", a: "Only download content you own or have permission to use. See our Terms for details." },
   { q: "Why did a download fail?", a: "Instagram changes things on their side from time to time; we patch fast — usually within hours. Try again soon." },
 ];
-
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app";
 
 /** schema.org FAQPage — helps tool pages surface in Google's FAQ-rich results. */
 export function faqJsonLd(items: QA[]) {

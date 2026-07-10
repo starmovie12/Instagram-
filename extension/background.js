@@ -2,7 +2,7 @@
 // The heavy lifting stays on the website; the extension just deep-links into
 // the existing /quick-action flow with the URL prefilled.
 
-const SITE = "https://instagrab.vercel.app";
+const SITE = "https://instagrabs.vercel.app";
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
