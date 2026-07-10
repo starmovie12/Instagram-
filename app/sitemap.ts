@@ -5,7 +5,10 @@ import { TOOLS } from "@/lib/copy";
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPaths = ["", "/blog", "/about", "/privacy-policy", "/terms", "/contact", "/dmca"];
+  const staticPaths = [
+    "", "/blog", "/about", "/privacy-policy", "/terms", "/contact", "/dmca",
+    "/snapinsta-alternative", "/fastdl-alternative",
+  ];
 
   const pages = [...staticPaths, ...TOOLS.map((t) => t.href)].map((path) => ({
     url: `${BASE}${path}`,

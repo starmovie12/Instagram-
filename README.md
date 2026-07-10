@@ -49,11 +49,30 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 🫥 Invisible character tool, 🔠 case converter (incl. Unicode small caps)
 - 🖼️ Studio (100% on-device canvas): photo resizer (IG presets), image compressor, color palette extractor, quote post maker
 
+**Round 3 — "everything else" drop:**
+- 💬 Comments exporter (recent ~40-50 → CSV) + 🎟️ giveaway comment picker (filters, multi-winner, backups) + 🏆 winner certificate (unique ID)
+- 📊 Post metadata card on results (likes/comments/views/date, when the extractor sees them)
+- 🎧 Reel → true MP3 (WebAudio decode + `@breezystack/lamejs` 192 kbps re-encode, on-device)
+- 📸 Reel frame grabber (proxied video → untainted canvas → full-res PNG)
+- 🖼️ Studio round 2 (all on-device): collage maker, 15 photo filters, blur/pixelate censor, 3×3 grid planner, video trimmer (MediaRecorder, beta), video→GIF (`gifenc`)
+- 📡 Story watch mode — multi-account story feed from an on-device watchlist
+- 🩺 Account health score — 4 pillars, A+–F report card, shareable
+- 🔎 Profile pic zoom (instazoom-style SEO page)
+- 🤖 AI additions: alt-text from image (Gemini vision `/api/alt-text`), story poll ideas, carousel outline
+- 🌐 Pinterest + Threads downloaders (host-allowlisted `/api/og-extract`; pinimg added to download proxy)
+- 📈 Trend radar India (curated, dated honestly) + SnapInsta/FastDL alternative SEO pages
+- 🤖 Telegram bot webhook `/api/telegram` (raw Bot API — set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_WEBHOOK_SECRET`, then `setWebhook`)
+- 🧩 Browser extension (MV3) in `/extension` — right-click → "Download with InstaGrab"
+
 **Retention & UX:**
-- ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K)
-- 🕘 "Pick up where you left off" — recently-used tools row on the homepage (localStorage only)
+- ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K, "/" also opens it)
+- 🕘 "Pick up where you left off" + 📜 /history page (download history with thumbnails, on-device)
+- ☀️ Tool of the day spotlight on the homepage (deterministic daily rotation)
 - 🔥 Daily-visit streak badge in the nav (appears from day 2)
 - 📋 Auto clipboard prefill on the golden bar (only when permission already granted — never prompts)
+- 🫳 Drag & drop a link anywhere on the page; recent-searches chips under the bar
+- ✨ Gold particle burst + haptic tick on downloads (respects reduced-motion)
+- 📢 Ad slots wired to the ad network via `AdFrame` (first frame per page hosts the native banner)
 
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
 

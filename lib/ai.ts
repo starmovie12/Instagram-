@@ -102,6 +102,23 @@ Format: WEEK 1-4 sections, each with 3-4 specific actions (posting cadence, cont
 ${LANG_LINE[l]}
 Be specific to the niche — no generic advice like "post consistently" without saying what exactly.`,
 
+  "story-poll-ideas": (i, l) => `You are an Instagram Stories engagement expert.
+Generate 15 interactive Story ideas for the niche: ${clean(i.topic)}
+Mix: 5 poll ideas (with both options written), 5 question-box prompts, 5 quiz/slider ideas.
+Each = one line, ready to type into the sticker. Label each [POLL] [QUESTION] [QUIZ].
+${LANG_LINE[l]}
+Number 1-15. No commentary.`,
+
+  "carousel-outline": (i, l) => `You are a viral carousel-post strategist.
+Create a 10-slide Instagram carousel outline about: ${clean(i.topic)}
+Format exactly:
+SLIDE 1 (HOOK — big bold line that stops the scroll):
+SLIDE 2-9 (one clear point per slide, max 25 words each, with a suggested visual):
+SLIDE 10 (CTA — save/share/follow ask):
+Then add: CAPTION (2-3 lines) and 10 HASHTAGS.
+${LANG_LINE[l]}
+Make each slide punchy enough to survive being read in 2 seconds.`,
+
   roast: (i, l) => `You are a stand-up comedian doing a light-hearted roast of an Instagram profile. Be funny and cheeky but never cruel, never body-shame, never touch religion/politics, keep it PG-13.
 Profile: @${clean(i.username, 40)}
 Bio: "${clean(i.bio, 300)}"
@@ -126,6 +143,7 @@ ${LANG_LINE[l]}`,
 export const LANG_AWARE = new Set([
   "caption-generator", "bio-generator", "reel-script-generator", "hook-generator",
   "content-ideas", "giveaway-caption", "reply-generator", "growth-strategy", "roast", "remix",
+  "story-poll-ideas", "carousel-outline",
 ]);
 
 const GEMINI_MODEL = "gemini-2.5-flash";

@@ -9,6 +9,7 @@ import FAQ from "@/components/FAQ";
 import AdFrame from "@/components/AdFrame";
 import ToolCard from "@/components/ToolCard";
 import RecentTools from "@/components/RecentTools";
+import ToolOfTheDay from "@/components/ToolOfTheDay";
 import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
 import { TOOL_GROUPS, QUARTET } from "@/lib/copy";
@@ -59,6 +60,7 @@ export default function Home() {
               <TrustLine />
             </div>
             <RecentTools />
+            <ToolOfTheDay />
           </div>
         </section>
 

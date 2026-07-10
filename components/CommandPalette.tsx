@@ -36,6 +36,13 @@ export default function CommandPalette() {
         setOpen((o) => { if (!o) { setRecent(getRecentTools()); setQuery(""); setActive(0); } return !o; });
         return;
       }
+      // H9 — "/" opens the palette when you're not typing in a field.
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT" && !(e.target as HTMLElement | null)?.isContentEditable) {
+        e.preventDefault();
+        setRecent(getRecentTools()); setQuery(""); setActive(0); setOpen(true);
+        return;
+      }
       if (e.key === "Escape") setOpen(false);
     }
     window.addEventListener("keydown", onKey);

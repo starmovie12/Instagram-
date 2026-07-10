@@ -1,10 +1,31 @@
 "use client";
 import { useState } from "react";
-import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check, Music } from "lucide-react";
+import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, ImageDown, AtSign, Download, Check, Music, Heart, MessageCircle, Play, Calendar } from "lucide-react";
 import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
 import CreatorPack from "./CreatorPack";
+import { recordDownload } from "@/lib/retention";
+import { fmt } from "@/lib/media";
 import { useI18n } from "@/lib/i18n";
+
+/** I3+I5 — tiny gold particle burst + haptic tick on download taps. */
+function celebrate(e: React.MouseEvent) {
+  try { navigator.vibrate?.(12); } catch {}
+  if (typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const { clientX: x, clientY: y } = e;
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement("span");
+    const angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.6;
+    const dist = 26 + Math.random() * 22;
+    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:5px;height:5px;border-radius:99px;pointer-events:none;z-index:99;background:linear-gradient(135deg,#EBD6A4,#A67C35);transition:transform 600ms cubic-bezier(.16,1,.3,1),opacity 600ms;`;
+    document.body.appendChild(p);
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`;
+      p.style.opacity = "0";
+    });
+    setTimeout(() => p.remove(), 700);
+  }
+}
 
 const KIND_ICON: Record<ExtractResult["kind"], React.ElementType> = {
   reel: Clapperboard, post: ImageIcon, carousel: GalleryHorizontalEnd, story: CircleDashed,
@@ -63,16 +84,47 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
   const best = main.versions[0];
   const dur = fmtDur(data.durationSeconds);
   const base = `instagrab-${data.shortcode}`;
+  const onDownload = (e: React.MouseEvent) => {
+    celebrate(e);
+    recordDownload({ shortcode: data.shortcode, kind: data.kind, username: data.username, thumbnail: data.thumbnail });
+  };
 
   return (
     <div className="card intro-rise" style={{ padding: 24, maxWidth: 920, margin: "0 auto", textAlign: "left" }}>
       {/* Meta row */}
-      <div className="mono" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--ink-3)", marginBottom: 20 }}>
+      <div className="mono" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--ink-3)", marginBottom: data.likes != null || data.views != null ? 10 : 20, flexWrap: "wrap" }}>
         <KindIcon size={16} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
         <span className="label" style={{ color: "var(--gold-ink)" }}>{data.kind}</span>
         {data.username && <span>@{data.username}</span>}
         {dur && <span>{dur}</span>}
       </div>
+
+      {/* A3 — post metadata card */}
+      {(data.likes != null || data.views != null || data.commentCount != null || data.takenAt != null) && (
+        <div className="mono" style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12.5, color: "var(--ink-2)", marginBottom: 20, flexWrap: "wrap" }}>
+          {data.views != null && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <Play size={13} strokeWidth={1.75} style={{ color: "var(--gold-ink)" }} /> {fmt(data.views)} views
+            </span>
+          )}
+          {data.likes != null && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <Heart size={13} strokeWidth={1.75} style={{ color: "var(--gold-ink)" }} /> {fmt(data.likes)} likes
+            </span>
+          )}
+          {data.commentCount != null && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <MessageCircle size={13} strokeWidth={1.75} style={{ color: "var(--gold-ink)" }} /> {fmt(data.commentCount)} comments
+            </span>
+          )}
+          {data.takenAt != null && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <Calendar size={13} strokeWidth={1.75} style={{ color: "var(--gold-ink)" }} />
+              {new Date(data.takenAt * 1000).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="result-grid">
         {/* Media */}
@@ -88,7 +140,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {main.versions.map((v, i) => (
                 <a key={i} href={dl(v.url, `${base}-${v.label.replace(/\W+/g, "")}`)}
-                  className={`btn btn-secondary ${i === 0 ? "gold" : ""}`} download>
+                  className={`btn btn-secondary ${i === 0 ? "gold" : ""}`} download onClick={onDownload}>
                   <Download size={16} strokeWidth={1.5} />
                   {i === 0 ? `${t("dlLabel")} ${v.label}` : v.label}
                 </a>

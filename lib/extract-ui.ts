@@ -7,7 +7,10 @@ import type {
   ExtractResult as CoreResult,
   MediaItem,
   StoryItem,
+  PostComment,
 } from "./instagram-extractor";
+
+export type { PostComment };
 
 export type MediaVersion = { label: string; url: string; width?: number; height?: number };
 
@@ -30,6 +33,13 @@ export type ExtractResult = {
   thumbnail: string;
   durationSeconds?: number;
   slides: Slide[]; // 1 slide for single post/reel; n for carousel/story tray
+  /** Post metadata (A3) — shown when the extractor could read it. */
+  likes?: number;
+  commentCount?: number;
+  views?: number;
+  takenAt?: number;
+  /** Recent public comments (up to ~40-50) — powers the comments exporter + giveaway picker. */
+  comments?: PostComment[];
 };
 
 export type UiErrorCode =
@@ -67,6 +77,11 @@ export function coreToUi(r: CoreResult): ExtractResult {
     mentions: r.mentions,
     thumbnail: r.thumbnail,
     slides: r.media.map(mediaToSlide),
+    likes: r.likes,
+    commentCount: r.commentCount,
+    views: r.views,
+    takenAt: r.takenAt,
+    comments: r.comments,
   };
 }
 

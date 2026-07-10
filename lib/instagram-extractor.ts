@@ -90,6 +90,12 @@ function imageQualities(resources: any[]): Quality[] {
   return out;
 }
 
+export type PostComment = {
+  username: string;
+  text: string;
+  likes?: number;
+};
+
 export type ExtractResult = {
   type: "video" | "image" | "carousel";
   shortcode: string;
@@ -100,6 +106,13 @@ export type ExtractResult = {
   mentions: string[];
   thumbnail: string;
   media: MediaItem[];
+  /** Post metadata — present when the GraphQL response carries it. */
+  likes?: number;
+  commentCount?: number;
+  views?: number;
+  takenAt?: number; // unix seconds
+  /** Recent comments included in the post payload (up to ~40, public data). */
+  comments?: PostComment[];
 };
 
 export class ExtractError extends Error {
@@ -215,6 +228,24 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
     );
   }
 
+  // Post metadata + the recent comments Instagram embeds in the post payload.
+  const likes: number | undefined =
+    media?.edge_media_preview_like?.count ?? media?.edge_liked_by?.count ?? undefined;
+  const commentEdge =
+    media?.edge_media_to_parent_comment ?? media?.edge_media_to_comment ?? media?.edge_media_preview_comment;
+  const commentCount: number | undefined = commentEdge?.count ?? undefined;
+  const views: number | undefined =
+    media?.video_view_count ?? media?.video_play_count ?? undefined;
+  const takenAt: number | undefined = media?.taken_at_timestamp ?? undefined;
+  const comments: PostComment[] = (Array.isArray(commentEdge?.edges) ? commentEdge.edges : [])
+    .map((e: any) => ({
+      username: e?.node?.owner?.username ?? "",
+      text: e?.node?.text ?? "",
+      likes: e?.node?.edge_liked_by?.count,
+    }))
+    .filter((c: PostComment) => c.username && c.text)
+    .slice(0, 50);
+
   return {
     type,
     shortcode,
@@ -225,6 +256,11 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
     mentions: extractMentions(caption),
     thumbnail,
     media: items,
+    likes,
+    commentCount,
+    views,
+    takenAt,
+    comments: comments.length ? comments : undefined,
   };
 }
 

@@ -7,7 +7,10 @@ import {
   PenLine, Contact, Magnet, Lightbulb, AtSign, Gift, MessagesSquare,
   Languages, Compass, Flame, Mic, Repeat2, Swords, FileText, TrendingUp,
   Coins, Scale, Rocket, Dices, QrCode, Link2, EyeOff, CaseSensitive,
-  Scaling, Shrink, Palette, Quote,
+  Scaling, Shrink, Palette, Quote, FileAudio, Pin, MessageCircle, Camera,
+  BarChart3, Layers, Accessibility, Rss, HeartPulse, ZoomIn, Ticket,
+  FileSpreadsheet, Award, LayoutDashboard, Wand2, Droplets, LayoutTemplate,
+  Scissors, Film, History, Radar,
 } from "lucide-react";
 import type { Tool } from "@/components/ToolCard";
 
@@ -24,6 +27,10 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/audio-downloader", title: "Audio downloader", desc: "Rip a reel's sound as an M4A — the trending audio, alone.", Icon: Music, badge: "New" },
       { href: "/thumbnail-downloader", title: "Thumbnail downloader", desc: "Any reel or video's HD cover image.", Icon: ImageDown, badge: "New" },
       { href: "/batch-downloader", title: "Batch downloader", desc: "Paste up to 20 links and grab them all at once.", Icon: ListChecks, badge: "Hot" },
+      { href: "/reel-to-mp3", title: "Reel to MP3", desc: "True 192 kbps MP3, re-encoded in your browser.", Icon: FileAudio, badge: "New" },
+      { href: "/reel-frame-grabber", title: "Reel frame grabber", desc: "Any second of any reel as a full-res image.", Icon: Camera, badge: "New" },
+      { href: "/pinterest-downloader", title: "Pinterest downloader", desc: "Pins, images and videos — original quality.", Icon: Pin, badge: "New" },
+      { href: "/threads-downloader", title: "Threads downloader", desc: "Videos and photos from Threads posts.", Icon: MessageCircle, badge: "New" },
     ],
   },
   {
@@ -36,6 +43,9 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/profile-picture-downloader", title: "Profile picture downloader", desc: "The full-size HD original, not the tiny circle.", Icon: CircleUserRound },
       { href: "/profile-battle", title: "Profile battle (VS)", desc: "Two accounts head-to-head — scores, rounds, one winner.", Icon: Swords, badge: "Hot" },
       { href: "/profile-roaster", title: "AI profile roaster", desc: "The AI reads a profile and roasts it. Group-chat gold.", Icon: Flame, badge: "Hot" },
+      { href: "/story-feed", title: "Story watch mode", desc: "All your favourite accounts' stories in one anonymous feed.", Icon: Rss, badge: "Hot" },
+      { href: "/account-health", title: "Account health score", desc: "A full report card — four pillars, one grade, /100.", Icon: HeartPulse, badge: "New" },
+      { href: "/profile-pic-zoom", title: "Profile pic zoom", desc: "See any DP full size — the circle, decoded.", Icon: ZoomIn, badge: "New" },
     ],
   },
   {
@@ -54,6 +64,9 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/ai/reply-generator", title: "AI reply generator", desc: "5 human replies to any comment, in your vibe.", Icon: MessagesSquare, badge: "New" },
       { href: "/ai/caption-translator", title: "AI caption translator", desc: "Natural translation into 18 languages — hashtags kept.", Icon: Languages, badge: "New" },
       { href: "/ai/growth-strategy", title: "AI growth strategy", desc: "A personalised 30-day plan for your niche and goal.", Icon: Compass, badge: "New" },
+      { href: "/ai/story-poll-ideas", title: "AI story poll ideas", desc: "15 tap-worthy polls, questions and quizzes for your niche.", Icon: BarChart3, badge: "New" },
+      { href: "/ai/carousel-outline", title: "AI carousel outline", desc: "A 10-slide outline with hook, points, CTA and caption.", Icon: Layers, badge: "New" },
+      { href: "/ai-alt-text", title: "AI alt text generator", desc: "Upload a photo → 3 alt text options for reach + accessibility.", Icon: Accessibility, badge: "New" },
     ],
   },
   {
@@ -88,7 +101,10 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
   {
     heading: "Giveaways & links",
     tools: [
+      { href: "/giveaway-picker", title: "Giveaway comment picker", desc: "Draw fair winners from your post's comments, with filters.", Icon: Ticket, badge: "Hot" },
       { href: "/wheel-spinner", title: "Wheel spinner", desc: "Paste entrants, spin, crown a provably random winner.", Icon: Dices, badge: "Hot" },
+      { href: "/winner-certificate", title: "Winner certificate", desc: "An official-looking result card with a unique ID.", Icon: Award, badge: "New" },
+      { href: "/comments-exporter", title: "Comments exporter", desc: "Recent comments → CSV that opens straight in Excel.", Icon: FileSpreadsheet, badge: "New" },
       { href: "/dm-link-generator", title: "DM link generator", desc: "Your ig.me link + a scan-to-DM QR code for print.", Icon: QrCode, badge: "New" },
       { href: "/utm-builder", title: "UTM link builder", desc: "Tag your bio links — see which placement really sells.", Icon: Link2, badge: "New" },
     ],
@@ -100,6 +116,12 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/image-compressor", title: "Image compressor", desc: "Quality slider, live size preview, zero uploads.", Icon: Shrink, badge: "New" },
       { href: "/color-palette", title: "Color palette extractor", desc: "Any photo's 5 signature colors as hex codes.", Icon: Palette, badge: "New" },
       { href: "/quote-maker", title: "Quote post maker", desc: "Editorial quote images — 5 themes, no watermark.", Icon: Quote, badge: "New" },
+      { href: "/collage-maker", title: "Collage maker", desc: "2-9 photos, 6 layouts, optional gold borders.", Icon: LayoutDashboard, badge: "New" },
+      { href: "/photo-filters", title: "Photo filters", desc: "15 Instagram-style presets with live thumbnails.", Icon: Wand2, badge: "New" },
+      { href: "/blur-tool", title: "Blur / pixelate tool", desc: "Rub out faces, names and numbers before sharing.", Icon: Droplets, badge: "New" },
+      { href: "/grid-planner", title: "Grid preview planner", desc: "Preview your 3×3 feed and swap posts before publishing.", Icon: LayoutTemplate, badge: "New" },
+      { href: "/video-trimmer", title: "Video trimmer", desc: "Cut a clip in your browser — no upload, no watermark.", Icon: Scissors, badge: "New" },
+      { href: "/video-to-gif", title: "Video to GIF", desc: "Up to 8 seconds of video as a share-ready GIF.", Icon: Film, badge: "New" },
     ],
   },
   {
@@ -110,6 +132,8 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/hashtag-counter", title: "Hashtag counter & cleaner", desc: "Count, dedupe and trim your tags to a clean set of 30.", Icon: ListOrdered, badge: "New" },
       { href: "/is-instagram-down", title: "Is Instagram down?", desc: "Live server check — outage, or just you?", Icon: ServerCrash, badge: "New" },
       { href: "/youtube-thumbnail-downloader", title: "YouTube thumbnail downloader", desc: "Any video's thumbnail in full HD — Shorts included.", Icon: Youtube, badge: "New" },
+      { href: "/trending-india", title: "Trend radar India", desc: "Trending hashtags, audio strategy and formats — curated.", Icon: Radar, badge: "Hot" },
+      { href: "/history", title: "Download history", desc: "Continue where you left off — private, on-device.", Icon: History, badge: "New" },
     ],
   },
 ];

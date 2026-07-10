@@ -304,6 +304,55 @@ export const AI_TOOLS: AiToolDef[] = [
   },
 ];
 
+AI_TOOLS.push(
+  {
+    slug: "story-poll-ideas",
+    tool: "story-poll-ideas",
+    name: "AI story poll ideas",
+    eyebrow: "AI story poll & question ideas",
+    h1: ["Stories your followers can't ", "not tap"],
+    lead: "15 ready-to-post interactive Story ideas — polls with both options written, question prompts and quizzes.",
+    button: "Give me 15 ideas",
+    fields: [
+      { id: "topic", label: "Your niche", placeholder: "e.g. fitness coaching", type: "text" },
+    ],
+    langAware: true,
+    seoTitle: "AI Instagram Story Poll & Question Ideas — Free | InstaGrab",
+    seoDesc: "Free AI generator for Instagram Story engagement: 15 poll, question-box and quiz ideas for your niche, ready to type into the sticker. Hinglish supported.",
+    faq: [
+      { q: "Why do Story stickers matter?", a: "Every tap on a poll or quiz is an engagement signal — accounts whose stories get interactions see their stories (and posts) ranked higher. Stickers are the cheapest engagement on Instagram." },
+      { q: "What's the mix?", a: "5 polls with both options pre-written, 5 question-box prompts, 5 quiz/slider ideas — labelled so you can post straight from the list." },
+    ],
+    prose: [
+      { h: "Taps train the algorithm", p: "Instagram ranks your stories by who interacts — and poll taps are the lowest-friction interaction there is. A daily interactive story quietly keeps you at the front of the story tray." },
+      { h: "Never stare at the sticker again", p: "The hard part of polls isn't posting them, it's thinking of one daily. Fifteen at a time, regenerated whenever the well runs dry, in your language." },
+    ],
+  },
+  {
+    slug: "carousel-outline",
+    tool: "carousel-outline",
+    name: "AI carousel outline",
+    eyebrow: "AI carousel outline maker",
+    h1: ["Ten slides, outlined in ", "ten seconds"],
+    lead: "Your topic → a hook slide, 8 punchy content slides with visual suggestions, a CTA slide — plus caption and hashtags.",
+    button: "Outline my carousel",
+    fields: [
+      { id: "topic", label: "Carousel topic", placeholder: "e.g. 5 money mistakes to avoid in your 20s", type: "textarea" },
+    ],
+    langAware: true,
+    seoTitle: "AI Instagram Carousel Outline Maker — 10 Slides Free | InstaGrab",
+    seoDesc: "Free AI carousel generator: enter a topic and get a 10-slide outline — hook, one point per slide with visual suggestions, CTA, caption and hashtags. Hinglish supported.",
+    faq: [
+      { q: "Why carousels?", a: "Carousels get a second chance in the feed — if someone scrolls past, Instagram often re-shows slide 2. They earn the most saves of any format, and saves are the strongest ranking signal." },
+      { q: "What makes a slide work?", a: "One idea, max ~25 words, readable in 2 seconds. The outline enforces that discipline, plus a scroll-stopping hook slide and a save-this CTA at the end." },
+    ],
+    prose: [
+      { h: "The save machine", p: "Educational carousels are Instagram's most-saved format, and every save tells the algorithm your post is worth distributing. The outline structures your knowledge into exactly that shape." },
+      { h: "From outline to design in minutes", p: "Take the outline into Canva or our quote maker, one slide per point. The thinking is done — you're just typesetting." },
+    ],
+  }
+);
+
 export function aiToolBySlug(slug: string): AiToolDef | undefined {
   return AI_TOOLS.find((t) => t.slug === slug);
 }

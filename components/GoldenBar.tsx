@@ -7,6 +7,7 @@ import ResultCard from "./ResultCard";
 import ProfileFeedCard from "./ProfileFeedCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
+import { recordSearch, getRecentSearches } from "@/lib/retention";
 import { useI18n } from "@/lib/i18n";
 
 // A media permalink (post/reel/story/tv) → extract flow.
@@ -80,6 +81,29 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     return () => { cancelled = true; };
   }, []);
 
+  // I10 — recent searches chips under the bar.
+  const [recents, setRecents] = useState<string[]>([]);
+  useEffect(() => { setRecents(getRecentSearches()); }, []);
+
+  // I4 — drop a link anywhere on the page and the bar catches it.
+  useEffect(() => {
+    function onDragOver(e: DragEvent) { e.preventDefault(); }
+    function onDrop(e: DragEvent) {
+      const txt = e.dataTransfer?.getData("text")?.trim();
+      if (txt && detect(txt)) {
+        e.preventDefault();
+        setValue(txt);
+        inputRef.current?.focus();
+      }
+    }
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("drop", onDrop);
+    return () => {
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("drop", onDrop);
+    };
+  }, []);
+
   async function paste() {
     try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
   }
@@ -100,6 +124,8 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
       return;
     }
     if (typeof navigator !== "undefined" && !navigator.onLine) { setPhase("error"); setError("OFFLINE"); return; }
+    recordSearch(value.trim());
+    setRecents(getRecentSearches());
     setPhase("loading");
     try {
       if (d.mode === "profile") {
@@ -179,6 +205,20 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
           <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? t("fetching") : t("download")}</span>
         </button>
       </div>
+
+      {/* I10 — recent searches, one tap to re-run */}
+      {phase === "idle" && !value && recents.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
+          {recents.map((r) => (
+            <button key={r} className="chip" onClick={() => { setValue(r); inputRef.current?.focus(); }}
+              style={{ cursor: "pointer", maxWidth: 220 }} title={r}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {r.replace(/^https?:\/\/(www\.)?/, "").slice(0, 34)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {phase === "error" && error && error !== "INVALID_URL" && (
         <div style={{ marginTop: 24 }}><ErrorCard code={error} /></div>
