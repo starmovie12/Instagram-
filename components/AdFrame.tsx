@@ -13,8 +13,8 @@ import { useEffect, useState } from "react";
  *  iframe banner) into a specific slot — child slots always render. */
 
 const SCRIPT_SRC =
-  "https://pl30279601.effectivecpmnetwork.com/30358b5312940856cb4704246525fc2d/invoke.js";
-const CONTAINER_ID = "container-30358b5312940856cb4704246525fc2d";
+  "https://pl30307334.effectivecpmnetwork.com/5b1394bab6b1e0e9f59f9dc1686475d7/invoke.js";
+const CONTAINER_ID = "container-5b1394bab6b1e0e9f59f9dc1686475d7";
 
 let claimed = false; // which AdFrame instance (if any) owns CONTAINER_ID this page load
 

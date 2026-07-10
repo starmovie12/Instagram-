@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import SoundToggle from "./SoundToggle";
+import { SPONSOR_LINK } from "@/lib/ads";
 import { TOOL_GROUPS } from "@/lib/copy";
 
 const COLS = [
@@ -26,7 +27,15 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        <p className="mono" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 40, maxWidth: "70ch", lineHeight: 1.7 }}>
+        <div style={{ marginTop: 36 }}>
+          <a href={SPONSOR_LINK} target="_blank" rel="noopener noreferrer sponsored"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
+              border: "1px solid var(--gold-300)", borderRadius: 999, padding: "8px 16px",
+              color: "var(--gold-ink)", fontSize: "var(--t-small)", fontWeight: 600 }}>
+            💛 Support InstaGrab — keeps every tool free
+          </a>
+        </div>
+        <p className="mono" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 24, maxWidth: "70ch", lineHeight: 1.7 }}>
           InstaGrab is not affiliated with Instagram™ or Meta. We do not host any content.
           All content belongs to its respective owners. Download only content you own or have
           permission to use.
