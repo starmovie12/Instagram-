@@ -27,7 +27,7 @@ export default function Page() {
       <h2>Reel download karne ka sabse aasan tarika</h2>
       <p>Instagram app mein download button sirf apni reels ke liye hai, aur woh bhi watermark ke saath. InstaGrab par tarika seedha hai: <strong>link copy karo → paste karo → download</strong>. HD quality, bina watermark, aur caption + hashtags bonus mein.</p>
       <h2>Sirf video nahi, poora post</h2>
-      <p>Doosre downloader sirf MP4 dete hain. Creators ke liye asli value caption mein hoti hai — hook, structure, CTA aur hashtag strategy. InstaGrab dono deta hai: file bhi, text bhi. Isliye yeh sirf downloader nahi, poori creator toolkit hai — 90+ tools, sab free.</p>
+      <p>Doosre downloader sirf MP4 dete hain. Creators ke liye asli value caption mein hoti hai — hook, structure, CTA aur hashtag strategy. InstaGrab dono deta hai: file bhi, text bhi. Isliye yeh sirf downloader nahi, poori creator toolkit hai — 80+ tools, sab free.</p>
       <h2>Phone ho ya laptop — sab jagah chalta hai</h2>
       <p>Koi app install nahi karni. Browser mein kholo, chahe Android ho, iPhone ya computer. Roz use karte ho to PWA install kar lo — home screen se ek tap mein khulega.</p>
     </SimpleToolLanding>

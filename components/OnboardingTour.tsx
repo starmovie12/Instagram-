@@ -18,7 +18,7 @@ const STEPS = [
   },
   {
     Icon: Search,
-    title: "90+ tools, one shortcut",
+    title: "80+ tools, one shortcut",
     body: "Press Ctrl+K (or the gold button, bottom-right) to jump to any tool in a second. Your recent tools stay on top.",
   },
 ];

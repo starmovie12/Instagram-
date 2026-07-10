@@ -5,7 +5,7 @@ import GoldenBar from "@/components/GoldenBar";
 export const metadata: Metadata = {
   title: "FastDL Alternative — InstaGrab (HD + Captions + AI Tools) | InstaGrab",
   description:
-    "Looking for a FastDL / iGram alternative? InstaGrab downloads Instagram media in HD with captions and hashtags included — plus true MP3, transcripts and 60+ free tools.",
+    "Looking for a FastDL / iGram alternative? InstaGrab downloads Instagram media in HD with captions and hashtags included — plus true MP3, transcripts and 80+ free tools.",
   alternates: { canonical: "/fastdl-alternative" },
 };
 
@@ -14,7 +14,7 @@ export default function Page() {
     <SimpleToolLanding
       eyebrow="FastDL / iGram alternative"
       h1={<>FastDL&apos;s downloads, plus the <em className="gilded">creator toolkit</em>.</>}
-      lead="HD media with metadata, true MP3 audio (not renamed M4A), reel transcripts and 60+ tools — one paste bar. Try it:"
+      lead="HD media with metadata, true MP3 audio (not renamed M4A), reel transcripts and 80+ tools — one paste bar. Try it:"
       tool={<GoldenBar />}
       faq={[
         { q: "Does InstaGrab show post metadata like FastDL?", a: "Yes — likes, comments, views and post date appear right on the result card when available, along with the full caption and hashtags FastDL doesn't give you." },

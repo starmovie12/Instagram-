@@ -28,7 +28,7 @@ export default function Page() {
       <h2>Anonymous dekhne ka faayda</h2>
       <p>Kabhi kabhi aap dekhna chahte ho par seen list mein nahi aana chahte — competitor research, purane dost, ya bas curiosity. InstaGrab se dekhi gayi story par aapka naam kabhi nahi aata.</p>
       <h2>Aur bhi bahut kuch — sab hindi-friendly</h2>
-      <p>Story ke alawa reels, photos, highlights, DP — sab download hota hai. Upar se AI tools jo <strong>Hinglish mein caption aur bio</strong> likhte hain. 90+ tools, ek website, sab free.</p>
+      <p>Story ke alawa reels, photos, highlights, DP — sab download hota hai. Upar se AI tools jo <strong>Hinglish mein caption aur bio</strong> likhte hain. 80+ tools, ek website, sab free.</p>
     </UsernameLanding>
   );
 }
