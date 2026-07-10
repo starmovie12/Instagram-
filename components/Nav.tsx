@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "./LanguagePicker";
+import InstallAppButton from "./InstallAppButton";
 import { bumpStreak } from "@/lib/retention";
 
 const LINKS = [
@@ -71,6 +72,7 @@ export default function Nav() {
           ))}
         </nav>
         <div style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: "auto" }}>
+          <InstallAppButton />
           <StreakBadge />
           <LanguagePicker />
           <ThemeToggle />
