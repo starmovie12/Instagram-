@@ -4,7 +4,7 @@ import { Clapperboard, Image as ImageIcon, GalleryHorizontalEnd, CircleDashed, I
 import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
 import CreatorPack from "./CreatorPack";
-import { recordDownload } from "@/lib/retention";
+import { recordDownload, playCoin } from "@/lib/retention";
 import { fmt } from "@/lib/media";
 import { useI18n } from "@/lib/i18n";
 
@@ -86,6 +86,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
   const base = `instagrab-${data.shortcode}`;
   const onDownload = (e: React.MouseEvent) => {
     celebrate(e);
+    playCoin();
     recordDownload({ shortcode: data.shortcode, kind: data.kind, username: data.username, thumbnail: data.thumbnail });
   };
 

@@ -8,10 +8,11 @@ export const dynamic = "force-dynamic";
  * Download proxy: Instagram CDN blocks cross-origin fetches, so the browser
  * can't save the file directly. This route streams the media through with a
  * Content-Disposition header so the browser downloads instead of playing it.
- * Only Instagram/Facebook CDN hosts (plus YouTube thumbnail and Pinterest
- * media hosts, for those tools) are allowed — this is NOT an open proxy.
+ * Only the CDN hosts of supported platforms (Instagram/Facebook, YouTube
+ * thumbnails, Pinterest, Twitter, TikTok) are allowed — NOT an open proxy.
  */
-const ALLOWED_HOST_RE = /(^|\.)(cdninstagram\.com|fbcdn\.net|ytimg\.com|pinimg\.com)$/;
+const ALLOWED_HOST_RE =
+  /(^|\.)(cdninstagram\.com|fbcdn\.net|ytimg\.com|pinimg\.com|twimg\.com|tiktokcdn(-[a-z0-9]+)?\.com)$/;
 const ALLOWED_EXACT_HOSTS = new Set(["img.youtube.com"]);
 
 function safeFilename(name: string, fallback: string): string {

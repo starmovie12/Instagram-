@@ -221,7 +221,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
       )}
 
       {phase === "error" && error && error !== "INVALID_URL" && (
-        <div style={{ marginTop: 24 }}><ErrorCard code={error} /></div>
+        <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
       )}
       {phase === "error" && error === "INVALID_URL" && (
         <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>

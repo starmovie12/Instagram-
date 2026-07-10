@@ -41,7 +41,7 @@ export default function OgDownloader({ platform, hostHint, placeholder }: {
 
   // Media on allowlisted CDNs downloads through our proxy; anything else links directly.
   const proxied = (u: string, name: string) =>
-    /(^https:\/\/)([\w-]+\.)*(pinimg\.com|cdninstagram\.com|fbcdn\.net)\//.test(u) ? dl(u, name) : u;
+    /(^https:\/\/)([\w-]+\.)*(pinimg\.com|cdninstagram\.com|fbcdn\.net|tiktokcdn(-[a-z0-9]+)?\.com)\//.test(u) ? dl(u, name) : u;
 
   return (
     <div style={{ width: "100%", maxWidth: 720, margin: "0 auto", textAlign: "left", display: "flex", flexDirection: "column", gap: 16 }}>

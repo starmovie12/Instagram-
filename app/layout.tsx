@@ -6,6 +6,7 @@ import { LangProvider } from "@/lib/i18n";
 import PwaRegister from "@/components/PwaRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import CommandPalette from "@/components/CommandPalette";
+import OnboardingTour from "@/components/OnboardingTour";
 import "./globals.css";
 
 const display = Fraunces({
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PwaRegister />
         <InstallPrompt />
         <CommandPalette />
+        <OnboardingTour />
         <Analytics />
         {/* Adsterra Social Bar — site-wide, no container needed. Loaded last
             and lazily so it never delays or competes with the main UI. */}

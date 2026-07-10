@@ -10,7 +10,7 @@ import {
   Scaling, Shrink, Palette, Quote, FileAudio, Pin, MessageCircle, Camera,
   BarChart3, Layers, Accessibility, Rss, HeartPulse, ZoomIn, Ticket,
   FileSpreadsheet, Award, LayoutDashboard, Wand2, Droplets, LayoutTemplate,
-  Scissors, Film, History, Radar,
+  Scissors, Film, History, Radar, Bird, Music2, Facebook,
 } from "lucide-react";
 import type { Tool } from "@/components/ToolCard";
 
@@ -31,6 +31,9 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/reel-frame-grabber", title: "Reel frame grabber", desc: "Any second of any reel as a full-res image.", Icon: Camera, badge: "New" },
       { href: "/pinterest-downloader", title: "Pinterest downloader", desc: "Pins, images and videos — original quality.", Icon: Pin, badge: "New" },
       { href: "/threads-downloader", title: "Threads downloader", desc: "Videos and photos from Threads posts.", Icon: MessageCircle, badge: "New" },
+      { href: "/twitter-downloader", title: "Twitter / X downloader", desc: "Tweet videos at top bitrate, photos at original size.", Icon: Bird, badge: "New" },
+      { href: "/tiktok-downloader", title: "TikTok downloader", desc: "Save TikToks from full or vm.tiktok.com links.", Icon: Music2, badge: "New" },
+      { href: "/facebook-downloader", title: "Facebook downloader", desc: "Public FB videos and reels — honest best-effort.", Icon: Facebook, badge: "New" },
     ],
   },
   {
@@ -107,6 +110,7 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/comments-exporter", title: "Comments exporter", desc: "Recent comments → CSV that opens straight in Excel.", Icon: FileSpreadsheet, badge: "New" },
       { href: "/dm-link-generator", title: "DM link generator", desc: "Your ig.me link + a scan-to-DM QR code for print.", Icon: QrCode, badge: "New" },
       { href: "/utm-builder", title: "UTM link builder", desc: "Tag your bio links — see which placement really sells.", Icon: Link2, badge: "New" },
+      { href: "/link-shortener", title: "Link shortener", desc: "Long links made bio-sized — clean, instant redirects.", Icon: Scissors, badge: "New" },
     ],
   },
   {

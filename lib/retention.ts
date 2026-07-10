@@ -94,6 +94,41 @@ export function getRecentSearches(): string[] {
   } catch { return []; }
 }
 
+/* ── Sound toggle (I11) — subtle coin-clink on downloads, default OFF ── */
+
+const SOUND_KEY = "ig.sound";
+
+export function isSoundOn(): boolean {
+  try { return localStorage.getItem(SOUND_KEY) === "1"; } catch { return false; }
+}
+
+export function setSoundOn(on: boolean) {
+  try { localStorage.setItem(SOUND_KEY, on ? "1" : "0"); } catch {}
+}
+
+/** Two quick sine pings — a tiny coin clink, synthesized so no audio asset is needed. */
+export function playCoin() {
+  if (!isSoundOn()) return;
+  try {
+    const AC: typeof AudioContext =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AC();
+    [[1320, 0], [1760, 0.07]].forEach(([freq, delay]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + delay + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.18);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.2);
+    });
+    setTimeout(() => ctx.close(), 600);
+  } catch { /* no audio — fine */ }
+}
+
 const STREAK_KEY = "ig.streak";
 
 function localDay(offsetDays = 0): string {

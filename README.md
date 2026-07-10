@@ -64,6 +64,15 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 🤖 Telegram bot webhook `/api/telegram` (raw Bot API — set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_WEBHOOK_SECRET`, then `setWebhook`)
 - 🧩 Browser extension (MV3) in `/extension` — right-click → "Download with InstaGrab"
 
+**Round 4 — the last mile:**
+- 🐦 Twitter/X downloader (`/api/twitter` — public syndication endpoint, top-bitrate MP4 + orig photos + tweet text)
+- 🎵 TikTok + 📘 Facebook downloaders (og-extract extended; TikTok hydration-JSON fallback; honest best-effort copy)
+- ✂️ Link shortener (E9): `/api/shorten` + `/s/[code]` on Upstash Redis REST (env-gated: `UPSTASH_REDIS_REST_URL/TOKEN`)
+- 🇮🇳 Hindi SEO pages (J1): `/reels-downloader-hindi`, `/story-downloader-hindi`, `/photo-downloader-hindi`
+- 📝 Blog expanded to 17 articles (brand deals, viral script formula, fake-follower checks, IG SEO, giveaway guide)
+- ⏱️ Error cards now have countdown-retry (H10); 📴 `/offline` page wired into the service worker (I12)
+- 👋 3-step first-visit tour, skippable (I7); 🔊 coin-clink sound toggle in footer, default OFF (I11)
+
 **Retention & UX:**
 - ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K, "/" also opens it)
 - 🕘 "Pick up where you left off" + 📜 /history page (download history with thumbnails, on-device)
