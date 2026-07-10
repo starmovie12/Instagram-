@@ -73,6 +73,16 @@ export const IG_CONFIG = {
   fallbackApiKey: process.env.FALLBACK_API_KEY ?? "",
   fallbackApiKeyHeader: process.env.FALLBACK_API_KEY_HEADER ?? "x-api-key",
 
+  /**
+   * Optional PROFILE fallback — used by the username tools (profile viewer,
+   * analyzers, stories) when both www and i.instagram.com are blocked.
+   * Point it at a provider that returns Instagram's web_profile_info shape
+   * (most providers proxy it verbatim). {username} is replaced.
+   *   FALLBACK_PROFILE_API_URL = https://<provider>/profile?username={username}
+   * Reuses FALLBACK_API_KEY / FALLBACK_API_KEY_HEADER above.
+   */
+  fallbackProfileApiUrl: process.env.FALLBACK_PROFILE_API_URL ?? "",
+
   /** Rate limit: per IP per minute */
   rateLimitPerMinute: 10,
 };

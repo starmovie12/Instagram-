@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign } from "lucide-react";
+import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign, Pencil } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import type { ProfileFeed } from "@/lib/media";
 import ResultCard from "./ResultCard";
@@ -104,10 +104,17 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     };
   }, []);
 
+  // Editing mode: the detected-URL chip collapses back into a text input so
+  // users can tweak a pasted link without deleting the whole thing.
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    if (editing) setTimeout(() => inputRef.current?.focus(), 20);
+  }, [editing]);
+
   async function paste() {
     try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
   }
-  function clear() { setValue(""); inputRef.current?.focus(); }
+  function clear() { setValue(""); setEditing(false); inputRef.current?.focus(); }
 
   function mapError(code: string | undefined): ErrorCode {
     const allowed: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
@@ -116,6 +123,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
 
   async function go() {
     if (phase === "loading") return;
+    setEditing(false);
     setError(null); setResult(null); setFeed(null);
     const d = detect(value);
     if (!d) {
@@ -162,7 +170,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   }
 
   const loading = phase === "loading";
-  const showChip = detected && !loading;
+  const showChip = detected && !loading && !editing;
 
   return (
     <div style={{ width: "100%" }}>
@@ -178,7 +186,14 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         {showChip ? (
           <span className="gbar-chip mono">
             <detected.Icon size={14} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
-            {detected.label}/{detected.hint}…
+            <button onClick={() => setEditing(true)} title="Edit link"
+              style={{ background: "none", border: "none", cursor: "text", padding: 0, font: "inherit", color: "inherit" }}>
+              {detected.label}/{detected.hint}…
+            </button>
+            <button onClick={() => setEditing(true)} aria-label="Edit link" title="Edit link"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--gold-ink)" }}>
+              <Pencil size={13} strokeWidth={1.5} />
+            </button>
             <button onClick={clear} aria-label="Clear" style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--ink-3)" }}>
               <X size={14} strokeWidth={1.5} />
             </button>
@@ -188,6 +203,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
             ref={inputRef} value={value} disabled={loading}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => e.key === "Enter" && go()}
+            onBlur={() => { if (editing && detected) setEditing(false); }}
             placeholder={t("smartPlaceholder")}
             aria-label="Instagram link or username"
             className="gbar-input"
