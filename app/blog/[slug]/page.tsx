@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import AdBanner300 from "@/components/AdBanner300";
 import { BLOG_POSTS, getPost } from "@/lib/blog-posts";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -40,14 +41,23 @@ export default async function BlogPostPage({ params }: Props) {
         </time>
         <div className="article intro-rise" style={{ marginTop: 40, ["--dl" as string]: "300ms" }}>
           {post.content.map((block, i) => {
-            if (block.type === "h2") return <h2 key={i}>{block.text}</h2>;
-            if (block.type === "ul")
+            const node =
+              block.type === "h2" ? <h2 key={i}>{block.text}</h2>
+              : block.type === "ul" ? (
+                  <ul key={i}>{block.items.map((item, j) => <li key={j}>{item}</li>)}</ul>
+                )
+              : <p key={i}>{block.text}</p>;
+            // Drop a 300×250 banner once, after the 2nd block — mid-article,
+            // where readers are engaged but not interrupted at the very top.
+            if (i === 2) {
               return (
-                <ul key={i}>
-                  {block.items.map((item, j) => <li key={j}>{item}</li>)}
-                </ul>
+                <div key={`wrap-${i}`}>
+                  {node}
+                  <AdBanner300 />
+                </div>
               );
-            return <p key={i}>{block.text}</p>;
+            }
+            return node;
           })}
           <p>
             <strong>Try it now:</strong>{" "}

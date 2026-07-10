@@ -5,6 +5,7 @@ import type { ExtractResult, Slide } from "@/lib/extract-ui";
 import CopyButton from "./CopyButton";
 import CreatorPack from "./CreatorPack";
 import { recordDownload, playCoin } from "@/lib/retention";
+import { openSponsorOnce } from "@/lib/ads";
 import { fmt } from "@/lib/media";
 import { useI18n } from "@/lib/i18n";
 
@@ -87,6 +88,7 @@ export default function ResultCard({ data }: { data: ExtractResult }) {
   const onDownload = (e: React.MouseEvent) => {
     celebrate(e);
     playCoin();
+    openSponsorOnce(); // sponsor opens in a new tab at most once/day; download proceeds here
     recordDownload({ shortcode: data.shortcode, kind: data.kind, username: data.username, thumbnail: data.thumbnail });
   };
 
