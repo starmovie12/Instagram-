@@ -3,9 +3,11 @@ import Script from "next/script";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
+import { SITE_URL } from "@/lib/site-url";
 import PwaRegister from "@/components/PwaRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import CommandPalette from "@/components/CommandPalette";
+import OnboardingTour from "@/components/OnboardingTour";
 import "./globals.css";
 
 const display = Fraunces({
@@ -16,7 +18,7 @@ const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", disp
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "InstaGrab — Download anything from Instagram, beautifully",
     template: "%s · InstaGrab",
@@ -60,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PwaRegister />
         <InstallPrompt />
         <CommandPalette />
+        <OnboardingTour />
         <Analytics />
         {/* Adsterra Social Bar — site-wide, no container needed. Loaded last
             and lazily so it never delays or competes with the main UI. */}

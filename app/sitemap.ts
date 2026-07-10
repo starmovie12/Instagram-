@@ -2,10 +2,14 @@ import type { MetadataRoute } from "next";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import { TOOLS } from "@/lib/copy";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://instagrabs.vercel.app";
+import { SITE_URL as BASE } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPaths = ["", "/blog", "/about", "/privacy-policy", "/terms", "/contact", "/dmca"];
+  const staticPaths = [
+    "", "/blog", "/about", "/privacy-policy", "/terms", "/contact", "/dmca",
+    "/snapinsta-alternative", "/fastdl-alternative",
+    "/reels-downloader-hindi", "/story-downloader-hindi", "/photo-downloader-hindi",
+  ];
 
   const pages = [...staticPaths, ...TOOLS.map((t) => t.href)].map((path) => ({
     url: `${BASE}${path}`,

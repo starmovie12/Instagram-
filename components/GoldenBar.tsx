@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign } from "lucide-react";
+import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign, Pencil } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import type { ProfileFeed } from "@/lib/media";
 import ResultCard from "./ResultCard";
 import ProfileFeedCard from "./ProfileFeedCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
 import AdFrame from "./AdFrame";
+import { recordSearch, getRecentSearches } from "@/lib/retention";
 import { useI18n } from "@/lib/i18n";
 
 // A media permalink (post/reel/story/tv) → extract flow.
@@ -80,10 +81,40 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     return () => { cancelled = true; };
   }, []);
 
+  // I10 — recent searches chips under the bar.
+  const [recents, setRecents] = useState<string[]>([]);
+  useEffect(() => { setRecents(getRecentSearches()); }, []);
+
+  // I4 — drop a link anywhere on the page and the bar catches it.
+  useEffect(() => {
+    function onDragOver(e: DragEvent) { e.preventDefault(); }
+    function onDrop(e: DragEvent) {
+      const txt = e.dataTransfer?.getData("text")?.trim();
+      if (txt && detect(txt)) {
+        e.preventDefault();
+        setValue(txt);
+        inputRef.current?.focus();
+      }
+    }
+    window.addEventListener("dragover", onDragOver);
+    window.addEventListener("drop", onDrop);
+    return () => {
+      window.removeEventListener("dragover", onDragOver);
+      window.removeEventListener("drop", onDrop);
+    };
+  }, []);
+
+  // Editing mode: the detected-URL chip collapses back into a text input so
+  // users can tweak a pasted link without deleting the whole thing.
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    if (editing) setTimeout(() => inputRef.current?.focus(), 20);
+  }, [editing]);
+
   async function paste() {
     try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
   }
-  function clear() { setValue(""); inputRef.current?.focus(); }
+  function clear() { setValue(""); setEditing(false); inputRef.current?.focus(); }
 
   function mapError(code: string | undefined): ErrorCode {
     const allowed: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
@@ -92,6 +123,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
 
   async function go() {
     if (phase === "loading") return;
+    setEditing(false);
     setError(null); setResult(null); setFeed(null);
     const d = detect(value);
     if (!d) {
@@ -100,6 +132,8 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
       return;
     }
     if (typeof navigator !== "undefined" && !navigator.onLine) { setPhase("error"); setError("OFFLINE"); return; }
+    recordSearch(value.trim());
+    setRecents(getRecentSearches());
     setPhase("loading");
     try {
       if (d.mode === "profile") {
@@ -136,7 +170,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   }
 
   const loading = phase === "loading";
-  const showChip = detected && !loading;
+  const showChip = detected && !loading && !editing;
 
   return (
     <div style={{ width: "100%" }}>
@@ -152,7 +186,14 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         {showChip ? (
           <span className="gbar-chip mono">
             <detected.Icon size={14} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
-            {detected.label}/{detected.hint}…
+            <button onClick={() => setEditing(true)} title="Edit link"
+              style={{ background: "none", border: "none", cursor: "text", padding: 0, font: "inherit", color: "inherit" }}>
+              {detected.label}/{detected.hint}…
+            </button>
+            <button onClick={() => setEditing(true)} aria-label="Edit link" title="Edit link"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--gold-ink)" }}>
+              <Pencil size={13} strokeWidth={1.5} />
+            </button>
             <button onClick={clear} aria-label="Clear" style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--ink-3)" }}>
               <X size={14} strokeWidth={1.5} />
             </button>
@@ -162,6 +203,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
             ref={inputRef} value={value} disabled={loading}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => e.key === "Enter" && go()}
+            onBlur={() => { if (editing && detected) setEditing(false); }}
             placeholder={t("smartPlaceholder")}
             aria-label="Instagram link or username"
             className="gbar-input"
@@ -180,8 +222,22 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         </button>
       </div>
 
+      {/* I10 — recent searches, one tap to re-run */}
+      {phase === "idle" && !value && recents.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
+          {recents.map((r) => (
+            <button key={r} className="chip" onClick={() => { setValue(r); inputRef.current?.focus(); }}
+              style={{ cursor: "pointer", maxWidth: 220 }} title={r}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {r.replace(/^https?:\/\/(www\.)?/, "").slice(0, 34)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {phase === "error" && error && error !== "INVALID_URL" && (
-        <div style={{ marginTop: 24 }}><ErrorCard code={error} /></div>
+        <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
       )}
       {phase === "error" && error === "INVALID_URL" && (
         <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>

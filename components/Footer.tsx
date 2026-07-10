@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import SoundToggle from "./SoundToggle";
 import { TOOL_GROUPS } from "@/lib/copy";
 
 const COLS = [
@@ -32,7 +33,10 @@ export default function Footer() {
         </p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--line)" }}>
           <span className="mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>© 2026 InstaGrab · Made for creators</span>
-          <ThemeToggle />
+          <span style={{ display: "flex", gap: 8 }}>
+            <SoundToggle />
+            <ThemeToggle />
+          </span>
         </div>
       </div>
     </footer>

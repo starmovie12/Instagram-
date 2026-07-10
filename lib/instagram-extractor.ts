@@ -90,6 +90,12 @@ function imageQualities(resources: any[]): Quality[] {
   return out;
 }
 
+export type PostComment = {
+  username: string;
+  text: string;
+  likes?: number;
+};
+
 export type ExtractResult = {
   type: "video" | "image" | "carousel";
   shortcode: string;
@@ -100,6 +106,13 @@ export type ExtractResult = {
   mentions: string[];
   thumbnail: string;
   media: MediaItem[];
+  /** Post metadata — present when the GraphQL response carries it. */
+  likes?: number;
+  commentCount?: number;
+  views?: number;
+  takenAt?: number; // unix seconds
+  /** Recent comments included in the post payload (up to ~40, public data). */
+  comments?: PostComment[];
 };
 
 export class ExtractError extends Error {
@@ -215,6 +228,24 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
     );
   }
 
+  // Post metadata + the recent comments Instagram embeds in the post payload.
+  const likes: number | undefined =
+    media?.edge_media_preview_like?.count ?? media?.edge_liked_by?.count ?? undefined;
+  const commentEdge =
+    media?.edge_media_to_parent_comment ?? media?.edge_media_to_comment ?? media?.edge_media_preview_comment;
+  const commentCount: number | undefined = commentEdge?.count ?? undefined;
+  const views: number | undefined =
+    media?.video_view_count ?? media?.video_play_count ?? undefined;
+  const takenAt: number | undefined = media?.taken_at_timestamp ?? undefined;
+  const comments: PostComment[] = (Array.isArray(commentEdge?.edges) ? commentEdge.edges : [])
+    .map((e: any) => ({
+      username: e?.node?.owner?.username ?? "",
+      text: e?.node?.text ?? "",
+      likes: e?.node?.edge_liked_by?.count,
+    }))
+    .filter((c: PostComment) => c.username && c.text)
+    .slice(0, 50);
+
   return {
     type,
     shortcode,
@@ -225,6 +256,11 @@ function parseGraphqlMedia(media: any, shortcode: string): ExtractResult {
     mentions: extractMentions(caption),
     thumbnail,
     media: items,
+    likes,
+    commentCount,
+    views,
+    takenAt,
+    comments: comments.length ? comments : undefined,
   };
 }
 
@@ -654,11 +690,25 @@ async function igHeaders(referer = "https://www.instagram.com/") {
   };
 }
 
+/**
+ * Headers that mimic the official iPhone app hitting i.instagram.com — that
+ * host is far more lenient with data-center IPs than www, so it's our
+ * automatic second attempt whenever www blocks a username-based call.
+ */
+function mobileHeaders(): Record<string, string> {
+  return {
+    "User-Agent":
+      "Instagram 275.0.0.27.98 (iPhone13,2; iOS 16_3; en_US; en-US; scale=3.00; 1170x2532; 458229237) AppleWebKit/420+",
+    "X-IG-App-ID": IG_CONFIG.appId,
+    Accept: "*/*",
+  };
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-async function fetchJson(url: string, referer?: string): Promise<any> {
+async function attemptJson(url: string, headers: Record<string, string>): Promise<any> {
   let res: Response;
   try {
-    res = await fetch(url, { headers: await igHeaders(referer), cache: "no-store" });
+    res = await fetch(url, { headers, cache: "no-store" });
   } catch {
     throw new ExtractError("Couldn't reach Instagram. Please try again.", "UPSTREAM_BLOCKED");
   }
@@ -684,12 +734,67 @@ async function fetchJson(url: string, referer?: string): Promise<any> {
   }
 }
 
+/**
+ * Fetch an Instagram /api/v1 JSON endpoint with an automatic escalation
+ * ladder: www + primed web session first, then the same path on
+ * i.instagram.com with mobile-app headers when www is blocked. This is what
+ * keeps the username tools alive on data-center IPs where only the
+ * shortcode GraphQL endpoint used to survive.
+ */
+async function fetchJson(url: string, referer?: string): Promise<any> {
+  try {
+    return await attemptJson(url, await igHeaders(referer));
+  } catch (err) {
+    const blocked = err instanceof ExtractError && err.code === "UPSTREAM_BLOCKED";
+    if (blocked && url.startsWith("https://www.instagram.com/")) {
+      const mobileUrl = url.replace("https://www.instagram.com/", "https://i.instagram.com/");
+      return await attemptJson(mobileUrl, mobileHeaders());
+    }
+    throw err;
+  }
+}
+
+/**
+ * web_profile_info with the full escalation ladder: www → i.instagram.com
+ * (inside fetchJson) → the optional profile fallback API. Providers usually
+ * proxy Instagram's own shape, so we accept `user` wherever it's nested.
+ */
+async function fetchWebProfile(username: string): Promise<any> {
+  try {
+    return await fetchJson(
+      IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
+      `https://www.instagram.com/${username}/`
+    );
+  } catch (err) {
+    const blocked = err instanceof ExtractError && err.code === "UPSTREAM_BLOCKED";
+    if (!blocked || !IG_CONFIG.fallbackProfileApiUrl) throw err;
+    const endpoint = IG_CONFIG.fallbackProfileApiUrl.replace(
+      "{username}",
+      encodeURIComponent(username)
+    );
+    let res: Response;
+    try {
+      res = await fetch(endpoint, {
+        headers: IG_CONFIG.fallbackApiKey
+          ? { [IG_CONFIG.fallbackApiKeyHeader]: IG_CONFIG.fallbackApiKey }
+          : undefined,
+        cache: "no-store",
+      });
+    } catch {
+      throw err;
+    }
+    if (!res.ok) throw err;
+    const json = await res.json().catch(() => null);
+    const user =
+      json?.data?.user ?? json?.user ?? json?.result?.user ?? json?.graphql?.user ?? null;
+    if (user) return { data: { user } };
+    throw err;
+  }
+}
+
 export async function extractProfile(rawUsername: string): Promise<ProfileResult> {
   const username = parseUsername(rawUsername);
-  const json = await fetchJson(
-    IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
-    `https://www.instagram.com/${username}/`
-  );
+  const json = await fetchWebProfile(username);
   const u = json?.data?.user;
   if (!u) {
     throw new ExtractError("No account found with that username.", "NOT_FOUND");
@@ -737,10 +842,7 @@ function timelineNodeToPost(node: any): FeedPost {
  */
 export async function extractProfileFeed(rawUsername: string): Promise<ProfileFeedResult> {
   const username = parseUsername(rawUsername);
-  const json = await fetchJson(
-    IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
-    `https://www.instagram.com/${username}/`
-  );
+  const json = await fetchWebProfile(username);
   const u = json?.data?.user;
   if (!u) {
     throw new ExtractError("No account found with that username.", "NOT_FOUND");

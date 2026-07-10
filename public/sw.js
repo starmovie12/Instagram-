@@ -1,7 +1,7 @@
 /* InstaGrab service worker — minimal, enables PWA install (and thus the
    Android share-target entry). Network-first, with a tiny offline shell. */
-const CACHE = "instagrab-v1";
-const SHELL = ["/", "/quick-action"];
+const CACHE = "instagrab-v2";
+const SHELL = ["/", "/quick-action", "/offline", "/history"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
@@ -28,6 +28,8 @@ self.addEventListener("fetch", (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(req).then((m) => m || caches.match("/")))
+      .catch(() =>
+        caches.match(req).then((m) => m || (req.mode === "navigate" ? caches.match("/offline") : caches.match("/")))
+      )
   );
 });

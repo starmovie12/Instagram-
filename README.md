@@ -33,10 +33,55 @@ Built with **Next.js 15 (App Router)**, deployable free on **Vercel**. Designed 
 - 🚦 Is Instagram down? — live server probe (`/api/ig-status`)
 - ▶️ YouTube thumbnail downloader — up to 1280×720, Shorts included
 
+**🤖 AI suite** (Gemini via shared `/api/ai` — set `GEMINI_API_KEY` env var; every tool speaks English/Hindi/**Hinglish**):
+- ✍️ Caption, #️⃣ hashtag (3 reach tiers), 🪪 bio, 🎬 reel script, 🧲 hook, 💡 30 content ideas,
+  @ username ideas, 🎁 giveaway caption, 💬 comment replies, 🌐 caption translator (18 langs), 🧭 30-day growth strategy
+- 🎙️ **Reel transcript extractor** (`/api/transcribe`) — reel → spoken script as text (Hindi/Hinglish faithful) *(unique)*
+- 🔁 **Reel remix studio** — viral reel's formula rewritten for YOUR niche *(unique)*
+- 🔥 **AI profile roaster** — reads a public profile, roasts it (PG-13, ends with a compliment)
+
+**Creator suite:**
+- ⚔️ Profile battle (VS mode) — two accounts, six rounds, one winner
+- 📦 Creator Pack ZIP — media + audio + thumbnail + caption.txt + hashtags.txt in one click (in ResultCard)
+- 📄 Media kit generator — gold-editorial PNG, canvas-drawn, no watermark
+- 📈 Follower growth tracker (localStorage + SVG chart), 🚀 virality score, 🪙 EMV calculator, ⚖️ ratio checker
+- 🎡 Wheel spinner (crypto-random), 📇 DM link + QR generator (`qrcode`), 🔗 UTM builder
+- 🫥 Invisible character tool, 🔠 case converter (incl. Unicode small caps)
+- 🖼️ Studio (100% on-device canvas): photo resizer (IG presets), image compressor, color palette extractor, quote post maker
+
+**Round 3 — "everything else" drop:**
+- 💬 Comments exporter (recent ~40-50 → CSV) + 🎟️ giveaway comment picker (filters, multi-winner, backups) + 🏆 winner certificate (unique ID)
+- 📊 Post metadata card on results (likes/comments/views/date, when the extractor sees them)
+- 🎧 Reel → true MP3 (WebAudio decode + `@breezystack/lamejs` 192 kbps re-encode, on-device)
+- 📸 Reel frame grabber (proxied video → untainted canvas → full-res PNG)
+- 🖼️ Studio round 2 (all on-device): collage maker, 15 photo filters, blur/pixelate censor, 3×3 grid planner, video trimmer (MediaRecorder, beta), video→GIF (`gifenc`)
+- 📡 Story watch mode — multi-account story feed from an on-device watchlist
+- 🩺 Account health score — 4 pillars, A+–F report card, shareable
+- 🔎 Profile pic zoom (instazoom-style SEO page)
+- 🤖 AI additions: alt-text from image (Gemini vision `/api/alt-text`), story poll ideas, carousel outline
+- 🌐 Pinterest + Threads downloaders (host-allowlisted `/api/og-extract`; pinimg added to download proxy)
+- 📈 Trend radar India (curated, dated honestly) + SnapInsta/FastDL alternative SEO pages
+- 🤖 Telegram bot webhook `/api/telegram` (raw Bot API — set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_WEBHOOK_SECRET`, then `setWebhook`)
+- 🧩 Browser extension (MV3) in `/extension` — right-click → "Download with InstaGrab"
+
+**Round 4 — the last mile:**
+- 🐦 Twitter/X downloader (`/api/twitter` — public syndication endpoint, top-bitrate MP4 + orig photos + tweet text)
+- 🎵 TikTok + 📘 Facebook downloaders (og-extract extended; TikTok hydration-JSON fallback; honest best-effort copy)
+- ✂️ Link shortener (E9): `/api/shorten` + `/s/[code]` on Upstash Redis REST (env-gated: `UPSTASH_REDIS_REST_URL/TOKEN`)
+- 🇮🇳 Hindi SEO pages (J1): `/reels-downloader-hindi`, `/story-downloader-hindi`, `/photo-downloader-hindi`
+- 📝 Blog expanded to 17 articles (brand deals, viral script formula, fake-follower checks, IG SEO, giveaway guide)
+- ⏱️ Error cards now have countdown-retry (H10); 📴 `/offline` page wired into the service worker (I12)
+- 👋 3-step first-visit tour, skippable (I7); 🔊 coin-clink sound toggle in footer, default OFF (I11)
+
 **Retention & UX:**
-- ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K)
-- 🕘 "Pick up where you left off" — recently-used tools row on the homepage (localStorage only)
+- ⌘K command palette — jump to any tool (floating button + Ctrl/Cmd+K, "/" also opens it)
+- 🕘 "Pick up where you left off" + 📜 /history page (download history with thumbnails, on-device)
+- ☀️ Tool of the day spotlight on the homepage (deterministic daily rotation)
+- 🔥 Daily-visit streak badge in the nav (appears from day 2)
 - 📋 Auto clipboard prefill on the golden bar (only when permission already granted — never prompts)
+- 🫳 Drag & drop a link anywhere on the page; recent-searches chips under the bar
+- ✨ Gold particle burst + haptic tick on downloads (respects reduced-motion)
+- 📢 Ad slots wired to the ad network via `AdFrame` (first frame per page hosts the native banner)
 
 Plus: 🔒 no login ever, public content only, rate-limited API, disclaimer footer, DMCA page.
 

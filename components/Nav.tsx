@@ -1,21 +1,35 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "./LanguagePicker";
+import { bumpStreak } from "@/lib/retention";
 
 const LINKS = [
   { href: "/reels-downloader", label: "Reels" },
   { href: "/story-downloader", label: "Story" },
-  { href: "/photo-downloader", label: "Photos" },
+  { href: "/ai/caption-generator", label: "AI tools" },
   { href: "/caption-extractor", label: "Captions" },
   { href: "/hashtag-extractor", label: "Hashtags" },
   { href: "/profile-viewer", label: "Profile" },
   { href: "/#tools", label: "All tools" },
   { href: "/blog", label: "Blog" },
 ];
+
+/** H4 — subtle daily-visit streak. Appears only from day 2, so first-timers never see it. */
+function StreakBadge() {
+  const [streak, setStreak] = useState(0);
+  useEffect(() => { setStreak(bumpStreak()); }, []);
+  if (streak < 2) return null;
+  return (
+    <span className="mono" title={`${streak}-day streak — come back tomorrow to keep it alive!`}
+      style={{ fontSize: 12, color: "var(--gold-ink)", border: "1px solid var(--gold-300)", borderRadius: 999, padding: "4px 10px", whiteSpace: "nowrap" }}>
+      🔥 {streak}
+    </span>
+  );
+}
 
 function Logo() {
   return (
@@ -57,6 +71,7 @@ export default function Nav() {
           ))}
         </nav>
         <div style={{ display: "flex", gap: 10, alignItems: "center", marginLeft: "auto" }}>
+          <StreakBadge />
           <LanguagePicker />
           <ThemeToggle />
           <button className="btn-icon nav-burger" aria-label="Menu" onClick={() => setOpen(true)}>

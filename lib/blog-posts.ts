@@ -243,6 +243,132 @@ BLOG_POSTS.push(
   }
 );
 
+BLOG_POSTS.push(
+  {
+    slug: "get-brand-deals-small-creator-india",
+    title: "How Small Creators in India Get Their First Brand Deal (Under 10K Followers)",
+    description:
+      "You don't need 100K followers to earn from Instagram. Here's the realistic playbook Indian nano-creators use to land their first paid collab.",
+    date: "2026-07-09",
+    content: [
+      { type: "p", text: "The biggest myth in the creator economy: 'brands only work with big accounts.' In reality, Indian brands increasingly prefer nano and micro creators (1K–50K followers) because their audiences actually trust them — engagement rates at that size run 3-8%, versus under 1.5% for celebrity accounts." },
+      { type: "h2", text: "Get your numbers deal-ready first" },
+      { type: "ul", items: [
+        "Know your engagement rate (use a free engagement calculator) — brands screen on this before follower count.",
+        "Run a fake-follower check on yourself; a clean audience grade is a selling point.",
+        "Calculate your EMV (earned media value) for your last 5 posts — 'my average post generates ₹X in earned media' is a pitch line that works.",
+      ]},
+      { type: "h2", text: "Build a one-page media kit" },
+      { type: "p", text: "A media kit is your creator résumé: stats, audience one-liner, rates, contact. It doesn't need design software — a clean one-page PNG with honest numbers beats a 10-page deck. Brands skim it in 20 seconds; make those seconds count." },
+      { type: "h2", text: "Pitch small, pitch local" },
+      { type: "ul", items: [
+        "Start with local businesses and D2C brands already spending on ads in your niche.",
+        "DM or email with one specific content idea for THEIR product — not 'let's collab'.",
+        "Accept barter early if the product is relevant, but set a paid rate from deal one — even ₹1,000 establishes you as paid talent.",
+      ]},
+      { type: "h2", text: "Price with a floor, not a fantasy" },
+      { type: "p", text: "A reasonable starting rate for Indian nano-creators: roughly ₹100–300 per 1,000 followers per post, adjusted up for strong engagement. Quote a number, hold your floor, and raise it after every 2-3 successful collabs." },
+    ],
+  },
+  {
+    slug: "viral-reel-script-formula",
+    title: "The Viral Reel Script Formula: Hook, Beats, CTA (With Examples)",
+    description:
+      "Viral reels aren't lucky — they're structured. Break down the 3-part script formula behind talking reels that travel, and how to write one in 10 minutes.",
+    date: "2026-07-08",
+    content: [
+      { type: "p", text: "Watch 20 viral talking reels in any niche and the same skeleton appears: a hook in the first 2 seconds, 3-5 tight beats in the middle, and a call-to-action that tells viewers exactly what to do. The topics differ; the architecture doesn't." },
+      { type: "h2", text: "The hook: 2 seconds that decide everything" },
+      { type: "p", text: "Instagram measures whether viewers survive your first moments. The proven hook patterns: a bold claim ('This mistake costs you 90% of your reach'), a negative warning ('Stop doing X'), a curiosity gap ('Nobody tells you this about…'), or a specific number. Write 10 hooks, pick the sharpest." },
+      { type: "h2", text: "The beats: one idea per breath" },
+      { type: "ul", items: [
+        "3-5 beats maximum for a 30-second reel — more ideas means less retention.",
+        "Each beat is one sentence of value plus one sentence of example.",
+        "Put your strongest beat second — viewers who survive the hook decide to stay during beat one.",
+      ]},
+      { type: "h2", text: "The CTA: ask for the metric you want" },
+      { type: "p", text: "'Follow for more' is weak because it's what everyone says. Ask for the action that helps distribution: 'Save this for your next post' (saves rank hardest), 'Send this to a friend who needs it' (shares travel furthest), or a question that sparks comments." },
+      { type: "h2", text: "Steal structure, never words" },
+      { type: "p", text: "The fastest way to learn the formula is to transcribe reels that went viral in your niche and mark the hook, beats and CTA. Study the skeleton, then write your own flesh onto it — that's how every big creator actually works." },
+    ],
+  },
+  {
+    slug: "spot-fake-followers-before-collab",
+    title: "How to Spot Fake Followers Before a Collab (5 Checks in 2 Minutes)",
+    description:
+      "Paying a creator with bot followers burns your budget. Five public-data checks that expose bought audiences before you sign anything.",
+    date: "2026-07-07",
+    content: [
+      { type: "p", text: "Influencer fraud quietly eats marketing budgets: you pay for an audience of 80K and reach the 30K that are real. The good news — bought followers leave fingerprints in public data that take two minutes to check." },
+      { type: "h2", text: "The five checks" },
+      { type: "ul", items: [
+        "Engagement rate vs size: a 100K account below ~0.5% ER is a red flag; healthy mid-size accounts run 2%+.",
+        "Comments-to-likes: thousands of likes with near-zero comments means the likes are probably purchased.",
+        "Comment quality: emoji-only and 'nice pic' comments in bulk are bot signatures.",
+        "Follower/following balance: following thousands with a similar follower count = follow-for-follow growth, not fans.",
+        "Like-count volatility: wild spikes on random posts suggest engagement drops bought per-post.",
+      ]},
+      { type: "h2", text: "Run the numbers, not vibes" },
+      { type: "p", text: "You don't need a paid audit suite — a free fake-follower checker computes these signals from public data and grades the audience A+ to F. Screenshot the grade into your collab notes; if the creator disputes it, they can explain the numbers." },
+      { type: "h2", text: "For creators: audit yourself first" },
+      { type: "p", text: "If you ever bought followers (or won them from spammy giveaways), they're suppressing your reach today — Instagram shows your content to a sample of followers first, and bots don't engage. A slow cleanup beats dragging dead weight forever." },
+    ],
+  },
+  {
+    slug: "instagram-seo-alt-text-keywords",
+    title: "Instagram SEO in 2026: Alt Text, Keywords, and How Search Actually Works",
+    description:
+      "Instagram is a search engine now. How captions, alt text and keywords decide whether your posts surface — and the 10-minute SEO routine per post.",
+    date: "2026-07-06",
+    content: [
+      { type: "p", text: "Instagram search stopped being just usernames and hashtags years ago — people search 'easy dinner recipes' and get posts, reels and accounts ranked by relevance. That means your posts have SEO, whether you manage it or not." },
+      { type: "h2", text: "Where Instagram reads keywords" },
+      { type: "ul", items: [
+        "Caption text — the first line weighs most; say the topic plainly before being clever.",
+        "Alt text — the most ignored field on the platform; describe the image with natural keywords.",
+        "Your name field and bio — searchable; 'Priya | Home Workouts' outranks a name alone for 'home workouts'.",
+        "On-screen text in reels — Instagram transcribes and reads it.",
+        "Hashtags — still topic signals, treated like keywords rather than magic reach buttons.",
+      ]},
+      { type: "h2", text: "The 10-minute per-post routine" },
+      { type: "ul", items: [
+        "Pick ONE search phrase the post should answer (e.g. '15 minute breakfast').",
+        "Use it naturally in the caption's first sentence.",
+        "Write alt text that describes the image and includes the phrase once.",
+        "Add 10-20 relevant hashtags including the phrase's variants.",
+      ]},
+      { type: "h2", text: "Why alt text is the free win" },
+      { type: "p", text: "Alt text serves accessibility first — screen-reader users get a description — and search second. Since almost nobody fills it, doing so consistently is one of the few remaining low-competition edges on the platform." },
+    ],
+  },
+  {
+    slug: "instagram-giveaway-guide-india",
+    title: "How to Run an Instagram Giveaway in India That Actually Grows Your Account",
+    description:
+      "Most giveaways attract prize-hunters who unfollow in a week. The mechanics that attract your real audience — rules, prizes, picking winners fairly.",
+    date: "2026-07-05",
+    content: [
+      { type: "p", text: "The classic giveaway failure: 500 new followers during the contest, 400 gone within two weeks, engagement rate wrecked. The problem isn't giveaways — it's generic prizes that attract everyone and therefore no one." },
+      { type: "h2", text: "Prize = filter" },
+      { type: "p", text: "An iPhone attracts prize-hunters; a niche prize attracts your future audience. A baking page should give a stand mixer or a masterclass seat, not cash. The rule: your prize should be worthless to someone who'd never follow you anyway." },
+      { type: "h2", text: "Rules that survive scrutiny" },
+      { type: "ul", items: [
+        "Keep entry simple: follow + like + tag 1-2 friends. Every extra step halves entries.",
+        "State the deadline (with timezone), the draw date, and how winners will be announced.",
+        "Say clearly that winners never pay anything — scammers impersonate giveaway hosts, so warn your audience about fake winner DMs.",
+      ]},
+      { type: "h2", text: "Pick winners transparently" },
+      { type: "ul", items: [
+        "Use a random picker on the actual comments — screen-record the draw and post it as a story.",
+        "Draw backup winners in the same recording, in case a winner doesn't claim.",
+        "Post a winner certificate/result card so the outcome is public and dated.",
+      ]},
+      { type: "h2", text: "After the giveaway: the retention window" },
+      { type: "p", text: "The 72 hours after announcing winners decide whether new followers stay. Ship your best content immediately, run a story poll to activate them, and pin a 'start here' post. A giveaway buys attention; content keeps it." },
+    ],
+  }
+);
+
 export function getPost(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((p) => p.slug === slug);
 }
