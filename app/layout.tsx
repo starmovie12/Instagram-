@@ -64,15 +64,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CommandPalette />
         <OnboardingTour />
         <Analytics />
-        {/* Adsterra Social Bar — site-wide floating unit, no container needed. */}
+        {/* Adsterra Social Bar — site-wide floating unit, no container needed.
+            NOTE: the Popunder unit was removed on purpose — popunder scripts
+            hijack the user's first click, which broke download buttons (and
+            intrusive-ad signals also hurt Google ranking). Don't re-add it. */}
         <Script
           src="https://pl30280133.effectivecpmnetwork.com/0c/f9/53/0cf9534424ebc32da0ad62ff5cfd5888.js"
-          strategy="lazyOnload"
-        />
-        {/* Adsterra Popunder — site-wide, fires on user interaction. Loaded
-            lazily so it never blocks the main UI or first paint. */}
-        <Script
-          src="https://pl30307336.effectivecpmnetwork.com/24/8a/a5/248aa59361a0986b753da9f69e278da4.js"
           strategy="lazyOnload"
         />
       </body>
