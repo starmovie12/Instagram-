@@ -41,7 +41,11 @@ export default function Footer() {
           permission to use.
         </p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--line)" }}>
-          <span className="mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>© 2026 InstaGrab · Made for creators</span>
+          <span className="mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+            © 2026 InstaGrab · Made for creators
+            {/* Subtle owner-only admin entry — intentionally low-key. */}
+            <Link href="/admin" aria-label="Admin" style={{ textDecoration: "none", color: "var(--line)", marginLeft: 8 }}>·</Link>
+          </span>
           <span style={{ display: "flex", gap: 8 }}>
             <SoundToggle />
             <ThemeToggle />
