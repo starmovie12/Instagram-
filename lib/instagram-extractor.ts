@@ -3,6 +3,7 @@
  * Config (doc_id, headers) `lib/instagram-config.ts` me hai; toote to wahi patch karo.
  */
 import { IG_CONFIG } from "./instagram-config";
+import { getLiveConfig } from "./runtime-config";
 
 export type Quality = {
   /** Human label, e.g. "1080p", "720p", "480p" */
@@ -277,9 +278,10 @@ async function getSession(): Promise<{ cookie: string; csrf: string }> {
     return { cookie: sessionCache.cookie, csrf: sessionCache.csrf };
   }
   try {
+    const cfg = await getLiveConfig();
     const res = await fetch("https://www.instagram.com/", {
       headers: {
-        "User-Agent": IG_CONFIG.userAgent,
+        "User-Agent": cfg.userAgent,
         Accept: "text/html,application/xhtml+xml",
         "Accept-Language": "en-US,en;q=0.9",
       },
@@ -309,6 +311,7 @@ async function getSession(): Promise<{ cookie: string; csrf: string }> {
 
 /** Primary method: Instagram's own public GraphQL endpoint. */
 async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
+  const cfg = await getLiveConfig();
   const session = await getSession();
   const variables = JSON.stringify({
     shortcode,
@@ -324,23 +327,23 @@ async function extractViaGraphql(shortcode: string): Promise<ExtractResult> {
     __a: "1",
     __req: "3",
     dpr: "1",
-    lsd: IG_CONFIG.lsd,
+    lsd: cfg.lsd,
     fb_api_caller_class: "RelayModern",
     fb_api_req_friendly_name: "PolarisPostActionLoadPostQueryQuery",
     variables,
     server_timestamps: "true",
-    doc_id: IG_CONFIG.docId,
+    doc_id: cfg.docId,
   });
 
   let res: Response;
   try {
-    res = await fetch(IG_CONFIG.graphqlUrl, {
+    res = await fetch(cfg.graphqlUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": IG_CONFIG.userAgent,
-        "X-IG-App-ID": IG_CONFIG.appId,
-        "X-FB-LSD": IG_CONFIG.lsd,
+        "User-Agent": cfg.userAgent,
+        "X-IG-App-ID": cfg.appId,
+        "X-FB-LSD": cfg.lsd,
         "X-ASBD-ID": "129477",
         "X-IG-WWW-Claim": "0",
         "X-Requested-With": "XMLHttpRequest",
@@ -523,22 +526,23 @@ function normalizeFallback(json: any, shortcode: string): ExtractResult {
 
 /** Fallback: a third-party API configured via env (see instagram-config.ts). */
 async function extractViaFallback(rawUrl: string, shortcode: string): Promise<ExtractResult> {
-  if (!IG_CONFIG.fallbackApiUrl) {
+  const cfg = await getLiveConfig();
+  if (!cfg.fallbackApiUrl) {
     throw new ExtractError(
-      "Instagram blocked our server and no fallback API is configured. Set FALLBACK_API_URL in the environment to enable reliable extraction.",
+      "Instagram blocked our server and no fallback API is configured. Set FALLBACK_API_URL in the environment (or the admin panel) to enable reliable extraction.",
       "UPSTREAM_BLOCKED"
     );
   }
   const postUrl = `https://www.instagram.com/p/${shortcode}/`;
-  const endpoint = IG_CONFIG.fallbackApiUrl
+  const endpoint = cfg.fallbackApiUrl
     .replace("{shortcode}", encodeURIComponent(shortcode))
     .replace("{url}", encodeURIComponent(rawUrl || postUrl));
 
   let res: Response;
   try {
     res = await fetch(endpoint, {
-      headers: IG_CONFIG.fallbackApiKey
-        ? { [IG_CONFIG.fallbackApiKeyHeader]: IG_CONFIG.fallbackApiKey }
+      headers: cfg.fallbackApiKey
+        ? { [cfg.fallbackApiKeyHeader]: cfg.fallbackApiKey }
         : undefined,
       cache: "no-store",
     });
@@ -562,9 +566,10 @@ async function extractViaFallback(rawUrl: string, shortcode: string): Promise<Ex
 
 export async function extract(rawUrl: string): Promise<ExtractResult> {
   const shortcode = parseShortcode(rawUrl);
+  const cfg = await getLiveConfig();
 
   // Force fallback-first if explicitly configured.
-  if (IG_CONFIG.useFallbackApi && IG_CONFIG.fallbackApiUrl) {
+  if (cfg.useFallbackApi && cfg.fallbackApiUrl) {
     return extractViaFallback(rawUrl, shortcode);
   }
 
@@ -576,7 +581,7 @@ export async function extract(rawUrl: string): Promise<ExtractResult> {
     const recoverable =
       err instanceof ExtractError &&
       (err.code === "UPSTREAM_BLOCKED" || err.code === "EXTRACTOR_DOWN");
-    if (recoverable && IG_CONFIG.fallbackApiUrl) {
+    if (recoverable && cfg.fallbackApiUrl) {
       return extractViaFallback(rawUrl, shortcode);
     }
     throw err;
@@ -675,10 +680,11 @@ export function parseUsername(raw: string): string {
 }
 
 async function igHeaders(referer = "https://www.instagram.com/") {
+  const cfg = await getLiveConfig();
   const session = await getSession();
   return {
-    "User-Agent": IG_CONFIG.userAgent,
-    "X-IG-App-ID": IG_CONFIG.appId,
+    "User-Agent": cfg.userAgent,
+    "X-IG-App-ID": cfg.appId,
     "X-ASBD-ID": "129477",
     "X-IG-WWW-Claim": "0",
     "X-Requested-With": "XMLHttpRequest",
@@ -695,11 +701,12 @@ async function igHeaders(referer = "https://www.instagram.com/") {
  * host is far more lenient with data-center IPs than www, so it's our
  * automatic second attempt whenever www blocks a username-based call.
  */
-function mobileHeaders(): Record<string, string> {
+async function mobileHeaders(): Promise<Record<string, string>> {
+  const cfg = await getLiveConfig();
   return {
     "User-Agent":
       "Instagram 275.0.0.27.98 (iPhone13,2; iOS 16_3; en_US; en-US; scale=3.00; 1170x2532; 458229237) AppleWebKit/420+",
-    "X-IG-App-ID": IG_CONFIG.appId,
+    "X-IG-App-ID": cfg.appId,
     Accept: "*/*",
   };
 }
@@ -748,7 +755,7 @@ async function fetchJson(url: string, referer?: string): Promise<any> {
     const blocked = err instanceof ExtractError && err.code === "UPSTREAM_BLOCKED";
     if (blocked && url.startsWith("https://www.instagram.com/")) {
       const mobileUrl = url.replace("https://www.instagram.com/", "https://i.instagram.com/");
-      return await attemptJson(mobileUrl, mobileHeaders());
+      return await attemptJson(mobileUrl, await mobileHeaders());
     }
     throw err;
   }
@@ -760,23 +767,24 @@ async function fetchJson(url: string, referer?: string): Promise<any> {
  * proxy Instagram's own shape, so we accept `user` wherever it's nested.
  */
 async function fetchWebProfile(username: string): Promise<any> {
+  const cfg = await getLiveConfig();
   try {
     return await fetchJson(
-      IG_CONFIG.webProfileInfoUrl + encodeURIComponent(username),
+      cfg.webProfileInfoUrl + encodeURIComponent(username),
       `https://www.instagram.com/${username}/`
     );
   } catch (err) {
     const blocked = err instanceof ExtractError && err.code === "UPSTREAM_BLOCKED";
-    if (!blocked || !IG_CONFIG.fallbackProfileApiUrl) throw err;
-    const endpoint = IG_CONFIG.fallbackProfileApiUrl.replace(
+    if (!blocked || !cfg.fallbackProfileApiUrl) throw err;
+    const endpoint = cfg.fallbackProfileApiUrl.replace(
       "{username}",
       encodeURIComponent(username)
     );
     let res: Response;
     try {
       res = await fetch(endpoint, {
-        headers: IG_CONFIG.fallbackApiKey
-          ? { [IG_CONFIG.fallbackApiKeyHeader]: IG_CONFIG.fallbackApiKey }
+        headers: cfg.fallbackApiKey
+          ? { [cfg.fallbackApiKeyHeader]: cfg.fallbackApiKey }
           : undefined,
         cache: "no-store",
       });
