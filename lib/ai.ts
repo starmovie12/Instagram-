@@ -137,13 +137,25 @@ REMIXED SCRIPT (same structure/formula, fully rewritten for the creator's niche 
 CAPTION (ready to post):
 10 HASHTAGS:
 ${LANG_LINE[l]}`,
+
+  repurpose: (i, l) => `You are a content repurposing engine. Turn this Instagram reel's transcript into 6 ready-to-post content pieces for other platforms.
+REEL TRANSCRIPT:
+"""${clean(i.transcript, 4000)}"""
+Produce all six, clearly labelled and copy-ready:
+✍️ BLOG POST (2-3 short paragraphs with a title)
+🧵 X / TWITTER THREAD (5-7 numbered tweets)
+💼 LINKEDIN POST (professional tone, 1 paragraph + a takeaway)
+📺 YOUTUBE SHORTS (title + 2-line description + 5 tags)
+📱 WHATSAPP STATUS (1-2 punchy lines)
+📧 NEWSLETTER SNIPPET (a short intro paragraph)
+${LANG_LINE[l]}`,
 };
 
 /** Tools whose output language can be switched (the Hinglish USP). */
 export const LANG_AWARE = new Set([
   "caption-generator", "bio-generator", "reel-script-generator", "hook-generator",
   "content-ideas", "giveaway-caption", "reply-generator", "growth-strategy", "roast", "remix",
-  "story-poll-ideas", "carousel-outline",
+  "story-poll-ideas", "carousel-outline", "repurpose",
 ]);
 
 const GEMINI_MODEL = "gemini-2.5-flash";

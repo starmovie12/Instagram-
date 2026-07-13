@@ -11,6 +11,8 @@ import {
   BarChart3, Layers, Accessibility, Rss, HeartPulse, ZoomIn, Ticket,
   FileSpreadsheet, Award, LayoutDashboard, Wand2, Droplets, LayoutTemplate,
   Scissors, Film, History, Radar, Bird, Music2, Facebook,
+  Sparkles, Ghost, Puzzle, Hourglass, PartyPopper, Gem, Recycle,
+  AudioLines, Frame, FlaskConical,
 } from "lucide-react";
 import type { Tool } from "@/components/ToolCard";
 
@@ -70,6 +72,21 @@ export const TOOL_GROUPS: { heading: string; tools: Tool[] }[] = [
       { href: "/ai/story-poll-ideas", title: "AI story poll ideas", desc: "15 tap-worthy polls, questions and quizzes for your niche.", Icon: BarChart3, badge: "New" },
       { href: "/ai/carousel-outline", title: "AI carousel outline", desc: "A 10-slide outline with hook, points, CTA and caption.", Icon: Layers, badge: "New" },
       { href: "/ai-alt-text", title: "AI alt text generator", desc: "Upload a photo → 3 alt text options for reach + accessibility.", Icon: Accessibility, badge: "New" },
+    ],
+  },
+  {
+    heading: "Inventions Lab",
+    tools: [
+      { href: "/insta-wrapped", title: "Insta Wrapped", desc: "Spotify Wrapped for Instagram — a shareable year-in-review card.", Icon: PartyPopper, badge: "World-first" },
+      { href: "/insta-guess", title: "InstaGuess (daily game)", desc: "Guess the blurred celebrity DP. New puzzle daily, build your streak.", Icon: Puzzle, badge: "World-first" },
+      { href: "/insta-kundli", title: "Insta Kundli", desc: "Your AI posting rashi + couple compatibility %. Pure Hinglish masti.", Icon: Sparkles, badge: "World-first" },
+      { href: "/crystal-ball", title: "Crystal Ball", desc: "AI predicts a post's virality BEFORE you post it. The pre-flight check.", Icon: Gem, badge: "World-first" },
+      { href: "/voice-cloner", title: "Caption voice cloner", desc: "AI learns any creator's caption style and writes yours in it.", Icon: AudioLines, badge: "World-first" },
+      { href: "/reel-repurposer", title: "Reel repurposer", desc: "Turn one reel into 6 ready-to-post content pieces.", Icon: Recycle, badge: "World-first" },
+      { href: "/time-capsule", title: "Stats time capsule", desc: "Seal your numbers today, open in 30 days, see how you grew.", Icon: Hourglass, badge: "World-first" },
+      { href: "/ghost-feed", title: "Ghost Feed", desc: "See which accounts you follow quietly stopped posting.", Icon: Ghost, badge: "World-first" },
+      { href: "/shadowban-lab", title: "Shadowban Lab", desc: "An honest reach check — real, fixable signals, zero scare tactics.", Icon: FlaskConical, badge: "World-first" },
+      { href: "/grid-architect", title: "Grid Architect", desc: "Arrange a colour-cohesive feed — auto-sort by colour, drag to plan.", Icon: Frame, badge: "World-first" },
     ],
   },
   {

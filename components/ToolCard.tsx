@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Reveal from "./Reveal";
 
-export type Badge = "Signature" | "New" | "Hot";
+export type Badge = "Signature" | "New" | "Hot" | "World-first";
 
 export type Tool = {
   href: string; title: string; desc: string;
@@ -13,6 +13,7 @@ const BADGE_STYLE: Record<Badge, React.CSSProperties> = {
   Signature: { color: "var(--gold-ink)", background: "rgba(245,233,207,.35)", borderColor: "var(--line)" },
   New: { color: "var(--gold-ink)", background: "color-mix(in srgb, var(--gold-300) 22%, transparent)", borderColor: "var(--gold-300)" },
   Hot: { color: "#fff", background: "var(--molten)", borderColor: "transparent" },
+  "World-first": { color: "#1a1205", background: "linear-gradient(100deg, var(--gold-300), #f5e9cf)", borderColor: "transparent" },
 };
 
 export function ToolBadge({ badge }: { badge: Badge }) {
