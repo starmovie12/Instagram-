@@ -1,49 +1,19 @@
 import { MetadataRoute } from "next";
-
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://instagrabs.vercel.app"
-).replace(/\/$/, "");
+import { SITE_URL } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: [
-          "/",
-          "/caption-extractor",
-          "/hashtag-extractor",
-          "/reels-downloader",
-          "/story-downloader",
-          "/photo-downloader",
-          "/carousel-downloader",
-          "/video-downloader",
-          "/profile-picture-downloader",
-          "/highlights-downloader",
-          "/blog",
-          "/about",
-          "/privacy-policy",
-          "/terms",
-          "/contact",
-          "/dmca",
-        ],
+        allow: "/",
         disallow: [
           "/api/",
           "/admin",
           "/history",
           "/offline",
+          "/quick-action",
           "/s/",
-          "/ai/",
-          "/insta-kundli",
-          "/crystal-ball",
-          "/voice-cloner",
-          "/wheel-spinner",
-          "/profile-roaster",
-          "/profile-battle",
-          "/insta-guess",
-          "/insta-wrapped",
-          "/time-capsule",
-          "/ghost-feed",
         ],
       },
     ],
