@@ -1,3 +1,5 @@
+import { getLiveConfig } from './runtime-config';
+
 const ENCODING_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 function decodeEscaped(str?: string | null): string | null {
@@ -785,4 +787,706 @@ export async function extractSocialMedia(inputUrl: string, options: any = {}) {
     return extractFacebookMedia(inputUrl, options);
   }
   return extractInstagramMedia(inputUrl, options);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ *  PUBLIC API used by the routes + lib/extract-ui.ts
+ *  (extract, extractStories, extractHighlights, extractHighlightItems,
+ *   extractProfile, extractProfileFeed, ExtractError + shared types)
+ *
+ *  Engine order for posts/reels (first success wins):
+ *    1. logged-in session (INSTAGRAM_SESSION_ID)  +  web GraphQL   (parallel)
+ *    2. paid/free FALLBACK API (FALLBACK_API_URL)   ← the real fix for the
+ *       "Instagram blocks Vercel data-centre IPs" 503
+ *    3. embed page, public resolvers, cobalt (parallel, last resort)
+ *  If `useFallbackApi` is on (admin panel / env) steps 1 and 2 swap order.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+export class ExtractError extends Error {
+  code: string;
+  constructor(message: string, code: string = 'EXTRACTOR_DOWN') {
+    super(message);
+    this.name = 'ExtractError';
+    this.code = code;
+  }
+}
+
+export type MediaQuality = { label: string; url: string; width?: number; height?: number };
+
+export type MediaItem = {
+  type: 'video' | 'image';
+  url: string;
+  thumbnail: string;
+  width?: number;
+  height?: number;
+  qualities?: MediaQuality[];
+  /** Audio-only (M4A) track from Instagram's DASH manifest, when exposed */
+  audioUrl?: string;
+};
+
+export type PostComment = { username: string; text: string; likes?: number; takenAt?: number };
+
+export type ExtractResult = {
+  shortcode: string;
+  type: 'video' | 'image' | 'carousel';
+  username: string;
+  fullName?: string;
+  caption: string;
+  hashtags: string[];
+  mentions: string[];
+  thumbnail: string;
+  media: MediaItem[];
+  likes?: number;
+  commentCount?: number;
+  views?: number;
+  takenAt?: number;
+  durationSeconds?: number;
+  comments?: PostComment[];
+  engine?: string;
+};
+
+export type StoryItem = {
+  id?: string;
+  type: 'video' | 'image';
+  url: string;
+  thumbnail: string;
+  takenAt: number;
+  qualities?: MediaQuality[];
+  audioUrl?: string;
+};
+
+export type StoriesResult = { username: string; items: StoryItem[] };
+export type HighlightAlbum = { id: string; title: string; cover: string };
+export type HighlightsResult = { username: string; albums: HighlightAlbum[] };
+
+export type ProfileResult = {
+  username: string;
+  fullName: string;
+  userId: string;
+  isPrivate: boolean;
+  isVerified: boolean;
+  biography: string;
+  followers: number;
+  following: number;
+  posts: number;
+  profilePicHd: string;
+};
+
+export type FeedPost = {
+  shortcode: string;
+  type: 'image' | 'video' | 'carousel';
+  thumbnail: string;
+  caption: string;
+  likes: number;
+  comments: number;
+  takenAt: number;
+  isPinned?: boolean;
+};
+
+export type ProfileFeedResult = ProfileResult & { postsList: FeedPost[]; hasMore: boolean };
+
+/* ───────────────────────── small helpers ───────────────────────── */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type Any = any;
+
+const HASHTAG_RE = /#[\p{L}\p{N}_]+/gu;
+const MENTION_RE = /@[A-Za-z0-9_.]+/g;
+const uniq = (a: string[]) => Array.from(new Set(a));
+const num = (v: unknown, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
+
+/** Never let a rejected promise escape an engine — an engine failing = "null". */
+function safe<T>(p: Promise<T | null>): Promise<T | null> {
+  return p.catch(() => null);
+}
+
+/** Resolve with the first NON-null result; null if every promise fails/returns null. */
+function firstSuccess<T>(ps: Promise<T | null>[]): Promise<T | null> {
+  return new Promise((resolve) => {
+    let pending = ps.length;
+    if (!pending) return resolve(null);
+    for (const p of ps) {
+      p.then(
+        (v) => {
+          if (v) resolve(v);
+          else if (--pending === 0) resolve(null);
+        },
+        () => {
+          if (--pending === 0) resolve(null);
+        }
+      );
+    }
+  });
+}
+
+/** Cookie header from INSTAGRAM_SESSION_ID (accepts a bare sessionid or a full cookie string). */
+function sessionCookie(): string | null {
+  const raw = (process.env.INSTAGRAM_SESSION_ID || '').trim();
+  if (!raw) return null;
+  let cookie = raw;
+  if (!/sessionid=/i.test(cookie)) cookie = `sessionid=${cookie}`;
+  const uid =
+    raw.match(/ds_user_id=(\d+)/)?.[1] || raw.match(/(\d{6,})%3A/)?.[1] || raw.match(/(\d{6,}):/)?.[1];
+  if (uid && !/ds_user_id=/.test(cookie)) cookie += `; ds_user_id=${uid}`;
+  return cookie;
+}
+
+function textOfCaption(node: Any): string {
+  const edge = node?.edge_media_to_caption?.edges?.[0]?.node?.text;
+  if (typeof edge === 'string') return edge;
+  const c = node?.caption;
+  if (typeof c === 'string') return c;
+  if (typeof c?.text === 'string') return c.text;
+  return '';
+}
+
+function audioFromDash(xml?: string | null): string | undefined {
+  if (!xml || typeof xml !== 'string') return undefined;
+  const m = xml.match(/<AdaptationSet[^>]*contentType="audio"[\s\S]*?<BaseURL>([^<]+)<\/BaseURL>/i);
+  return m ? m[1].replace(/&amp;/g, '&') : undefined;
+}
+
+function uniqueByHeight(list: Any[] | undefined): MediaQuality[] {
+  const seen = new Set<number>();
+  const out: MediaQuality[] = [];
+  const sorted = [...(list ?? [])]
+    .filter((v) => v?.url)
+    .sort((a, b) => num(b.height) - num(a.height) || num(b.width) - num(a.width));
+  for (const v of sorted) {
+    const h = num(v.height);
+    if (h && seen.has(h)) continue;
+    if (h) seen.add(h);
+    out.push({ label: h ? `${h}p` : 'HD', url: v.url, width: v.width, height: v.height });
+  }
+  return out.slice(0, 4);
+}
+
+/* ───────────── shape converters: web GraphQL node → MediaItem ───────────── */
+
+function graphNodeToMedia(n: Any): MediaItem | null {
+  const isVideo = Boolean(n?.is_video || n?.video_url);
+  const image: string =
+    n?.display_url || n?.display_resources?.[n?.display_resources?.length - 1]?.src || n?.thumbnail_src || '';
+  const url: string = isVideo ? n?.video_url : image;
+  if (!url) return null;
+  const width = n?.dimensions?.width;
+  const height = n?.dimensions?.height;
+  return {
+    type: isVideo ? 'video' : 'image',
+    url,
+    thumbnail: image || url,
+    width,
+    height,
+    qualities: [{ label: isVideo ? 'HD' : 'Original', url, width, height }],
+    audioUrl: isVideo ? audioFromDash(n?.dash_info?.video_dash_manifest || n?.video_dash_manifest) : undefined,
+  };
+}
+
+/* ───────────── shape converters: mobile API item → MediaItem ───────────── */
+
+function mobileItemToMedia(it: Any): MediaItem | null {
+  const videos: Any[] | undefined = it?.video_versions;
+  const cands: Any[] | undefined = it?.image_versions2?.candidates;
+  const isVideo = it?.media_type === 2 || Boolean(videos?.length);
+  const url: string | undefined = isVideo ? videos?.[0]?.url : cands?.[0]?.url;
+  if (!url) return null;
+  const thumb = cands?.[0]?.url || url;
+  const qualities = isVideo
+    ? uniqueByHeight(videos)
+    : (cands ?? [])
+        .filter((c) => c?.url)
+        .slice(0, 3)
+        .map((c, i) => ({ label: i === 0 ? 'Original' : `${c.width}px`, url: c.url, width: c.width, height: c.height }));
+  return {
+    type: isVideo ? 'video' : 'image',
+    url,
+    thumbnail: thumb,
+    width: it?.original_width,
+    height: it?.original_height,
+    qualities: qualities.length ? qualities : undefined,
+    audioUrl: isVideo ? audioFromDash(it?.video_dash_manifest) : undefined,
+  };
+}
+
+function buildResult(
+  shortcode: string,
+  engine: string,
+  media: MediaItem[],
+  extra: Partial<ExtractResult> & { caption?: string; username?: string }
+): ExtractResult | null {
+  if (!media.length) return null;
+  const caption = extra.caption ?? '';
+  return {
+    shortcode,
+    type: media.length > 1 ? 'carousel' : media[0].type,
+    username: extra.username || 'instagram_user',
+    fullName: extra.fullName,
+    caption,
+    hashtags: uniq(caption.match(HASHTAG_RE) ?? []),
+    mentions: uniq(caption.match(MENTION_RE) ?? []),
+    thumbnail: media[0].thumbnail,
+    media,
+    likes: extra.likes,
+    commentCount: extra.commentCount,
+    views: extra.views,
+    takenAt: extra.takenAt,
+    durationSeconds: extra.durationSeconds,
+    comments: extra.comments,
+    engine,
+  };
+}
+
+/** Web GraphQL shape (xdt_shortcode_media / shortcode_media) → ExtractResult */
+function graphNodeToResult(node: Any, shortcode: string, engine: string): ExtractResult | null {
+  const children: Any[] = node?.edge_sidecar_to_children?.edges?.map((e: Any) => e?.node) ?? [];
+  const media = (children.length ? children : [node]).map(graphNodeToMedia).filter(Boolean) as MediaItem[];
+
+  const commentEdges: Any[] =
+    node?.edge_media_to_parent_comment?.edges ?? node?.edge_media_to_comment?.edges ?? node?.edge_media_preview_comment?.edges ?? [];
+  const comments: PostComment[] = commentEdges
+    .map((e) => e?.node)
+    .filter((c) => c?.text)
+    .map((c) => ({
+      username: c?.owner?.username || 'user',
+      text: String(c.text),
+      likes: typeof c?.edge_liked_by?.count === 'number' ? c.edge_liked_by.count : undefined,
+      takenAt: c?.created_at,
+    }));
+
+  return buildResult(shortcode, engine, media, {
+    caption: textOfCaption(node),
+    username: node?.owner?.username,
+    fullName: node?.owner?.full_name,
+    likes: node?.edge_media_preview_like?.count ?? node?.edge_liked_by?.count,
+    commentCount: node?.edge_media_to_parent_comment?.count ?? node?.edge_media_to_comment?.count,
+    views: node?.video_view_count ?? node?.video_play_count,
+    takenAt: node?.taken_at_timestamp,
+    durationSeconds: node?.video_duration,
+    comments: comments.length ? comments : undefined,
+  });
+}
+
+/** Mobile API shape (media/info → items[0]) → ExtractResult */
+function mobileItemToResult(item: Any, shortcode: string, engine: string): ExtractResult | null {
+  const kids: Any[] = Array.isArray(item?.carousel_media) ? item.carousel_media : [];
+  const media = (kids.length ? kids : [item]).map(mobileItemToMedia).filter(Boolean) as MediaItem[];
+  return buildResult(shortcode, engine, media, {
+    caption: textOfCaption(item),
+    username: item?.user?.username,
+    fullName: item?.user?.full_name,
+    likes: item?.like_count,
+    commentCount: item?.comment_count,
+    views: item?.play_count ?? item?.view_count,
+    takenAt: item?.taken_at,
+    durationSeconds: item?.video_duration,
+  });
+}
+
+/** Old engines (embed / resolvers / cobalt) return {author, media[{url,thumbnail,type}]} */
+function legacyToCore(r: Any): ExtractResult | null {
+  if (!r?.success || !Array.isArray(r.media)) return null;
+  const media: MediaItem[] = r.media
+    .filter((m: Any) => m?.url)
+    .map((m: Any) => ({
+      type: m.type === 'video' ? 'video' : 'image',
+      url: m.url,
+      thumbnail: m.thumbnail || m.url,
+      width: m.width,
+      height: m.height,
+      qualities: [{ label: m.type === 'video' ? 'HD' : 'Original', url: m.url }],
+    }));
+  return buildResult(r.shortcode, r.engine || 'legacy', media, {
+    caption: r.caption || '',
+    username: r.author?.username,
+    fullName: r.author?.fullName,
+  });
+}
+
+/* ───────────────────────── post / reel engines ───────────────────────── */
+
+type Cfg = Awaited<ReturnType<typeof getLiveConfig>>;
+
+async function viaGraphql(shortcode: string, cfg: Cfg, cookie: string | null): Promise<ExtractResult | null> {
+  const headers: Record<string, string> = {
+    'User-Agent': cfg.userAgent,
+    'X-IG-App-ID': cfg.appId,
+    'X-FB-LSD': cfg.lsd,
+    'X-ASBD-ID': '129477',
+    Accept: '*/*',
+    Origin: 'https://www.instagram.com',
+    Referer: `https://www.instagram.com/p/${shortcode}/`,
+  };
+  if (cookie) headers.Cookie = cookie;
+
+  const variables = JSON.stringify({ shortcode, fetch_tagged_user_count: null, hoisted_comment_id: null, hoisted_reply_id: null });
+
+  // 1) POST (what the web app does)
+  try {
+    const res = await fetch(cfg.graphqlUrl, {
+      method: 'POST',
+      headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ variables, doc_id: cfg.docId, lsd: cfg.lsd }).toString(),
+      signal: AbortSignal.timeout(7000),
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const json: Any = await res.json().catch(() => null);
+      const node = json?.data?.xdt_shortcode_media ?? json?.data?.shortcode_media;
+      const out = node ? graphNodeToResult(node, shortcode, 'graphql') : null;
+      if (out) return out;
+    }
+  } catch {}
+
+  // 2) GET variant (older doc_ids still answer this)
+  try {
+    const res = await fetch(
+      `https://www.instagram.com/graphql/query/?doc_id=${encodeURIComponent(cfg.docId)}&variables=${encodeURIComponent(
+        JSON.stringify({ shortcode })
+      )}`,
+      { headers, signal: AbortSignal.timeout(6000), cache: 'no-store' }
+    );
+    if (res.ok) {
+      const json: Any = await res.json().catch(() => null);
+      const node = json?.data?.xdt_shortcode_media ?? json?.data?.shortcode_media;
+      return node ? graphNodeToResult(node, shortcode, 'graphql_get') : null;
+    }
+  } catch {}
+  return null;
+}
+
+async function viaSessionMobile(shortcode: string, cookie: string): Promise<ExtractResult | null> {
+  const pk = shortcodeToPk(shortcode);
+  try {
+    const res = await fetch(`https://i.instagram.com/api/v1/media/${pk}/info/`, {
+      headers: {
+        'User-Agent':
+          'Instagram 319.0.0.38.109 (iPhone14,3; iOS 17_4; en_US; en-US; scale=3.00; 1284x2778; 576822237)',
+        'X-IG-App-ID': '124024574287414',
+        'X-ASBD-ID': '359341',
+        'X-IG-WWW-Claim': '0',
+        Cookie: cookie,
+        Accept: '*/*',
+      },
+      signal: AbortSignal.timeout(8000),
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json: Any = await res.json().catch(() => null);
+    const item = json?.items?.[0];
+    return item ? mobileItemToResult(item, shortcode, 'session_mobile') : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Provider-agnostic: handles ScrapeCreators / RapidAPI style responses. */
+async function viaFallbackApi(canonicalUrl: string, shortcode: string, cfg: Cfg): Promise<ExtractResult | null> {
+  if (!cfg.fallbackApiUrl) return null;
+  const endpoint = cfg.fallbackApiUrl
+    .replace('{url}', encodeURIComponent(canonicalUrl))
+    .replace('{shortcode}', encodeURIComponent(shortcode));
+  const headers: Record<string, string> = { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0' };
+  if (cfg.fallbackApiKey) headers[cfg.fallbackApiKeyHeader || 'x-api-key'] = cfg.fallbackApiKey;
+
+  try {
+    const res = await fetch(endpoint, { headers, signal: AbortSignal.timeout(12000), cache: 'no-store' });
+    if (!res.ok) return null;
+    const json: Any = await res.json().catch(() => null);
+    if (!json) return null;
+    const d: Any = json?.data ?? json;
+
+    const node = d?.xdt_shortcode_media ?? d?.shortcode_media ?? d?.graphql?.shortcode_media;
+    if (node) return graphNodeToResult(node, shortcode, 'fallback_api');
+
+    const item = d?.items?.[0] ?? json?.items?.[0];
+    if (item) return mobileItemToResult(item, shortcode, 'fallback_api');
+
+    // Generic "download links" shape
+    const list: Any[] = d?.media ?? d?.medias ?? d?.result ?? d?.urls ?? [];
+    const media: MediaItem[] = (Array.isArray(list) ? list : [])
+      .map((m: Any) => {
+        const url: string | undefined = m?.url || m?.download_url || m?.video_url || m?.image_url || m?.display_url;
+        if (!url) return null;
+        const isVid = m?.type === 'video' || /\.mp4(\?|$)/i.test(url) || Boolean(m?.video_url);
+        return {
+          type: isVid ? 'video' : 'image',
+          url,
+          thumbnail: m?.thumbnail || m?.thumb || m?.display_url || url,
+        } as MediaItem;
+      })
+      .filter(Boolean) as MediaItem[];
+    if (!media.length && (d?.video_url || d?.display_url)) {
+      const m = graphNodeToMedia(d);
+      if (m) media.push(m);
+    }
+    return buildResult(shortcode, 'fallback_api', media, {
+      caption: typeof d?.caption === 'string' ? d.caption : textOfCaption(d),
+      username: d?.owner?.username ?? d?.username ?? d?.user?.username,
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Post / reel / carousel / IGTV → ExtractResult.
+ * Throws ExtractError('INVALID_URL' | 'EXTRACTOR_DOWN').
+ */
+export async function extract(inputUrl: string): Promise<ExtractResult> {
+  const parsed = parseInstagramUrl(inputUrl);
+  if (!parsed) {
+    throw new ExtractError('Please paste a valid Instagram post, reel or video link.', 'INVALID_URL');
+  }
+  const { shortcode, canonicalUrl } = parsed;
+  const cfg = await getLiveConfig();
+  const cookie = sessionCookie();
+
+  const direct = () =>
+    firstSuccess<ExtractResult>([
+      cookie ? safe(viaSessionMobile(shortcode, cookie)) : Promise.resolve(null),
+      safe(viaGraphql(shortcode, cfg, cookie)),
+    ]);
+  const fallback = () => safe(viaFallbackApi(canonicalUrl, shortcode, cfg));
+
+  for (const stage of cfg.useFallbackApi ? [fallback, direct] : [direct, fallback]) {
+    const r = await stage();
+    if (r) return r;
+  }
+
+  const cobaltInstance = process.env.COBALT_INSTANCE || null;
+  const cobaltApiKey = process.env.COBALT_API_KEY || null;
+  const last = await firstSuccess<ExtractResult>([
+    safe(fetchViaInstagramEmbed(shortcode).then(legacyToCore)),
+    safe(fetchViaPublicResolver(canonicalUrl, shortcode, 'instagram').then(legacyToCore)),
+    cobaltInstance
+      ? safe(fetchViaCobalt(canonicalUrl, shortcode, cobaltInstance, cobaltApiKey, 'instagram').then(legacyToCore))
+      : Promise.resolve(null),
+  ]);
+  if (last) return last;
+
+  throw new ExtractError(
+    "We couldn't fetch this post right now. It may be private, or Instagram is blocking our server — please try again in a minute.",
+    'EXTRACTOR_DOWN'
+  );
+}
+
+/* ───────────────────────── profile / feed ───────────────────────── */
+
+/** "@name", "name", or an instagram.com/name URL → clean username (else INVALID_USERNAME). */
+export function normalizeUsername(input: string): string {
+  let s = String(input ?? '').trim();
+  const fromUrl = s.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+  if (fromUrl) s = fromUrl[1];
+  s = s.replace(/^@+/, '').replace(/[/?#].*$/, '');
+  if (!/^[A-Za-z0-9._]{1,30}$/.test(s)) {
+    throw new ExtractError('Please enter a valid Instagram username.', 'INVALID_USERNAME');
+  }
+  return s.toLowerCase();
+}
+
+async function fetchProfileUser(username: string, cfg: Cfg): Promise<Any> {
+  const cookie = sessionCookie();
+
+  const direct = async (): Promise<Any | null> => {
+    const res = await fetch(cfg.webProfileInfoUrl + encodeURIComponent(username), {
+      headers: {
+        'User-Agent': cfg.userAgent,
+        'X-IG-App-ID': cfg.appId,
+        'X-ASBD-ID': '129477',
+        Accept: '*/*',
+        Referer: `https://www.instagram.com/${username}/`,
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
+      signal: AbortSignal.timeout(8000),
+      cache: 'no-store',
+    });
+    if (res.status === 404) throw new ExtractError("This account doesn't exist.", 'NOT_FOUND');
+    if (!res.ok) return null;
+    const json: Any = await res.json().catch(() => null);
+    return json?.data?.user ?? null;
+  };
+
+  const viaProvider = async (): Promise<Any | null> => {
+    if (!cfg.fallbackProfileApiUrl) return null;
+    const headers: Record<string, string> = { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0' };
+    if (cfg.fallbackApiKey) headers[cfg.fallbackApiKeyHeader || 'x-api-key'] = cfg.fallbackApiKey;
+    const res = await fetch(cfg.fallbackProfileApiUrl.replace('{username}', encodeURIComponent(username)), {
+      headers,
+      signal: AbortSignal.timeout(12000),
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json: Any = await res.json().catch(() => null);
+    return json?.data?.user ?? json?.user ?? (json?.data?.username ? json.data : null);
+  };
+
+  for (const step of cfg.useFallbackApi ? [viaProvider, direct] : [direct, viaProvider]) {
+    try {
+      const u = await step();
+      if (u) return u;
+    } catch (e) {
+      if (e instanceof ExtractError) throw e;
+    }
+  }
+  throw new ExtractError(
+    "Couldn't reach Instagram right now. Please try again in a minute.",
+    'EXTRACTOR_DOWN'
+  );
+}
+
+function userToProfile(u: Any, fallbackName: string): ProfileResult {
+  return {
+    username: u?.username || fallbackName,
+    fullName: u?.full_name ?? '',
+    userId: String(u?.id ?? u?.pk ?? ''),
+    isPrivate: Boolean(u?.is_private),
+    isVerified: Boolean(u?.is_verified),
+    biography: u?.biography ?? '',
+    followers: num(u?.edge_followed_by?.count ?? u?.follower_count),
+    following: num(u?.edge_follow?.count ?? u?.following_count),
+    posts: num(u?.edge_owner_to_timeline_media?.count ?? u?.media_count),
+    profilePicHd: u?.profile_pic_url_hd ?? u?.hd_profile_pic_url_info?.url ?? u?.profile_pic_url ?? '',
+  };
+}
+
+export async function extractProfile(usernameInput: string): Promise<ProfileResult> {
+  const username = normalizeUsername(usernameInput);
+  const cfg = await getLiveConfig();
+  const user = await fetchProfileUser(username, cfg);
+  return userToProfile(user, username);
+}
+
+export async function extractProfileFeed(usernameInput: string): Promise<ProfileFeedResult> {
+  const username = normalizeUsername(usernameInput);
+  const cfg = await getLiveConfig();
+  const user = await fetchProfileUser(username, cfg);
+  const profile = userToProfile(user, username);
+
+  const tl = user?.edge_owner_to_timeline_media;
+  const postsList: FeedPost[] = (tl?.edges ?? [])
+    .map((e: Any) => e?.node)
+    .filter((n: Any) => n?.shortcode)
+    .map((n: Any): FeedPost => {
+      const t = n.__typename;
+      const type: FeedPost['type'] =
+        t === 'GraphSidecar' || n.edge_sidecar_to_children
+          ? 'carousel'
+          : t === 'GraphVideo' || n.is_video
+          ? 'video'
+          : 'image';
+      return {
+        shortcode: n.shortcode,
+        type,
+        thumbnail: n.thumbnail_src || n.display_url || '',
+        caption: textOfCaption(n),
+        likes: num(n.edge_liked_by?.count ?? n.edge_media_preview_like?.count),
+        comments: num(n.edge_media_to_comment?.count ?? n.edge_media_to_parent_comment?.count),
+        takenAt: num(n.taken_at_timestamp),
+        isPinned: Array.isArray(n.pinned_for_users) && n.pinned_for_users.length > 0,
+      };
+    });
+
+  return { ...profile, postsList, hasMore: Boolean(tl?.page_info?.has_next_page) };
+}
+
+/* ───────────────────── stories & highlights (need a session) ───────────────────── */
+
+const SESSION_NEEDED =
+  'Stories and highlights need a logged-in Instagram session. The site owner must set INSTAGRAM_SESSION_ID in Vercel.';
+
+async function reelItems(reelId: string): Promise<Any[]> {
+  const cookie = sessionCookie();
+  if (!cookie) throw new ExtractError(SESSION_NEEDED, 'STORY_UNSUPPORTED');
+  const cfg = await getLiveConfig();
+  let res: Response;
+  try {
+    res = await fetch(cfg.reelsMediaUrl + encodeURIComponent(reelId), {
+      headers: {
+        'User-Agent': cfg.userAgent,
+        'X-IG-App-ID': cfg.appId,
+        'X-ASBD-ID': '129477',
+        Accept: '*/*',
+        Cookie: cookie,
+      },
+      signal: AbortSignal.timeout(9000),
+      cache: 'no-store',
+    });
+  } catch {
+    throw new ExtractError('Instagram did not respond in time. Please try again.', 'EXTRACTOR_DOWN');
+  }
+  if (res.status === 401 || res.status === 403) {
+    throw new ExtractError('The Instagram session has expired — the owner needs to refresh INSTAGRAM_SESSION_ID.', 'STORY_UNSUPPORTED');
+  }
+  if (!res.ok) throw new ExtractError('Instagram refused the request. Please try again later.', 'EXTRACTOR_DOWN');
+  const json: Any = await res.json().catch(() => null);
+  const reel = json?.reels?.[reelId] ?? json?.reels_media?.[0];
+  return Array.isArray(reel?.items) ? reel.items : [];
+}
+
+function mobileItemToStory(it: Any): StoryItem | null {
+  const m = mobileItemToMedia(it);
+  if (!m) return null;
+  return {
+    id: it?.pk ? String(it.pk) : it?.id ? String(it.id).split('_')[0] : undefined,
+    type: m.type,
+    url: m.url,
+    thumbnail: m.thumbnail,
+    takenAt: num(it?.taken_at),
+    qualities: m.qualities,
+    audioUrl: m.audioUrl,
+  };
+}
+
+export async function extractStories(usernameInput: string): Promise<StoriesResult> {
+  const username = normalizeUsername(usernameInput);
+  const profile = await extractProfile(username);
+  if (!profile.userId) {
+    throw new ExtractError("Couldn't look up this account's id. Please try again.", 'EXTRACTOR_DOWN');
+  }
+  const items = (await reelItems(profile.userId)).map(mobileItemToStory).filter(Boolean) as StoryItem[];
+  if (!items.length) {
+    throw new ExtractError('No active stories right now (stories disappear after 24 hours).', 'NO_STORIES');
+  }
+  return { username: profile.username, items };
+}
+
+export async function extractHighlights(usernameInput: string): Promise<HighlightsResult> {
+  const cookie = sessionCookie();
+  if (!cookie) throw new ExtractError(SESSION_NEEDED, 'STORY_UNSUPPORTED');
+  const username = normalizeUsername(usernameInput);
+  const cfg = await getLiveConfig();
+  const profile = await extractProfile(username);
+  if (!profile.userId) {
+    throw new ExtractError("Couldn't look up this account's id. Please try again.", 'EXTRACTOR_DOWN');
+  }
+  let json: Any = null;
+  try {
+    const res = await fetch(cfg.highlightsTrayUrl.replace('{userId}', encodeURIComponent(profile.userId)), {
+      headers: { 'User-Agent': cfg.userAgent, 'X-IG-App-ID': cfg.appId, 'X-ASBD-ID': '129477', Accept: '*/*', Cookie: cookie },
+      signal: AbortSignal.timeout(9000),
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('bad status');
+    json = await res.json().catch(() => null);
+  } catch {
+    throw new ExtractError('Instagram refused the request. Please try again later.', 'EXTRACTOR_DOWN');
+  }
+  const albums: HighlightAlbum[] = (json?.tray ?? [])
+    .filter((t: Any) => t?.id)
+    .map((t: Any) => ({
+      id: String(t.id),
+      title: t.title || 'Highlight',
+      cover: t.cover_media?.cropped_image_version?.url || t.cover_media?.thumbnail_src || '',
+    }));
+  if (!albums.length) throw new ExtractError('This account has no highlights.', 'NO_HIGHLIGHTS');
+  return { username: profile.username, albums };
+}
+
+export async function extractHighlightItems(highlightId: string): Promise<StoryItem[]> {
+  const raw = String(highlightId ?? '').trim();
+  const id = /^highlight:\d+$/.test(raw) ? raw : /^\d+$/.test(raw) ? `highlight:${raw}` : '';
+  if (!id) throw new ExtractError('Invalid highlight id.', 'INVALID_URL');
+  const items = (await reelItems(id)).map(mobileItemToStory).filter(Boolean) as StoryItem[];
+  if (!items.length) throw new ExtractError('This highlight is empty.', 'NO_STORIES');
+  return items;
 }
