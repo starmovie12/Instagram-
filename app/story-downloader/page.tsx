@@ -4,6 +4,9 @@ import ToolLanding from "@/components/ToolLanding";
 export const metadata: Metadata = {
   title: "Instagram Story Downloader — Save Before They Vanish | InstaGrab",
   description: "Save public Instagram stories as video or photo before they disappear at 24 hours. Anonymous — no login, no view notification.",
+  alternates: {
+    canonical: "/story-downloader",
+  },
 };
 
 export default function Page() {
