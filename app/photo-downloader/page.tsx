@@ -4,6 +4,9 @@ import ToolLanding from "@/components/ToolLanding";
 export const metadata: Metadata = {
   title: "Instagram Photo Downloader — Original Quality, Carousels Too | InstaGrab",
   description: "Download Instagram photos in original resolution — single posts and full carousels, every slide. Free, no login.",
+  alternates: {
+    canonical: "/photo-downloader",
+  },
 };
 
 export default function Page() {
