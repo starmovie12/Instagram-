@@ -4,6 +4,9 @@ import ToolLanding from "@/components/ToolLanding";
 export const metadata: Metadata = {
   title: "Instagram Reels Downloader — HD MP4, Free, No Login | InstaGrab",
   description: "Download any public Instagram reel in HD MP4 with its caption and hashtags. Free, no watermark, no login required.",
+  alternates: {
+    canonical: "/reels-downloader",
+  },
 };
 
 export default function Page() {
