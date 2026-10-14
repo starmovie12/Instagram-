@@ -4,6 +4,7 @@ import {
   extractStories,
   extractHighlightItems,
   ExtractError,
+  parseInstagramUrl,
 } from "@/lib/instagram-extractor";
 import {
   coreToUi,
@@ -14,13 +15,11 @@ import {
   type Slide,
 } from "@/lib/extract-ui";
 import { isRateLimited } from "@/lib/rate-limit";
-import { IG_CONFIG } from "@/lib/instagram-config";
+import { getLiveConfig } from "@/lib/runtime-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const ENCODING_CHARS =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+export const maxDuration = 30;
 
 const STORY_RE = /instagram\.com\/stories\/([\w.]+)(?:\/(\d+))?/i;
 
@@ -74,21 +73,6 @@ function extractHashtags(text: string): string[] {
 function extractMentions(text: string): string[] {
   const matches = text.match(/@[a-zA-Z0-9_.]+/g);
   return matches ? Array.from(new Set(matches)) : [];
-}
-
-function shortcodeToPk(shortcode: string): string {
-  let cleanCode = shortcode;
-  if (cleanCode.length > 28) {
-    cleanCode = cleanCode.slice(0, -28);
-  }
-  const base = BigInt(64);
-  let pk = BigInt(0);
-  for (let i = 0; i < cleanCode.length; i++) {
-    const idx = BigInt(ENCODING_CHARS.indexOf(cleanCode[i]));
-    if (idx === BigInt(-1)) continue;
-    pk = pk * base + idx;
-  }
-  return pk.toString();
 }
 
 function metaContent(html: string, prop: string): string | null {
@@ -154,114 +138,6 @@ function toUnifiedPayload(
     },
     media,
   };
-}
-
-/** 1. Optional Authenticated Instagram Session Engine (from instagrab-main) */
-async function fetchViaInstagramSession(
-  shortcode: string,
-  sessionId?: string
-): Promise<UnifiedExtractResponse | null> {
-  const token = (sessionId || process.env.INSTAGRAM_SESSION_ID || "").trim();
-  if (!token) return null;
-
-  const pk = shortcodeToPk(shortcode);
-  let cookieHeader = token;
-  const userIdMatch =
-    cookieHeader.match(/(\d{6,})%3A/) ||
-    cookieHeader.match(/(\d{6,}):/) ||
-    cookieHeader.match(/ds_user_id=(\d+)/);
-
-  if (!cookieHeader.includes("sessionid=")) {
-    cookieHeader = `sessionid=${cookieHeader}`;
-  }
-  if (userIdMatch && !cookieHeader.includes("ds_user_id=")) {
-    cookieHeader = `${cookieHeader}; ds_user_id=${userIdMatch[1]}`;
-  }
-
-  try {
-    const res = await fetch(`https://i.instagram.com/api/v1/media/${pk}/info/`, {
-      headers: {
-        "User-Agent":
-          "Instagram 319.0.0.38.109 (iPhone14,3; iOS 17_4; en_US; en-US; scale=3.00; 1284x2778; 576822237)",
-        "X-IG-App-ID": "124024574287414",
-        "X-ASBD-ID": "359341",
-        "X-IG-WWW-Claim": "0",
-        Cookie: cookieHeader,
-        Accept: "*/*",
-      },
-      signal: AbortSignal.timeout(9000),
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    const item = data?.items?.[0];
-    if (!item) return null;
-
-    const username = item.user?.username || "instagram_user";
-    const fullName = item.user?.full_name || "";
-    const avatar = item.user?.profile_pic_url || null;
-    const caption = item.caption?.text || "";
-
-    const rawList =
-      Array.isArray(item.carousel_media) && item.carousel_media.length > 0
-        ? item.carousel_media
-        : [item];
-
-    const slides: Slide[] = rawList
-      .map((child: Record<string, unknown>) => {
-        const videoVersions = child.video_versions as
-          | Array<{ url: string; width?: number; height?: number }>
-          | undefined;
-        const imageCandidates = (
-          child.image_versions2 as {
-            candidates?: Array<{ url: string; width?: number; height?: number }>;
-          }
-        )?.candidates;
-
-        const isVideo = child.media_type === 2 || Boolean(videoVersions?.length);
-        const bestUrl = isVideo
-          ? videoVersions?.[0]?.url
-          : imageCandidates?.[0]?.url;
-        const thumb = imageCandidates?.[0]?.url || bestUrl || "";
-
-        if (!bestUrl) return null;
-        return {
-          type: isVideo ? ("video" as const) : ("image" as const),
-          url: bestUrl,
-          thumbnail: thumb,
-          versions: [{ label: "1080p HD", url: bestUrl }],
-        };
-      })
-      .filter((s: Slide | null): s is Slide => Boolean(s));
-
-    if (!slides.length) return null;
-
-    const uiResult: ExtractResult = {
-      kind:
-        slides.length > 1
-          ? "carousel"
-          : slides[0].type === "video"
-          ? "reel"
-          : "post",
-      shortcode,
-      username,
-      caption,
-      hashtags: extractHashtags(caption),
-      mentions: extractMentions(caption),
-      thumbnail: slides[0].thumbnail,
-      slides,
-    };
-
-    return toUnifiedPayload(
-      uiResult,
-      "instagram",
-      `https://www.instagram.com/p/${shortcode}/`,
-      avatar,
-      fullName
-    );
-  } catch {
-    return null;
-  }
 }
 
 /** 2. Public Fallback Resolvers for Instagram & Facebook (from instagrab-main) */
@@ -404,6 +280,14 @@ async function extractFacebook(
   cobaltInstance?: string
 ): Promise<UnifiedExtractResponse> {
   const resolvedUrl = await resolveFacebookShortlink(rawUrl);
+  try {
+    if (platformOfHost(new URL(resolvedUrl).hostname) !== "facebook") {
+      throw new ExtractError("That doesn't look like a Facebook link.", "INVALID_URL");
+    }
+  } catch (e) {
+    if (e instanceof ExtractError) throw e;
+    throw new ExtractError("That doesn't look like a valid link.", "INVALID_URL");
+  }
   const idMatch =
     resolvedUrl.match(
       /(?:videos|reel|watch|posts|photos|r|v)\/(?:[^\s/?#]+\/)?([0-9A-Za-z_-]+)/i
@@ -698,4 +582,118 @@ async function extractOtherPlatform(
     platform,
     rawUrl
   );
+}
+
+/* ───────────────────────── routing + HTTP handler ───────────────────────── */
+
+type Platform =
+  | "instagram"
+  | "facebook"
+  | "youtube"
+  | "twitter"
+  | "tiktok"
+  | "pinterest"
+  | "threads";
+
+const HOST_MAP: Array<[RegExp, Platform]> = [
+  [/(^|\.)(instagram\.com|instagr\.am)$/, "instagram"],
+  [/(^|\.)(facebook\.com|fb\.watch|fb\.me)$/, "facebook"],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, "youtube"],
+  [/(^|\.)(twitter\.com|x\.com)$/, "twitter"],
+  [/(^|\.)tiktok\.com$/, "tiktok"],
+  [/(^|\.)(pinterest\.com|pin\.it)$/, "pinterest"],
+  [/(^|\.)(threads\.net|threads\.com)$/, "threads"],
+];
+
+function platformOfHost(host: string): Platform | null {
+  const h = host.toLowerCase();
+  for (const [re, p] of HOST_MAP) if (re.test(h)) return p;
+  return null;
+}
+
+/** Accepts "https://…", "instagram.com/…" (no scheme) or a bare shortcode. */
+function normalizeInput(raw: string): { url: string; platform: Platform } | null {
+  const s = raw.trim();
+  if (!s || s.length > 2000) return null;
+  if (/^[A-Za-z0-9_-]{9,20}$/.test(s)) {
+    return { url: `https://www.instagram.com/p/${s}/`, platform: "instagram" };
+  }
+  const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  try {
+    const u = new URL(withScheme);
+    if (u.protocol === "http:") u.protocol = "https:";
+    const platform = platformOfHost(u.hostname);
+    return platform ? { url: u.toString(), platform } : null;
+  } catch {
+    return null;
+  }
+}
+
+function errorJson(code: string, message: string, status: number) {
+  return NextResponse.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
+}
+
+async function resolve(raw: string): Promise<UnifiedExtractResponse> {
+  const input = normalizeInput(raw);
+  if (!input) {
+    throw new ExtractError("Please paste a valid Instagram, Facebook, YouTube, X, TikTok, Pinterest or Threads link.", "INVALID_URL");
+  }
+
+  switch (input.platform) {
+    case "instagram": {
+      // Stories + highlights permalinks
+      const st = input.url.match(STORY_RE);
+      if (st) {
+        if (st[1].toLowerCase() === "highlights") {
+          const id = input.url.match(/stories\/highlights\/(\d+)/i)?.[1];
+          if (!id) throw new ExtractError("Invalid highlight link.", "INVALID_URL");
+          const items = await extractHighlightItems(id);
+          return toUnifiedPayload(storyItemsToUi(items, "instagram", id), "instagram", input.url);
+        }
+        const { username, items } = await extractStories(st[1]);
+        const wanted = st[2] ? items.filter((i) => i.id === st[2]) : [];
+        return toUnifiedPayload(
+          storyItemsToUi(wanted.length ? wanted : items, username, st[2] || username),
+          "instagram",
+          input.url
+        );
+      }
+
+      const core = await extract(input.url);
+      const canonical = parseInstagramUrl(input.url)?.canonicalUrl ?? input.url;
+      return toUnifiedPayload(coreToUi(core), "instagram", canonical, null, core.fullName ?? "");
+    }
+    case "facebook":
+      return extractFacebook(input.url);
+    default:
+      return extractOtherPlatform(input.url, input.platform);
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const cfg = await getLiveConfig();
+  if (isRateLimited("extract:" + clientIp(req), cfg.rateLimitPerMinute)) {
+    return errorJson("RATE_LIMITED", "Too many requests — please wait a minute and try again.", 429);
+  }
+
+  let url = "";
+  try {
+    const body = await req.json();
+    url = String(body?.url ?? "");
+  } catch {
+    return errorJson("INVALID_URL", "Invalid request body.", 400);
+  }
+  if (!url.trim()) return errorJson("INVALID_URL", "Paste a link first.", 400);
+
+  try {
+    const data = await resolve(url);
+    return NextResponse.json({ data }, { headers: { "Cache-Control": "no-store" } });
+  } catch (err) {
+    if (err instanceof ExtractError) {
+      const code = toUiErrorCode(err.code);
+      return errorJson(code, err.message, statusForUiError(code));
+    }
+    console.error("extract failed:", err);
+    return errorJson("EXTRACTOR_DOWN", "Something went wrong on our side. Please try again in a moment.", 503);
+  }
 }
