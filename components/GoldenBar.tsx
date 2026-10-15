@@ -1,468 +1,1438 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
-import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign, Pencil, Loader2, CircleAlert } from "lucide-react";
-import type { ExtractResult } from "@/lib/extract-ui";
-import type { ProfileFeed } from "@/lib/media";
-import ResultCard from "./ResultCard";
-import ProfileFeedCard from "./ProfileFeedCard";
-import ErrorCard, { ErrorCode } from "./ErrorCard";
-import SupportedTools from "./SupportedTools";
-import AdFrame from "./AdFrame";
-import { recordSearch, getRecentSearches } from "@/lib/retention";
-import { useI18n } from "@/lib/i18n";
 
-// A media permalink (post/reel/story/tv) → extract flow.
-const MEDIA_RE = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv|stories)\/([\w-]+)/i;
-// A profile URL (instagram.com/<handle> with no media segment) → profile flow.
-const PROFILE_URL_RE = /instagram\.com\/(?!p\/|reel|reels|tv\/|stories\/|explore\/|accounts\/)([A-Za-z0-9._]{1,30})\/?(?:\?|#|$)/i;
-// A bare handle / @handle.
-const HANDLE_RE = /^@?([A-Za-z0-9._]{1,30})$/;
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import Link from "next/link";
 
-type Phase = "idle" | "loading" | "success" | "error";
-type Kind = { Icon: React.ElementType; label: string };
-const MEDIA_META: Record<string, Kind> = {
-  p: { Icon: ImageIcon, label: "post" },
-  reel: { Icon: Clapperboard, label: "reel" },
-  reels: { Icon: Clapperboard, label: "reel" },
-  tv: { Icon: Clapperboard, label: "video" },
-  stories: { Icon: CircleDashed, label: "story" },
+export type GoldenBarMode =
+  | "auto"
+  | "reel"
+  | "story"
+  | "photo"
+  | "video"
+  | "carousel"
+  | "dp"
+  | "profile"
+  | "audio"
+  | "highlights"
+  | "tiktok"
+  | "twitter"
+  | "facebook"
+  | "pinterest"
+  | "threads"
+  | "youtube";
+
+export interface MediaItem {
+  url: string;
+  type: "video" | "image" | "audio";
+  thumbnail?: string;
+  quality?: string;
+  width?: number;
+  height?: number;
+  filename?: string;
+}
+
+export interface ExtractedResult {
+  success?: boolean;
+  platform?: string;
+  type?: string;
+  title?: string;
+  caption?: string;
+  author?: {
+    username?: string;
+    fullName?: string;
+    avatar?: string;
+    verified?: boolean;
+    followers?: number;
+    following?: number;
+    postsCount?: number;
+    bio?: string;
+  };
+  thumbnail?: string;
+  url?: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+  media?: MediaItem[];
+  items?: MediaItem[];
+  shortcode?: string;
+  timestamp?: number;
+  likes?: number;
+  comments?: number;
+  views?: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  input: string;
+  platform: string;
+  title: string;
+  thumbnail?: string;
+  timestamp: number;
+}
+
+export interface GoldenBarProps {
+  placeholder?: string;
+  mode?: GoldenBarMode | string;
+  toolType?: string;
+  platform?: string;
+  initialValue?: string;
+  defaultUrl?: string;
+  buttonText?: string;
+  compact?: boolean;
+  autoFocus?: boolean;
+  showQuickModes?: boolean;
+  showHistory?: boolean;
+  showTrustBadges?: boolean;
+  onResult?: (data: ExtractedResult) => void;
+  onError?: (message: string) => void;
+  className?: string;
+  [key: string]: unknown;
+}
+
+type DetectedPlatform = {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  isUsername?: boolean;
 };
 
-type Detected =
-  | { mode: "media"; label: string; Icon: React.ElementType; hint: string }
-  | { mode: "profile"; label: string; Icon: React.ElementType; hint: string }
-  | null;
-
-/** Decide what the user typed: a media permalink, a profile/username, or nothing yet. */
-function detect(value: string): Detected {
-  const v = value.trim();
-  if (!v) return null;
-  const media = v.match(MEDIA_RE);
-  if (media) {
-    const m = MEDIA_META[media[1].toLowerCase()] ?? MEDIA_META.p;
-    return { mode: "media", label: m.label, Icon: m.Icon, hint: media[2].slice(0, 8) };
-  }
-  if (/instagram\.com/i.test(v)) {
-    const prof = v.match(PROFILE_URL_RE);
-    if (prof) return { mode: "profile", label: "profile", Icon: AtSign, hint: prof[1] };
-    return null;
-  }
-  const handle = v.match(HANDLE_RE);
-  if (handle) return { mode: "profile", label: "profile", Icon: AtSign, hint: handle[1] };
-  return null;
-}
-
-// Other platforms the unified /api/extract route resolves (used by the neon homepage box).
-const OTHER_PLATFORMS: [RegExp, string][] = [
-  [/(^|[/.])(facebook\.com|fb\.watch|fb\.me)(\/|$|\?)/i, "Facebook"],
-  [/(^|[/.])(youtube\.com|youtu\.be)(\/|$|\?)/i, "YouTube"],
-  [/(^|[/.])(twitter\.com|x\.com)(\/|$|\?)/i, "X post"],
-  [/(^|[/.])tiktok\.com(\/|$|\?)/i, "TikTok"],
-  [/(^|[/.])(pinterest\.com|pin\.it)(\/|$|\?)/i, "Pinterest"],
-  [/(^|[/.])(threads\.net|threads\.com)(\/|$|\?)/i, "Threads"],
+const QUICK_MODES: { id: GoldenBarMode; label: string; icon: string; hint: string }[] = [
+  { id: "auto", label: "Auto Detect", icon: "✨", hint: "Paste any link or @username..." },
+  { id: "reel", label: "Reels HD", icon: "🎬", hint: "Paste Instagram Reel link..." },
+  { id: "story", label: "Stories", icon: "⭕", hint: "Paste Story link or @username..." },
+  { id: "photo", label: "Photo / Carousel", icon: "🖼️", hint: "Paste Instagram Post or Carousel URL..." },
+  { id: "dp", label: "HD DP / Profile", icon: "👤", hint: "Enter Instagram @username or profile URL..." },
+  { id: "audio", label: "Reel to MP3", icon: "🎵", hint: "Paste Reel link to extract MP3 audio..." },
 ];
 
-/** Like detect(), but also recognises Facebook / YouTube / X / TikTok / Pinterest / Threads links. */
-function detectAny(value: string): Detected {
-  const own = detect(value);
-  if (own) return own;
-  const v = value.trim();
-  for (const [re, label] of OTHER_PLATFORMS) {
-    if (re.test(v)) return { mode: "media", label, Icon: Link2, hint: "link" };
+const HISTORY_STORAGE_KEY = "ig_goldenbar_recent_v1";
+
+function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
+  const val = raw.trim();
+  if (!val) {
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
   }
-  return null;
+
+  const lower = val.toLowerCase();
+
+  if (lower.includes("instagram.com") || lower.includes("instagr.am")) {
+    if (lower.includes("/reel/") || lower.includes("/reels/")) {
+      return { id: "ig-reel", label: "IG Reel", icon: "🎬", color: "#ec4899" };
+    }
+    if (lower.includes("/stories/")) {
+      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "#f59e0b" };
+    }
+    if (lower.includes("/p/") || lower.includes("/tv/")) {
+      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "#8b5cf6" };
+    }
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
+  }
+
+  if (lower.includes("tiktok.com")) {
+    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "#14b8a6" };
+  }
+  if (lower.includes("twitter.com") || lower.includes("x.com")) {
+    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "#3b82f6" };
+  }
+  if (lower.includes("facebook.com") || lower.includes("fb.watch")) {
+    return { id: "facebook", label: "Facebook", icon: "📘", color: "#2563eb" };
+  }
+  if (lower.includes("pinterest.") || lower.includes("pin.it")) {
+    return { id: "pinterest", label: "Pinterest", icon: "📌", color: "#ef4444" };
+  }
+  if (lower.includes("threads.net") || lower.includes("threads.com")) {
+    return { id: "threads", label: "Threads", icon: "🧵", color: "#a855f7" };
+  }
+  if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
+    return { id: "youtube", label: "YouTube", icon: "▶️", color: "#ef4444" };
+  }
+
+  // Check if it looks like an @username
+  const cleanHandle = val.replace(/^@/, "");
+  const isHandlePattern = /^[a-zA-Z0-9._]{1,30}$/.test(cleanHandle);
+  if (
+    val.startsWith("@") ||
+    (isHandlePattern && !val.includes("/") && !val.includes(":")) ||
+    fallbackMode === "dp" ||
+    fallbackMode === "profile"
+  ) {
+    return {
+      id: "username",
+      label: `@${cleanHandle || "username"}`,
+      icon: "👤",
+      color: "#f59e0b",
+      isUsername: true,
+    };
+  }
+
+  return { id: "url", label: "Web Link", icon: "🔗", color: "#8b5cf6" };
 }
 
-// "Paste & go" only fires for something that is clearly a link — never for a bare word
-// that merely *could* be a username (clipboard holding "thanks" must not trigger a lookup).
-const LOOKS_LIKE_URL = /^(https?:\/\/|www\.)|^[a-z0-9-]+(\.[a-z0-9-]+)+\//i;
-
-/** Client-side ceiling so a stalled mobile connection can't leave the bar spinning forever (server maxDuration is 30s). */
-function timeoutSignal(ms: number): AbortSignal | undefined {
-  return typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(ms) : undefined;
+function buildDownloadProxyUrl(mediaUrl: string, filename = "instagram-media") {
+  if (!mediaUrl) return "#";
+  return `/api/download?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(filename)}`;
 }
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+function normalizeApiResponse(raw: any, inputVal: string): ExtractedResult {
+  const data = raw?.data || raw?.result || raw;
+
+  const mediaList: MediaItem[] = [];
+
+  if (Array.isArray(data?.media)) {
+    for (const item of data.media) {
+      if (typeof item === "string") {
+        mediaList.push({
+          url: item,
+          type: item.includes(".mp4") ? "video" : "image",
+        });
+      } else if (item?.url || item?.src || item?.videoUrl || item?.imageUrl) {
+        mediaList.push({
+          url: item.url || item.videoUrl || item.imageUrl || item.src,
+          type:
+            item.type === "video" || item.isVideo || Boolean(item.videoUrl)
+              ? "video"
+              : item.type === "audio"
+              ? "audio"
+              : "image",
+          thumbnail: item.thumbnail || item.poster || item.preview,
+          quality: item.quality || "HD",
+        });
+      }
+    }
+  } else if (Array.isArray(data?.items)) {
+    for (const item of data.items) {
+      const u = item?.url || item?.video_url || item?.display_url || item?.src;
+      if (u) {
+        mediaList.push({
+          url: u,
+          type:
+            item?.type === "video" || item?.is_video || Boolean(item?.video_url)
+              ? "video"
+              : "image",
+          thumbnail: item?.thumbnail || item?.display_url,
+          quality: item?.quality || "HD",
+        });
+      }
+    }
+  }
+
+  const singleVideo =
+    data?.videoUrl || data?.video_url || data?.video || (data?.type === "video" ? data?.url : undefined);
+  const singleImage =
+    data?.imageUrl ||
+    data?.display_url ||
+    data?.profilePicHd ||
+    data?.profile_pic_url_hd ||
+    data?.avatar ||
+    data?.thumbnail ||
+    (data?.type === "image" ? data?.url : undefined);
+  const singleAudio = data?.audioUrl || data?.audio_url || data?.musicUrl;
+
+  if (mediaList.length === 0) {
+    if (singleVideo) {
+      mediaList.push({
+        url: singleVideo,
+        type: "video",
+        thumbnail: singleImage || data?.thumbnail,
+        quality: "Full HD",
+      });
+    } else if (singleImage) {
+      mediaList.push({
+        url: singleImage,
+        type: "image",
+        thumbnail: singleImage,
+        quality: "Original HD",
+      });
+    } else if (data?.url && typeof data.url === "string") {
+      mediaList.push({
+        url: data.url,
+        type: data.url.includes(".mp4") ? "video" : "image",
+        thumbnail: data.thumbnail,
+        quality: "HD",
+      });
+    }
+  }
+
+  // Also append recent posts if profile API returned posts
+  if (Array.isArray(data?.posts) && mediaList.length <= 1) {
+    for (const post of data.posts) {
+      const postUrl = post?.videoUrl || post?.video_url || post?.displayUrl || post?.display_url || post?.url;
+      if (postUrl) {
+        mediaList.push({
+          url: postUrl,
+          type: post?.isVideo || post?.is_video || Boolean(post?.videoUrl) ? "video" : "image",
+          thumbnail: post?.thumbnail || post?.displayUrl || post?.display_url,
+          quality: "Feed Post",
+        });
+      }
+    }
+  }
+
+  const username =
+    data?.author?.username ||
+    data?.username ||
+    data?.owner?.username ||
+    (inputVal.startsWith("@") ? inputVal.slice(1) : undefined);
+
+  return {
+    success: true,
+    platform: data?.platform || "instagram",
+    type: data?.type || (mediaList[0]?.type ?? "media"),
+    title:
+      data?.title ||
+      data?.caption?.slice(0, 90) ||
+      (username ? `@${username}` : "Instagram Media"),
+    caption: data?.caption || data?.description || data?.bio || "",
+    author: {
+      username: username,
+      fullName: data?.author?.fullName || data?.fullName || data?.full_name || data?.owner?.full_name,
+      avatar:
+        data?.author?.avatar ||
+        data?.profilePicHd ||
+        data?.profile_pic_url_hd ||
+        data?.profilePic ||
+        data?.avatar,
+      verified: Boolean(data?.author?.verified || data?.isVerified || data?.is_verified),
+      followers: data?.followers ?? data?.edge_followed_by?.count,
+      following: data?.following ?? data?.edge_follow?.count,
+      postsCount: data?.postsCount ?? data?.edge_owner_to_timeline_media?.count,
+      bio: data?.bio || data?.biography,
+    },
+    thumbnail:
+      data?.thumbnail ||
+      mediaList[0]?.thumbnail ||
+      singleImage ||
+      data?.author?.avatar,
+    url: mediaList[0]?.url || singleVideo || singleImage,
+    videoUrl: singleVideo || mediaList.find((m) => m.type === "video")?.url,
+    imageUrl: singleImage || mediaList.find((m) => m.type === "image")?.url,
+    audioUrl: singleAudio,
+    media: mediaList,
+    likes: data?.likes ?? data?.like_count,
+    comments: data?.comments ?? data?.comment_count,
+    views: data?.views ?? data?.view_count,
+  };
 }
 
-export default function GoldenBar({ intro = false, variant = "classic" }: { intro?: boolean; variant?: "classic" | "neon" }) {
-  const neon = variant === "neon";
-  const { t } = useI18n();
-  const [value, setValue] = useState("");
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [invalid, setInvalid] = useState(false);
-  const [error, setError] = useState<ErrorCode | null>(null);
-  const [result, setResult] = useState<ExtractResult | null>(null);
-  const [feed, setFeed] = useState<ProfileFeed | null>(null);
-  const [flash, setFlash] = useState(false);
-  const [pasteBlocked, setPasteBlocked] = useState(false);
+export function GoldenBar({
+  placeholder,
+  mode = "auto",
+  toolType,
+  initialValue = "",
+  defaultUrl = "",
+  buttonText = "Download HD",
+  compact = false,
+  autoFocus = false,
+  showQuickModes = true,
+  showHistory = true,
+  showTrustBadges = true,
+  onResult,
+  onError,
+  className = "",
+}: GoldenBarProps) {
+  const effectiveInitialMode = (toolType || mode || "auto") as GoldenBarMode;
+  const [selectedMode, setSelectedMode] = useState<GoldenBarMode>(effectiveInitialMode);
+  const [input, setInput] = useState<string>(initialValue || defaultUrl || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingStep, setLoadingStep] = useState<string>("Connecting...");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [result, setResult] = useState<ExtractedResult | null>(null);
+  const [copiedCaption, setCopiedCaption] = useState<boolean>(false);
+  const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const msgId = `${useId()}-msg`; // ties the inline hint/error to the input for screen readers
 
-  const detect_ = neon ? detectAny : detect;
-  const detected = detect_(value);
-  const [canPaste, setCanPaste] = useState(false);
-  useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
-
-  // Auto clipboard: if clipboard-read is ALREADY granted (no prompt ever shown
-  // by us), prefill an Instagram link waiting on the clipboard — one tap saved.
+  // Load recent history from localStorage
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const perm = await navigator.permissions?.query?.({ name: "clipboard-read" as PermissionName });
-        if (perm?.state !== "granted") return;
-        const txt = (await navigator.clipboard.readText())?.trim();
-        if (!cancelled && txt && detect_(txt)) setValue((v) => v || txt);
-      } catch { /* clipboard unavailable — the paste button still works */ }
-    })();
-    return () => { cancelled = true; };
+    try {
+      const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setRecentHistory(parsed.slice(0, 6));
+        }
+      }
+    } catch {
+      // Ignore storage errors in private mode
+    }
   }, []);
 
-  // I10 — recent searches chips under the bar.
-  const [recents, setRecents] = useState<string[]>([]);
-  useEffect(() => { setRecents(getRecentSearches()); }, []);
-
-  // I4 — drop a link anywhere on the page and the bar catches it.
+  // Keyboard shortcut Ctrl/Cmd + K to focus bar
   useEffect(() => {
-    function onDragOver(e: DragEvent) { e.preventDefault(); }
-    function onDrop(e: DragEvent) {
-      const txt = e.dataTransfer?.getData("text")?.trim();
-      if (txt && detect_(txt)) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setValue(txt);
         inputRef.current?.focus();
       }
-    }
-    window.addEventListener("dragover", onDragOver);
-    window.addEventListener("drop", onDrop);
-    return () => {
-      window.removeEventListener("dragover", onDragOver);
-      window.removeEventListener("drop", onDrop);
     };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Editing mode: the detected-URL chip collapses back into a text input so
-  // users can tweak a pasted link without deleting the whole thing.
-  const [editing, setEditing] = useState(false);
-  useEffect(() => {
-    if (editing) setTimeout(() => inputRef.current?.focus(), 20);
-  }, [editing]);
-
-  async function paste() {
-    setPasteBlocked(false);
-    try {
-      const txt = (await navigator.clipboard.readText())?.trim();
-      if (txt) {
-        setValue(txt);
-        // Paste & go: a recognisable link starts straight away — one tap instead of two.
-        if (LOOKS_LIKE_URL.test(txt) && detect_(txt)) go(txt);
-        return;
-      }
-    } catch { /* permission denied or API missing — fall through to the hint */ }
-    setPasteBlocked(true);
-    inputRef.current?.focus(); // clipboard blocked → let the user long-press / Ctrl+V into the box
-  }
-  function clear() { setValue(""); setEditing(false); setPasteBlocked(false); inputRef.current?.focus(); }
-
-  // Typing again dismisses a stale "not a link" message instead of leaving it on screen.
-  function onType(v: string) {
-    setValue(v);
-    if (pasteBlocked) setPasteBlocked(false);
-    if (phase === "error" && error === "INVALID_URL") { setPhase("idle"); setError(null); }
-  }
-  function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.nativeEvent.isComposing) return; // IME (Hindi / Japanese…): Enter confirms a word, it must not submit
-    if (e.key === "Enter") go();
-    else if (e.key === "Escape" && value) clear();
-  }
-
-  // Results can land below the fold on phones — bring them into view (never yank a desktop page).
-  useEffect(() => {
-    if (phase !== "success") return;
-    const el = resultsRef.current;
-    if (el && el.getBoundingClientRect().top > window.innerHeight * 0.65) {
-      el.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
-    }
-  }, [phase]);
-
-  function mapError(code: string | undefined): ErrorCode {
-    const allowed: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
-    return (allowed.includes(code as ErrorCode) ? code : "EXTRACTOR_DOWN") as ErrorCode;
-  }
-
-  async function go() {
-    if (phase === "loading") return;
-    setEditing(false);
-    setError(null); setResult(null); setFeed(null);
-    const d = detect_(value);
-    if (!d) {
-      setInvalid(true); setTimeout(() => setInvalid(false), 300);
-      setPhase("error"); setError("INVALID_URL");
-      return;
-    }
-    if (typeof navigator !== "undefined" && !navigator.onLine) { setPhase("error"); setError("OFFLINE"); return; }
-    recordSearch(value.trim());
-    setRecents(getRecentSearches());
-    setPhase("loading");
-    try {
-      if (d.mode === "profile") {
-        // Universal box: a username / profile URL → full public profile + posts.
-        const res = await fetch("/api/profile", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "feed", username: value.trim() }),
-        });
-        const json = await res.json().catch(() => null);
-        if (!res.ok || json?.error) {
-          setPhase("error"); setError(mapError(json?.code));
-          return;
-        }
-        setFlash(true);
-        setTimeout(() => { setFlash(false); setFeed(json as ProfileFeed); setPhase("success"); }, 200);
-        return;
-      }
-      // Media permalink → extract flow.
-      const res = await fetch("/api/extract", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: value.trim() }),
-      });
-      const json = await res.json().catch(() => null);
-      if (!res.ok || json?.error) {
-        setPhase("error"); setError(mapError(json?.error?.code));
-        return;
-      }
-      setFlash(true);
-      setTimeout(() => { setFlash(false); setResult(json.data as ExtractResult); setPhase("success"); }, 200);
-    } catch {
-      setPhase("error");
-      setError(typeof navigator !== "undefined" && !navigator.onLine ? "OFFLINE" : "EXTRACTOR_DOWN");
-    }
-  }
-
-  const loading = phase === "loading";
-  const showChip = detected && !loading && !editing;
-
-  const below = (
-    <>
-      {/* I10 — recent searches, one tap to re-run */}
-      {!neon && phase === "idle" && !value && recents.length > 0 && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
-          {recents.map((r) => (
-            <button key={r} className="chip" onClick={() => { setValue(r); inputRef.current?.focus(); }}
-              style={{ cursor: "pointer", maxWidth: 220 }} title={r}>
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {r.replace(/^https?:\/\/(www\.)?/, "").slice(0, 34)}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {phase === "error" && error && error !== "INVALID_URL" && (
-        <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
-      )}
-      {phase === "error" && error === "INVALID_URL" && (
-        <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
-          {t("invalidLink")}
-        </p>
-      )}
-
-      {(result || feed) && (
-        <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
-          {result && <ResultCard data={result} />}
-          {feed && <ProfileFeedCard data={feed} showBulk />}
-          {/* Ad slot A — Native Banner, only after success, never inside the card */}
-          <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
-        </div>
-      )}
-
-    </>
+  const detected = useMemo(
+    () => detectInputType(input, selectedMode),
+    [input, selectedMode]
   );
 
-  if (neon) {
-    return (
-      <div className="nb-root">
-        <div className="nb-card">
-          <div className={`nb-field ${loading ? "loading" : ""} ${invalid ? "shake" : ""}`}>
-            <div className="nb-row">
-              <span className="nb-link" aria-hidden="true"><Link2 size={22} strokeWidth={1.8} /></span>
-              <input
-                ref={inputRef} value={value} disabled={loading}
-                onChange={e => setValue(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && go()}
-                placeholder="Paste Instagram, Facebook, or any link..."
-                aria-label="Paste a social media link or @username"
-                className="nb-input"
-                inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
-              />
-              {detected && !loading && <span className="nb-tag">{detected.label}</span>}
-              {value && !loading && (
-                <button type="button" className="nb-x" onClick={clear} aria-label="Clear">
-                  <X size={20} strokeWidth={1.8} />
+  const activePlaceholder = useMemo(() => {
+    if (placeholder) return placeholder;
+    const found = QUICK_MODES.find((m) => m.id === selectedMode);
+    return found ? found.hint : "Paste Instagram Reel, Story, Photo link or @username...";
+  }, [placeholder, selectedMode]);
+
+  const saveToHistory = useCallback((entry: Omit<HistoryEntry, "id" | "timestamp">) => {
+    try {
+      const newItem: HistoryEntry = {
+        ...entry,
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+      };
+      setRecentHistory((prev) => {
+        const filtered = prev.filter((item) => item.input !== entry.input);
+        const updated = [newItem, ...filtered].slice(0, 6);
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch {
+      // Ignore storage write error
+    }
+  }, []);
+
+  const clearHistory = () => {
+    try {
+      localStorage.removeItem(HISTORY_STORAGE_KEY);
+      setRecentHistory([]);
+    } catch {
+      // Ignore
+    }
+  };
+
+  const handlePasteClipboard = async () => {
+    setErrorMsg(null);
+    try {
+      if (navigator.clipboard?.readText) {
+        const clipText = await navigator.clipboard.readText();
+        if (clipText && clipText.trim()) {
+          setInput(clipText.trim());
+          inputRef.current?.focus();
+          return;
+        }
+      }
+      inputRef.current?.focus();
+    } catch {
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleExtract = async (overrideInput?: string) => {
+    const targetInput = (overrideInput ?? input).trim();
+    if (!targetInput) {
+      setErrorMsg("Please paste an Instagram link or enter an @username first.");
+      inputRef.current?.focus();
+      return;
+    }
+
+    setErrorMsg(null);
+    setResult(null);
+    setIsLoading(true);
+    setLoadingStep("Analyzing link...");
+
+    const inputInfo = detectInputType(targetInput, selectedMode);
+
+    try {
+      let response: Response | null = null;
+      let payload: any = null;
+
+      // 1. Handle @username / Profile requests
+      if (inputInfo.isUsername) {
+        const cleanUsername = targetInput
+          .replace(/^@/, "")
+          .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
+          .split("/")[0]
+          .split("?")[0]
+          .trim();
+
+        setLoadingStep(`Fetching @${cleanUsername} profile...`);
+        response = await fetch(
+          `/api/profile?username=${encodeURIComponent(cleanUsername)}`,
+          {
+            method: "GET",
+            headers: { Accept: "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          response = await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: cleanUsername }),
+          });
+        }
+
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 2. Handle Twitter / X URLs
+      if (!payload && inputInfo.id === "twitter") {
+        setLoadingStep("Extracting X / Twitter video...");
+        response = await fetch("/api/twitter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: targetInput }),
+        });
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 3. Handle Multi-Platform URLs (TikTok, FB, Pinterest, Threads, YouTube)
+      if (
+        !payload &&
+        ["tiktok", "facebook", "pinterest", "threads", "youtube"].includes(
+          inputInfo.id
+        )
+      ) {
+        setLoadingStep(`Extracting ${inputInfo.label} media...`);
+        response = await fetch("/api/og-extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: targetInput }),
+        });
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 4. Default / Primary Instagram Extractor (/api/extract)
+      if (!payload) {
+        setLoadingStep("Extracting HD media from Instagram...");
+        response = await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: targetInput,
+            mode: selectedMode,
+          }),
+        });
+
+        if (!response.ok) {
+          // Fallback to /api/og-extract if primary extractor fails
+          const fallbackRes = await fetch("/api/og-extract", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: targetInput }),
+          });
+          if (fallbackRes.ok) {
+            payload = await fallbackRes.json();
+          } else {
+            const errJson = await response.json().catch(() => ({}));
+            throw new Error(
+              errJson?.error ||
+                errJson?.message ||
+                "Could not extract media. Make sure the post or profile is public."
+            );
+          }
+        } else {
+          payload = await response.json();
+        }
+      }
+
+      if (!payload || payload.error) {
+        throw new Error(
+          payload?.error ||
+            payload?.message ||
+            "Unable to fetch media right now. Please check the link and try again."
+        );
+      }
+
+      const normalized = normalizeApiResponse(payload, targetInput);
+
+      if (
+        (!normalized.media || normalized.media.length === 0) &&
+        !normalized.author?.avatar &&
+        !normalized.url
+      ) {
+        throw new Error(
+          "No downloadable media found for this link. Ensure the account is public."
+        );
+      }
+
+      setResult(normalized);
+      onResult?.(normalized);
+
+      saveToHistory({
+        input: targetInput,
+        platform: inputInfo.label,
+        title: normalized.title || targetInput,
+        thumbnail: normalized.thumbnail,
+      });
+    } catch (err: any) {
+      const msg =
+        err?.message ||
+        "Something went wrong while fetching media. Please verify the link.";
+      setErrorMsg(msg);
+      onError?.(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleExtract();
+  };
+
+  const handleCopyCaption = async () => {
+    if (!result?.caption) return;
+    try {
+      await navigator.clipboard.writeText(result.caption);
+      setCopiedCaption(true);
+      setTimeout(() => setCopiedCaption(false), 2000);
+    } catch {
+      // Ignore
+    }
+  };
+
+  return (
+    <div className={`gb-wrapper ${compact ? "gb-compact" : ""} ${className}`}>
+      {/* Quick Mode Selector Pills */}
+      {showQuickModes && !compact && (
+        <div className="gb-modes" role="tablist" aria-label="Download mode">
+          {QUICK_MODES.map((m) => {
+            const active = selectedMode === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => {
+                  setSelectedMode(m.id);
+                  setErrorMsg(null);
+                }}
+                className={`gb-mode-pill ${active ? "gb-mode-active" : ""}`}
+              >
+                <span aria-hidden="true">{m.icon}</span>
+                <span>{m.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Main Golden Input Form */}
+      <form onSubmit={handleFormSubmit} className="gb-form" noValidate>
+        <div className={`gb-bar-outer ${isLoading ? "gb-bar-loading" : ""}`}>
+          <div className="gb-bar-inner">
+            {/* Detected Platform Badge */}
+            <div
+              className="gb-platform-chip"
+              style={{
+                borderColor: `${detected.color}40`,
+                backgroundColor: `${detected.color}18`,
+                color: detected.color,
+              }}
+              title={`Detected: ${detected.label}`}
+            >
+              <span aria-hidden="true">{detected.icon}</span>
+              <span className="gb-platform-text">{detected.label}</span>
+            </div>
+
+            {/* URL / Username Input */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              placeholder={activePlaceholder}
+              autoFocus={autoFocus}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              disabled={isLoading}
+              className="gb-input"
+              aria-label="Instagram URL or username"
+            />
+
+            {/* Right Action Buttons inside Bar */}
+            <div className="gb-actions">
+              {input ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInput("");
+                    setErrorMsg(null);
+                    setResult(null);
+                    inputRef.current?.focus();
+                  }}
+                  className="gb-clear-btn"
+                  aria-label="Clear input"
+                  title="Clear"
+                >
+                  ✕
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handlePasteClipboard}
+                  className="gb-paste-btn"
+                  title="Paste from clipboard"
+                >
+                  <span aria-hidden="true">📋</span>
+                  <span>Paste</span>
                 </button>
               )}
-            </div>
 
-            {/* Supported apps — chhote, sirf dikhane ke liye, click par kuch nahi hota */}
-            <div
-              className="nb-support"
-              aria-hidden="true"
-              {...({ inert: "" } as Record<string, unknown>)}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            >
-              <SupportedTools />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="gb-submit-btn"
+              >
+                {isLoading ? (
+                  <span className="gb-spinner-wrap">
+                    <span className="gb-spinner" aria-hidden="true" />
+                    <span>{loadingStep}</span>
+                  </span>
+                ) : (
+                  <>
+                    <span>{buttonText}</span>
+                    <span aria-hidden="true">⚡</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
+        </div>
+      </form>
 
-          <div className="nb-actions">
-            <button type="button" className="nb-paste" onClick={paste} disabled={loading}>
-              <ClipboardPaste size={24} strokeWidth={1.8} /> <span>Paste Link</span>
-            </button>
-            <button type="button" className="nb-grab" onClick={go} disabled={loading}>
-              <Download size={26} strokeWidth={2} />
-              <span>{loading ? t("fetching") : "Grab Media"}</span>
+      {/* Trust & Speed Micro-Bar */}
+      {showTrustBadges && !compact && (
+        <div className="gb-trust-row">
+          <span className="gb-trust-item">🔒 100% Anonymous & Safe</span>
+          <span className="gb-trust-sep">•</span>
+          <span className="gb-trust-item">✨ Full HD / 4K Original Quality</span>
+          <span className="gb-trust-sep">•</span>
+          <span className="gb-trust-item">⚡ No Login or Watermark</span>
+        </div>
+      )}
+
+      {/* Recent Searches / Downloads Strip */}
+      {showHistory && recentHistory.length > 0 && !result && !isLoading && (
+        <div className="gb-history-bar">
+          <div className="gb-history-left">
+            <span className="gb-history-label">🕒 Recent:</span>
+            <div className="gb-history-chips">
+              {recentHistory.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setInput(item.input);
+                    handleExtract(item.input);
+                  }}
+                  className="gb-history-chip"
+                  title={item.input}
+                >
+                  <span>
+                    {item.input.length > 28
+                      ? `${item.input.slice(0, 28)}...`
+                      : item.input}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="gb-history-right">
+            <Link href="/history" className="gb-history-link">
+              Full History
+            </Link>
+            <button
+              type="button"
+              onClick={clearHistory}
+              className="gb-history-clear"
+            >
+              Clear
             </button>
           </div>
         </div>
+      )}
 
-        {phase === "error" && error === "INVALID_URL" && (
-          <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
-            That doesn&apos;t look like a supported link. Paste an Instagram, Facebook, Pinterest, X, TikTok, YouTube or Threads link — or an @username.
-          </p>
-        )}
-        {phase === "error" && error && error !== "INVALID_URL" && (
-          <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
-        )}
-        {(result || feed) && (
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 24 }}>
-            {result && <ResultCard data={result} />}
-            {feed && <ProfileFeedCard data={feed} showBulk />}
-            <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
+      {/* Error Alert Box */}
+      {errorMsg && (
+        <div className="gb-error-card" role="alert">
+          <div className="gb-error-header">
+            <span className="gb-error-icon" aria-hidden="true">
+              ⚠️
+            </span>
+            <div>
+              <h4 className="gb-error-title">Could not fetch media</h4>
+              <p className="gb-error-desc">{errorMsg}</p>
+            </div>
           </div>
-        )}
+          <div className="gb-error-tips">
+            <span>Tip: Make sure the account is public, or try our</span>
+            <Link href="/story-viewer" className="gb-error-link">
+              Story Viewer
+            </Link>
+            <span>or</span>
+            <Link href="/profile-viewer" className="gb-error-link">
+              Profile Viewer
+            </Link>
+          </div>
+        </div>
+      )}
 
-        <style jsx>{`
-          .nb-root { width: 100%; max-width: 760px; margin: 0 auto; }
-          .nb-card { padding: 12px; border-radius: 24px; border: 1.5px solid rgba(34, 228, 255, 0.45);
-            background: linear-gradient(165deg, #0A1238 0%, #0A0F34 60%, #120D38 100%);
-            box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.16), 0 0 44px -16px rgba(34, 228, 255, 0.55);
-            display: flex; flex-direction: column; gap: 12px; }
-          @media (min-width: 640px) { .nb-card { padding: 14px; border-radius: 26px; gap: 14px; } }
-          .nb-field { display: flex; flex-direction: column; align-items: stretch; padding: 0 12px 8px; border-radius: 18px;
-            border: 1.5px solid rgba(139, 92, 246, 0.65); background: rgba(14, 20, 62, 0.85);
-            transition: border-color 160ms ease, box-shadow 160ms ease; }
-          .nb-field:focus-within { border-color: #22E4FF; box-shadow: 0 0 0 3px rgba(34, 228, 255, 0.22); }
-          .nb-field.loading { opacity: 0.85; }
-          .nb-row { display: flex; align-items: center; gap: 10px; height: 54px; }
-          @media (min-width: 640px) { .nb-row { height: 60px; } }
-          .nb-link { color: #EAF0FF; display: inline-flex; flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)); }
-          /* 16px input = iPhone par focus karne par zoom nahi hota */
-          .nb-input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: #EAF0FF; font-size: 16px; text-overflow: ellipsis; }
-          .nb-input::placeholder { color: #8A96C8; }
-          /* Supported apps strip: chhote icons, non-clickable */
-          .nb-support { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
-            padding-top: 8px; border-top: 1px solid rgba(139, 162, 255, 0.16);
-            pointer-events: none; user-select: none; -webkit-user-select: none; cursor: default; }
-          .nb-support :global(*) { pointer-events: none !important; cursor: default !important; user-select: none; }
-          .nb-support :global(a), .nb-support :global(button) { text-decoration: none; }
-          .nb-support :global(svg), .nb-support :global(img) { width: 16px !important; height: 16px !important; max-width: 16px; max-height: 16px; flex-shrink: 0; }
-          @media (min-width: 640px) { .nb-support :global(svg), .nb-support :global(img) { width: 18px !important; height: 18px !important; max-width: 18px; max-height: 18px; } }
-          .nb-tag { flex-shrink: 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #22E4FF;
-            background: rgba(34, 228, 255, 0.12); border: 1px solid rgba(34, 228, 255, 0.35); text-transform: capitalize; }
-          .nb-x { flex-shrink: 0; display: inline-flex; background: none; border: none; cursor: pointer; color: #C9D2F5; padding: 4px; }
-          .nb-actions { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: 10px; }
-          @media (min-width: 640px) { .nb-actions { gap: 14px; } }
-          .nb-paste, .nb-grab { height: 54px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; font-weight: 700; font-size: clamp(0.92rem, 0.8rem + 0.5vw, 1.1rem); cursor: pointer; color: #fff; white-space: nowrap;
-            transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
-          .nb-paste { background: rgba(14, 22, 62, 0.9); border: 1.5px solid rgba(139, 162, 255, 0.4); }
-          .nb-paste:hover { border-color: rgba(34, 228, 255, 0.7); }
-          .nb-grab { border: none; background: linear-gradient(90deg, #22E4FF 0%, #4F8CFF 52%, #A855F7 100%);
-            box-shadow: 0 10px 28px -10px rgba(34, 228, 255, 0.8), 0 0 24px -6px rgba(168, 85, 247, 0.6); }
-          .nb-grab:hover:not(:disabled) { transform: translateY(-1px); }
-          .nb-paste:active, .nb-grab:active { transform: scale(0.98); }
-          .nb-paste:disabled, .nb-grab:disabled { opacity: 0.7; cursor: progress; }
-          .nb-paste:focus-visible, .nb-grab:focus-visible, .nb-x:focus-visible { outline: 2px solid #22E4FF; outline-offset: 2px; }
-          @media (min-width: 640px) { .nb-paste, .nb-grab { height: 60px; border-radius: 18px; gap: 10px; } }
-          @media (max-width: 400px) { .nb-paste span { font-size: 0.88rem; } .nb-actions { gap: 8px; } .nb-tag { display: none; } }
-        `}</style>
-      </div>
-    );
-  }
+      {/* Extracted Media Result Showcase */}
+      {result && (
+        <div className="gb-result-card">
+          {/* Author / Profile Header */}
+          {(result.author?.username || result.author?.avatar || result.title) && (
+            <div className="gb-result-header">
+              <div className="gb-author-box">
+                {result.author?.avatar && (
+                  <img
+                    src={buildDownloadProxyUrl(result.author.avatar, "avatar")}
+                    alt={result.author.username || "Creator"}
+                    className="gb-author-avatar"
+                  />
+                )}
+                <div>
+                  <div className="gb-author-name-row">
+                    <span className="gb-author-name">
+                      {result.author?.fullName ||
+                        (result.author?.username
+                          ? `@${result.author.username}`
+                          : result.title)}
+                    </span>
+                    {result.author?.verified && (
+                      <span className="gb-verified" title="Verified">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  {result.author?.username && (
+                    <span className="gb-author-handle">
+                      @{result.author.username}
+                    </span>
+                  )}
+                </div>
+              </div>
 
+              {/* Profile Stats if available */}
+              {typeof result.author?.followers === "number" && (
+                <div className="gb-profile-stats">
+                  <div className="gb-stat">
+                    <strong>{result.author.followers.toLocaleString()}</strong>
+                    <span>Followers</span>
+                  </div>
+                  {typeof result.author.following === "number" && (
+                    <div className="gb-stat">
+                      <strong>{result.author.following.toLocaleString()}</strong>
+                      <span>Following</span>
+                    </div>
+                  )}
+                  {typeof result.author.postsCount === "number" && (
+                    <div className="gb-stat">
+                      <strong>{result.author.postsCount.toLocaleString()}</strong>
+                      <span>Posts</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-  return (
-    <div style={{ width: "100%" }}>
-      <div
-        className={`bar gbar ${loading ? "loading" : ""} ${invalid ? "shake" : ""} ${intro ? "bar-intro" : ""}`}
-        style={{
-          maxWidth: 720, margin: "0 auto",
-          borderColor: flash ? "var(--gold-400)" : undefined,
-          transition: "border-color 200ms var(--ease-silk)",
-        }}>
-        <span className="gbar-icon" aria-hidden="true"><Link2 size={20} strokeWidth={1.5} /></span>
+              {result.author?.avatar && (
+                <a
+                  href={buildDownloadProxyUrl(
+                    result.author.avatar,
+                    `${result.author.username || "profile"}-dp.jpg`
+                  )}
+                  download
+                  className="gb-dp-btn"
+                >
+                  ⬇️ Download HD DP
+                </a>
+              )}
+            </div>
+          )}
 
-        {showChip ? (
-          <span className="gbar-chip mono">
-            <detected.Icon size={14} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />
-            <button onClick={() => setEditing(true)} title="Edit link"
-              style={{ background: "none", border: "none", cursor: "text", padding: 0, font: "inherit", color: "inherit" }}>
-              {detected.label}/{detected.hint}…
-            </button>
-            <button onClick={() => setEditing(true)} aria-label="Edit link" title="Edit link"
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--gold-ink)" }}>
-              <Pencil size={13} strokeWidth={1.5} />
-            </button>
-            <button onClick={clear} aria-label="Clear" style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "inline-flex", color: "var(--ink-3)" }}>
-              <X size={14} strokeWidth={1.5} />
-            </button>
-          </span>
-        ) : (
-          <input
-            ref={inputRef} value={value} disabled={loading}
-            onChange={e => setValue(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && go()}
-            onBlur={() => { if (editing && detected) setEditing(false); }}
-            placeholder={t("smartPlaceholder")}
-            aria-label="Instagram link or username"
-            className="gbar-input"
-          />
-        )}
+          {/* Media Items Grid (Supports Single Video/Image or Multi-Slide Carousel) */}
+          {result.media && result.media.length > 0 && (
+            <div className="gb-media-grid">
+              {result.media.map((item, idx) => {
+                const ext = item.type === "video" ? "mp4" : "jpg";
+                const fname = `${
+                  result.author?.username || "instagram"
+                }-${idx + 1}.${ext}`;
+                const downloadHref = buildDownloadProxyUrl(item.url, fname);
 
-        {canPaste && !detected && !loading && (
-          <button className="btn btn-ghost mono gbar-paste" onClick={paste} style={{ fontSize: 12, letterSpacing: ".12em", minHeight: 40, textTransform: "uppercase" }}>
-            <ClipboardPaste size={16} strokeWidth={1.5} /> {t("paste")}
-          </button>
-        )}
+                return (
+                  <div key={`${item.url}-${idx}`} className="gb-media-item">
+                    <div className="gb-media-preview">
+                      {item.type === "video" ? (
+                        <video
+                          src={item.url}
+                          poster={item.thumbnail || result.thumbnail}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="gb-video"
+                        />
+                      ) : (
+                        <img
+                          src={buildDownloadProxyUrl(item.url, fname)}
+                          alt={`Slide ${idx + 1}`}
+                          loading="lazy"
+                          className="gb-image"
+                        />
+                      )}
+                      <span className="gb-quality-tag">
+                        {item.quality || (item.type === "video" ? "HD MP4" : "HD JPG")}
+                      </span>
+                    </div>
 
-        <button className="btn btn-molten gbar-go" onClick={go} disabled={loading} style={{ height: 48 }}>
-          <Download size={20} strokeWidth={1.5} />
-          <span style={{ transition: "opacity 240ms var(--ease-silk)" }}>{loading ? t("fetching") : t("download")}</span>
-        </button>
-      </div>
+                    <div className="gb-media-footer">
+                      <a
+                        href={downloadHref}
+                        download={fname}
+                        className="gb-download-primary"
+                      >
+                        <span>
+                          ⬇️ Download {item.type === "video" ? "Video (MP4)" : "Photo (HD)"}
+                        </span>
+                      </a>
 
-      {below}
+                      {item.thumbnail && item.type === "video" && (
+                        <a
+                          href={buildDownloadProxyUrl(
+                            item.thumbnail,
+                            `${result.author?.username || "reel"}-thumb.jpg`
+                          )}
+                          download
+                          className="gb-download-secondary"
+                        >
+                          🖼️ Cover Thumbnail
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Caption & Quick Creator Follow-up Actions */}
+          {result.caption && (
+            <div className="gb-caption-box">
+              <div className="gb-caption-top">
+                <span className="gb-caption-label">📝 Post Caption & Hashtags</span>
+                <button
+                  type="button"
+                  onClick={handleCopyCaption}
+                  className="gb-copy-btn"
+                >
+                  {copiedCaption ? "✓ Copied!" : "📋 Copy Caption"}
+                </button>
+              </div>
+              <p className="gb-caption-text">{result.caption}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <style jsx>{`
-        .gbar{ display:flex; align-items:center; gap:8px; height:64px; padding:8px 8px 8px 20px; }
-        .gbar-icon{ color:var(--ink-3); display:inline-flex; flex-shrink:0; }
-        .gbar-input{ flex:1; min-width:0; background:none; border:none; font-size:15px; color:var(--ink); }
-        .gbar-input::placeholder{ color:var(--ink-3); }
-        .gbar-chip{ flex:1; display:inline-flex; align-items:center; gap:8px; font-size:13px;
-          background:var(--surface-2); border:1px solid var(--gold-400); border-radius:999px;
-          padding:6px 12px; color:var(--ink-2); animation:coinpop 240ms var(--ease-coin); max-width:max-content; }
-        .gbar:focus-within{ border-color:var(--gold-400); box-shadow:var(--focus-ring); }
-        .gbar.loading:focus-within{ box-shadow:none; }
-        @media (max-width:639px){
-          .gbar{ flex-wrap:wrap; height:auto; border-radius:24px; padding:12px; }
-          .gbar-input{ flex:1 1 60%; height:44px; }
-          .gbar-chip{ order:1; }
-          .gbar-paste{ order:2; }
-          .gbar-go{ order:3; width:100%; }
+        .gb-wrapper {
+          width: 100%;
+          max-width: 820px;
+          margin: 0 auto;
+        }
+        .gb-compact {
+          max-width: 680px;
+        }
+        .gb-modes {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.45rem;
+          margin-bottom: 0.9rem;
+        }
+        .gb-mode-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.38rem;
+          padding: 0.42rem 0.85rem;
+          border-radius: 999px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          border: 1px solid rgba(245, 158, 11, 0.25);
+          background: rgba(15, 23, 42, 0.04);
+          color: inherit;
+          cursor: pointer;
+          transition: all 0.18s ease;
+        }
+        .gb-mode-pill:hover {
+          border-color: rgba(245, 158, 11, 0.6);
+          transform: translateY(-1px);
+        }
+        .gb-mode-active {
+          background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6);
+          color: #ffffff;
+          border-color: transparent;
+          box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+        }
+        .gb-form {
+          width: 100%;
+        }
+        .gb-bar-outer {
+          padding: 3px;
+          border-radius: 20px;
+          background: linear-gradient(
+            120deg,
+            #f59e0b 0%,
+            #ec4899 50%,
+            #8b5cf6 100%
+          );
+          box-shadow: 0 14px 35px -10px rgba(236, 72, 153, 0.32),
+            0 0 0 1px rgba(245, 158, 11, 0.2);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .gb-bar-outer:focus-within {
+          transform: translateY(-1px);
+          box-shadow: 0 18px 42px -10px rgba(236, 72, 153, 0.45),
+            0 0 0 3px rgba(245, 158, 11, 0.28);
+        }
+        .gb-bar-inner {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.45rem 0.5rem 0.45rem 0.75rem;
+          border-radius: 17px;
+          background: var(--background, #0f172a);
+          color: var(--foreground, #f8fafc);
+        }
+        .gb-platform-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.38rem 0.7rem;
+          border-radius: 12px;
+          border: 1px solid;
+          font-size: 0.76rem;
+          font-weight: 700;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .gb-input {
+          flex: 1;
+          min-width: 0;
+          border: none;
+          background: transparent;
+          color: inherit;
+          font-size: 0.98rem;
+          padding: 0.65rem 0.4rem;
+          outline: none;
+        }
+        .gb-input::placeholder {
+          opacity: 0.55;
+        }
+        .gb-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          flex-shrink: 0;
+        }
+        .gb-paste-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          padding: 0.55rem 0.85rem;
+          border-radius: 12px;
+          border: 1px solid rgba(148, 163, 184, 0.28);
+          background: rgba(148, 163, 184, 0.1);
+          color: inherit;
+          font-size: 0.82rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s ease;
+        }
+        .gb-paste-btn:hover {
+          background: rgba(148, 163, 184, 0.2);
+        }
+        .gb-clear-btn {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(148, 163, 184, 0.18);
+          color: inherit;
+          cursor: pointer;
+          font-size: 0.8rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .gb-submit-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45rem;
+          padding: 0.78rem 1.35rem;
+          border-radius: 13px;
+          border: none;
+          background: linear-gradient(135deg, #f59e0b 0%, #ec4899 60%, #8b5cf6 100%);
+          color: #ffffff;
+          font-size: 0.92rem;
+          font-weight: 800;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
+          transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        .gb-submit-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+        }
+        .gb-submit-btn:disabled {
+          opacity: 0.75;
+          cursor: wait;
+        }
+        .gb-spinner-wrap {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .gb-spinner {
+          width: 15px;
+          height: 15px;
+          border: 2px solid rgba(255, 255, 255, 0.35);
+          border-top-color: #ffffff;
+          border-radius: 50%;
+          animation: gbSpin 0.7s linear infinite;
+        }
+        @keyframes gbSpin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .gb-trust-row {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          gap: 0.55rem;
+          margin-top: 0.75rem;
+          font-size: 0.78rem;
+          opacity: 0.75;
+        }
+        .gb-trust-sep {
+          opacity: 0.4;
+        }
+        .gb-history-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 0.85rem;
+          padding: 0.55rem 0.85rem;
+          border-radius: 12px;
+          background: rgba(148, 163, 184, 0.06);
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          font-size: 0.78rem;
+        }
+        .gb-history-left {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+        }
+        .gb-history-label {
+          font-weight: 700;
+          opacity: 0.75;
+        }
+        .gb-history-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.35rem;
+        }
+        .gb-history-chip {
+          padding: 0.2rem 0.55rem;
+          border-radius: 999px;
+          border: 1px solid rgba(148, 163, 184, 0.25);
+          background: transparent;
+          color: inherit;
+          font-size: 0.74rem;
+          cursor: pointer;
+        }
+        .gb-history-chip:hover {
+          border-color: #ec4899;
+          color: #ec4899;
+        }
+        .gb-history-right {
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+        }
+        .gb-history-link {
+          color: #ec4899;
+          text-decoration: none;
+          font-weight: 600;
+        }
+        .gb-history-clear {
+          border: none;
+          background: transparent;
+          color: inherit;
+          opacity: 0.65;
+          cursor: pointer;
+          font-size: 0.74rem;
+        }
+        .gb-error-card {
+          margin-top: 1.1rem;
+          padding: 1rem 1.15rem;
+          border-radius: 16px;
+          border: 1px solid rgba(239, 68, 68, 0.35);
+          background: rgba(239, 68, 68, 0.08);
+          text-align: left;
+        }
+        .gb-error-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+        .gb-error-icon {
+          font-size: 1.25rem;
+        }
+        .gb-error-title {
+          margin: 0 0 0.2rem;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #f87171;
+        }
+        .gb-error-desc {
+          margin: 0;
+          font-size: 0.85rem;
+          opacity: 0.88;
+        }
+        .gb-error-tips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.35rem;
+          margin-top: 0.65rem;
+          padding-top: 0.6rem;
+          border-top: 1px dashed rgba(239, 68, 68, 0.25);
+          font-size: 0.78rem;
+          opacity: 0.85;
+        }
+        .gb-error-link {
+          color: #f472b6;
+          font-weight: 700;
+          text-decoration: underline;
+        }
+        .gb-result-card {
+          margin-top: 1.4rem;
+          padding: 1.25rem;
+          border-radius: 20px;
+          border: 1px solid rgba(236, 72, 153, 0.28);
+          background: rgba(15, 23, 42, 0.04);
+          text-align: left;
+        }
+        .gb-result-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 0.85rem;
+          padding-bottom: 1rem;
+          margin-bottom: 1rem;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        .gb-author-box {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        .gb-author-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid #ec4899;
+        }
+        .gb-author-name-row {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .gb-author-name {
+          font-weight: 800;
+          font-size: 1rem;
+        }
+        .gb-verified {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #3b82f6;
+          color: #fff;
+          font-size: 0.65rem;
+          font-weight: 800;
+        }
+        .gb-author-handle {
+          font-size: 0.82rem;
+          opacity: 0.7;
+        }
+        .gb-profile-stats {
+          display: flex;
+          gap: 1rem;
+        }
+        .gb-stat {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 0.78rem;
+        }
+        .gb-dp-btn {
+          padding: 0.5rem 0.9rem;
+          border-radius: 10px;
+          background: rgba(245, 158, 11, 0.15);
+          border: 1px solid rgba(245, 158, 11, 0.4);
+          color: #fbbf24;
+          text-decoration: none;
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+        .gb-media-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+        .gb-media-item {
+          display: flex;
+          flex-direction: column;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          background: rgba(0, 0, 0, 0.15);
+        }
+        .gb-media-preview {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 5;
+          background: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .gb-video,
+        .gb-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        .gb-quality-tag {
+          position: absolute;
+          top: 0.6rem;
+          right: 0.6rem;
+          padding: 0.2rem 0.55rem;
+          border-radius: 999px;
+          background: rgba(0, 0, 0, 0.72);
+          color: #fff;
+          font-size: 0.7rem;
+          font-weight: 700;
+        }
+        .gb-media-footer {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45rem;
+          padding: 0.75rem;
+        }
+        .gb-download-primary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.7rem 1rem;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #ec4899, #8b5cf6);
+          color: #ffffff;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.86rem;
+          text-align: center;
+        }
+        .gb-download-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.5rem 0.85rem;
+          border-radius: 10px;
+          border: 1px solid rgba(148, 163, 184, 0.25);
+          color: inherit;
+          text-decoration: none;
+          font-size: 0.78rem;
+          font-weight: 600;
+        }
+        .gb-caption-box {
+          margin-top: 1rem;
+          padding: 0.85rem 1rem;
+          border-radius: 12px;
+          background: rgba(148, 163, 184, 0.06);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        .gb-caption-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.45rem;
+        }
+        .gb-caption-label {
+          font-size: 0.78rem;
+          font-weight: 700;
+          opacity: 0.75;
+        }
+        .gb-copy-btn {
+          padding: 0.28rem 0.65rem;
+          border-radius: 8px;
+          border: 1px solid rgba(236, 72, 153, 0.35);
+          background: rgba(236, 72, 153, 0.1);
+          color: #f472b6;
+          font-size: 0.75rem;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .gb-caption-text {
+          margin: 0;
+          font-size: 0.84rem;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          max-height: 110px;
+          overflow-y: auto;
+          opacity: 0.85;
+        }
+        @media (max-width: 640px) {
+          .gb-bar-inner {
+            flex-wrap: wrap;
+            padding: 0.55rem;
+          }
+          .gb-platform-text {
+            display: none;
+          }
+          .gb-actions {
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 0.35rem;
+          }
+          .gb-submit-btn {
+            flex: 1;
+          }
         }
       `}</style>
     </div>
   );
 }
+
+export default GoldenBar;
