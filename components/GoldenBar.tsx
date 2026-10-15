@@ -84,18 +84,19 @@ export interface GoldenBarProps {
   showHistory?: boolean;
   showTrustBadges?: boolean;
   onResult?: (data: ExtractedResult) => void;
+  onExtract?: (data: ExtractedResult) => void;
   onError?: (message: string) => void;
   className?: string;
   [key: string]: unknown;
 }
 
-type DetectedPlatform = {
+interface DetectedPlatform {
   id: string;
   label: string;
   icon: string;
   color: string;
   isUsername?: boolean;
-};
+}
 
 const QUICK_MODES: { id: GoldenBarMode; label: string; icon: string; hint: string }[] = [
   { id: "auto", label: "Auto Detect", icon: "✨", hint: "Paste any link or @username..." },
@@ -107,6 +108,22 @@ const QUICK_MODES: { id: GoldenBarMode; label: string; icon: string; hint: strin
 ];
 
 const HISTORY_STORAGE_KEY = "ig_goldenbar_recent_v1";
+
+function isRecord(val: unknown): val is Record<string, unknown> {
+  return typeof val === "object" && val !== null && !Array.isArray(val);
+}
+
+function getStr(val: unknown): string | undefined {
+  return typeof val === "string" && val.trim().length > 0 ? val.trim() : undefined;
+}
+
+function getNum(val: unknown): number | undefined {
+  return typeof val === "number" && !Number.isNaN(val) ? val : undefined;
+}
+
+function getBool(val: unknown): boolean {
+  return Boolean(val);
+}
 
 function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
   const val = raw.trim();
@@ -148,7 +165,6 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
     return { id: "youtube", label: "YouTube", icon: "▶️", color: "#ef4444" };
   }
 
-  // Check if it looks like an @username
   const cleanHandle = val.replace(/^@/, "");
   const isHandlePattern = /^[a-zA-Z0-9._]{1,30}$/.test(cleanHandle);
   if (
@@ -169,72 +185,99 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
   return { id: "url", label: "Web Link", icon: "🔗", color: "#8b5cf6" };
 }
 
-function buildDownloadProxyUrl(mediaUrl: string, filename = "instagram-media") {
+function buildDownloadProxyUrl(mediaUrl: string, filename = "instagram-media"): string {
   if (!mediaUrl) return "#";
   return `/api/download?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(filename)}`;
 }
 
-function normalizeApiResponse(raw: any, inputVal: string): ExtractedResult {
-  const data = raw?.data || raw?.result || raw;
+function normalizeApiResponse(rawPayload: unknown, inputVal: string): ExtractedResult {
+  const root = isRecord(rawPayload) ? rawPayload : {};
+  const data = isRecord(root.data)
+    ? root.data
+    : isRecord(root.result)
+    ? root.result
+    : root;
 
   const mediaList: MediaItem[] = [];
 
-  if (Array.isArray(data?.media)) {
+  if (Array.isArray(data.media)) {
     for (const item of data.media) {
       if (typeof item === "string") {
         mediaList.push({
           url: item,
           type: item.includes(".mp4") ? "video" : "image",
         });
-      } else if (item?.url || item?.src || item?.videoUrl || item?.imageUrl) {
-        mediaList.push({
-          url: item.url || item.videoUrl || item.imageUrl || item.src,
-          type:
-            item.type === "video" || item.isVideo || Boolean(item.videoUrl)
-              ? "video"
-              : item.type === "audio"
-              ? "audio"
-              : "image",
-          thumbnail: item.thumbnail || item.poster || item.preview,
-          quality: item.quality || "HD",
-        });
+      } else if (isRecord(item)) {
+        const itemUrl =
+          getStr(item.url) ||
+          getStr(item.videoUrl) ||
+          getStr(item.imageUrl) ||
+          getStr(item.src);
+        if (itemUrl) {
+          const isVid =
+            item.type === "video" ||
+            getBool(item.isVideo) ||
+            Boolean(getStr(item.videoUrl));
+          mediaList.push({
+            url: itemUrl,
+            type: isVid ? "video" : item.type === "audio" ? "audio" : "image",
+            thumbnail:
+              getStr(item.thumbnail) ||
+              getStr(item.poster) ||
+              getStr(item.preview),
+            quality: getStr(item.quality) || "HD",
+          });
+        }
       }
     }
-  } else if (Array.isArray(data?.items)) {
+  } else if (Array.isArray(data.items)) {
     for (const item of data.items) {
-      const u = item?.url || item?.video_url || item?.display_url || item?.src;
-      if (u) {
-        mediaList.push({
-          url: u,
-          type:
-            item?.type === "video" || item?.is_video || Boolean(item?.video_url)
-              ? "video"
-              : "image",
-          thumbnail: item?.thumbnail || item?.display_url,
-          quality: item?.quality || "HD",
-        });
+      if (isRecord(item)) {
+        const u =
+          getStr(item.url) ||
+          getStr(item.video_url) ||
+          getStr(item.display_url) ||
+          getStr(item.src);
+        if (u) {
+          const isVid =
+            item.type === "video" ||
+            getBool(item.is_video) ||
+            Boolean(getStr(item.video_url));
+          mediaList.push({
+            url: u,
+            type: isVid ? "video" : "image",
+            thumbnail: getStr(item.thumbnail) || getStr(item.display_url),
+            quality: getStr(item.quality) || "HD",
+          });
+        }
       }
     }
   }
 
   const singleVideo =
-    data?.videoUrl || data?.video_url || data?.video || (data?.type === "video" ? data?.url : undefined);
+    getStr(data.videoUrl) ||
+    getStr(data.video_url) ||
+    getStr(data.video) ||
+    (data.type === "video" ? getStr(data.url) : undefined);
+
   const singleImage =
-    data?.imageUrl ||
-    data?.display_url ||
-    data?.profilePicHd ||
-    data?.profile_pic_url_hd ||
-    data?.avatar ||
-    data?.thumbnail ||
-    (data?.type === "image" ? data?.url : undefined);
-  const singleAudio = data?.audioUrl || data?.audio_url || data?.musicUrl;
+    getStr(data.imageUrl) ||
+    getStr(data.display_url) ||
+    getStr(data.profilePicHd) ||
+    getStr(data.profile_pic_url_hd) ||
+    getStr(data.avatar) ||
+    getStr(data.thumbnail) ||
+    (data.type === "image" ? getStr(data.url) : undefined);
+
+  const singleAudio =
+    getStr(data.audioUrl) || getStr(data.audio_url) || getStr(data.musicUrl);
 
   if (mediaList.length === 0) {
     if (singleVideo) {
       mediaList.push({
         url: singleVideo,
         type: "video",
-        thumbnail: singleImage || data?.thumbnail,
+        thumbnail: singleImage || getStr(data.thumbnail),
         quality: "Full HD",
       });
     } else if (singleImage) {
@@ -244,76 +287,593 @@ function normalizeApiResponse(raw: any, inputVal: string): ExtractedResult {
         thumbnail: singleImage,
         quality: "Original HD",
       });
-    } else if (data?.url && typeof data.url === "string") {
-      mediaList.push({
-        url: data.url,
-        type: data.url.includes(".mp4") ? "video" : "image",
-        thumbnail: data.thumbnail,
-        quality: "HD",
-      });
-    }
-  }
-
-  // Also append recent posts if profile API returned posts
-  if (Array.isArray(data?.posts) && mediaList.length <= 1) {
-    for (const post of data.posts) {
-      const postUrl = post?.videoUrl || post?.video_url || post?.displayUrl || post?.display_url || post?.url;
-      if (postUrl) {
+    } else {
+      const directUrl = getStr(data.url);
+      if (directUrl) {
         mediaList.push({
-          url: postUrl,
-          type: post?.isVideo || post?.is_video || Boolean(post?.videoUrl) ? "video" : "image",
-          thumbnail: post?.thumbnail || post?.displayUrl || post?.display_url,
-          quality: "Feed Post",
+          url: directUrl,
+          type: directUrl.includes(".mp4") ? "video" : "image",
+          thumbnail: getStr(data.thumbnail),
+          quality: "HD",
         });
       }
     }
   }
 
+  if (Array.isArray(data.posts) && mediaList.length <= 1) {
+    for (const post of data.posts) {
+      if (isRecord(post)) {
+        const postUrl =
+          getStr(post.videoUrl) ||
+          getStr(post.video_url) ||
+          getStr(post.displayUrl) ||
+          getStr(post.display_url) ||
+          getStr(post.url);
+        if (postUrl) {
+          const isVid =
+            getBool(post.isVideo) ||
+            getBool(post.is_video) ||
+            Boolean(getStr(post.videoUrl));
+          mediaList.push({
+            url: postUrl,
+            type: isVid ? "video" : "image",
+            thumbnail:
+              getStr(post.thumbnail) ||
+              getStr(post.displayUrl) ||
+              getStr(post.display_url),
+            quality: "Feed Post",
+          });
+        }
+      }
+    }
+  }
+
+  const authorRec = isRecord(data.author) ? data.author : {};
+  const ownerRec = isRecord(data.owner) ? data.owner : {};
+  const followedByRec = isRecord(data.edge_followed_by) ? data.edge_followed_by : {};
+  const followRec = isRecord(data.edge_follow) ? data.edge_follow : {};
+  const timelineRec = isRecord(data.edge_owner_to_timeline_media)
+    ? data.edge_owner_to_timeline_media
+    : {};
+
   const username =
-    data?.author?.username ||
-    data?.username ||
-    data?.owner?.username ||
+    getStr(authorRec.username) ||
+    getStr(data.username) ||
+    getStr(ownerRec.username) ||
     (inputVal.startsWith("@") ? inputVal.slice(1) : undefined);
+
+  const captionText =
+    getStr(data.caption) || getStr(data.description) || getStr(data.bio) || "";
+
+  const authorAvatar =
+    getStr(authorRec.avatar) ||
+    getStr(data.profilePicHd) ||
+    getStr(data.profile_pic_url_hd) ||
+    getStr(data.profilePic) ||
+    getStr(data.avatar);
 
   return {
     success: true,
-    platform: data?.platform || "instagram",
-    type: data?.type || (mediaList[0]?.type ?? "media"),
+    platform: getStr(data.platform) || "instagram",
+    type: getStr(data.type) || (mediaList[0]?.type ?? "media"),
     title:
-      data?.title ||
-      data?.caption?.slice(0, 90) ||
+      getStr(data.title) ||
+      (captionText ? captionText.slice(0, 90) : undefined) ||
       (username ? `@${username}` : "Instagram Media"),
-    caption: data?.caption || data?.description || data?.bio || "",
+    caption: captionText,
     author: {
-      username: username,
-      fullName: data?.author?.fullName || data?.fullName || data?.full_name || data?.owner?.full_name,
-      avatar:
-        data?.author?.avatar ||
-        data?.profilePicHd ||
-        data?.profile_pic_url_hd ||
-        data?.profilePic ||
-        data?.avatar,
-      verified: Boolean(data?.author?.verified || data?.isVerified || data?.is_verified),
-      followers: data?.followers ?? data?.edge_followed_by?.count,
-      following: data?.following ?? data?.edge_follow?.count,
-      postsCount: data?.postsCount ?? data?.edge_owner_to_timeline_media?.count,
-      bio: data?.bio || data?.biography,
+      username,
+      fullName:
+        getStr(authorRec.fullName) ||
+        getStr(data.fullName) ||
+        getStr(data.full_name) ||
+        getStr(ownerRec.full_name),
+      avatar: authorAvatar,
+      verified:
+        getBool(authorRec.verified) ||
+        getBool(data.isVerified) ||
+        getBool(data.is_verified),
+      followers: getNum(data.followers) ?? getNum(followedByRec.count),
+      following: getNum(data.following) ?? getNum(followRec.count),
+      postsCount: getNum(data.postsCount) ?? getNum(timelineRec.count),
+      bio: getStr(data.bio) || getStr(data.biography),
     },
     thumbnail:
-      data?.thumbnail ||
+      getStr(data.thumbnail) ||
       mediaList[0]?.thumbnail ||
       singleImage ||
-      data?.author?.avatar,
+      authorAvatar,
     url: mediaList[0]?.url || singleVideo || singleImage,
     videoUrl: singleVideo || mediaList.find((m) => m.type === "video")?.url,
     imageUrl: singleImage || mediaList.find((m) => m.type === "image")?.url,
     audioUrl: singleAudio,
     media: mediaList,
-    likes: data?.likes ?? data?.like_count,
-    comments: data?.comments ?? data?.comment_count,
-    views: data?.views ?? data?.view_count,
+    likes: getNum(data.likes) ?? getNum(data.like_count),
+    comments: getNum(data.comments) ?? getNum(data.comment_count),
+    views: getNum(data.views) ?? getNum(data.view_count),
   };
 }
+
+const GOLDEN_BAR_STYLES = `
+  .gb-wrapper {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+  .gb-compact {
+    max-width: 680px;
+  }
+  .gb-modes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+  }
+  .gb-mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: rgba(15, 23, 42, 0.04);
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .gb-mode-pill:hover {
+    border-color: rgba(245, 158, 11, 0.6);
+    transform: translateY(-1px);
+  }
+  .gb-mode-active {
+    background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+  }
+  .gb-form {
+    width: 100%;
+  }
+  .gb-bar-outer {
+    padding: 3px;
+    border-radius: 20px;
+    background: linear-gradient(120deg, #f59e0b 0%, #ec4899 50%, #8b5cf6 100%);
+    box-shadow: 0 14px 35px -10px rgba(236, 72, 153, 0.32), 0 0 0 1px rgba(245, 158, 11, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .gb-bar-outer:focus-within {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 42px -10px rgba(236, 72, 153, 0.45), 0 0 0 3px rgba(245, 158, 11, 0.28);
+  }
+  .gb-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.75rem;
+    border-radius: 17px;
+    background: var(--background, #0f172a);
+    color: var(--foreground, #f8fafc);
+  }
+  .gb-platform-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.7rem;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .gb-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 0.98rem;
+    padding: 0.65rem 0.4rem;
+    outline: none;
+  }
+  .gb-input::placeholder {
+    opacity: 0.55;
+  }
+  .gb-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+  }
+  .gb-paste-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(148, 163, 184, 0.1);
+    color: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .gb-paste-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+  }
+  .gb-clear-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(148, 163, 184, 0.18);
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gb-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.78rem 1.35rem;
+    border-radius: 13px;
+    border: none;
+    background: linear-gradient(135deg, #f59e0b 0%, #ec4899 60%, #8b5cf6 100%);
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .gb-submit-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .gb-submit-btn:disabled {
+    opacity: 0.75;
+    cursor: wait;
+  }
+  .gb-spinner-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .gb-spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: gbSpin 0.7s linear infinite;
+  }
+  @keyframes gbSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .gb-trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    opacity: 0.75;
+  }
+  .gb-trust-sep {
+    opacity: 0.4;
+  }
+  .gb-history-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    font-size: 0.78rem;
+  }
+  .gb-history-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .gb-history-label {
+    font-weight: 700;
+    opacity: 0.75;
+  }
+  .gb-history-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .gb-history-chip {
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: transparent;
+    color: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+  }
+  .gb-history-chip:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+  .gb-history-right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .gb-history-link {
+    color: #ec4899;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .gb-history-clear {
+    border: none;
+    background: transparent;
+    color: inherit;
+    opacity: 0.65;
+    cursor: pointer;
+    font-size: 0.74rem;
+  }
+  .gb-error-card {
+    margin-top: 1.1rem;
+    padding: 1rem 1.15rem;
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.08);
+    text-align: left;
+  }
+  .gb-error-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .gb-error-icon {
+    font-size: 1.25rem;
+  }
+  .gb-error-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f87171;
+  }
+  .gb-error-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.88;
+  }
+  .gb-error-tips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed rgba(239, 68, 68, 0.25);
+    font-size: 0.78rem;
+    opacity: 0.85;
+  }
+  .gb-error-link {
+    color: #f472b6;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+  .gb-result-card {
+    margin-top: 1.4rem;
+    padding: 1.25rem;
+    border-radius: 20px;
+    border: 1px solid rgba(236, 72, 153, 0.28);
+    background: rgba(15, 23, 42, 0.04);
+    text-align: left;
+  }
+  .gb-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .gb-author-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .gb-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ec4899;
+  }
+  .gb-author-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .gb-author-name {
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .gb-verified {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+  }
+  .gb-author-handle {
+    font-size: 0.82rem;
+    opacity: 0.7;
+  }
+  .gb-profile-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  .gb-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.78rem;
+  }
+  .gb-dp-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .gb-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  .gb-media-item {
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .gb-media-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gb-video,
+  .gb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .gb-quality-tag {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .gb-media-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.75rem;
+  }
+  .gb-download-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.86rem;
+    text-align: center;
+  }
+  .gb-download-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .gb-caption-box {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .gb-caption-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+  }
+  .gb-caption-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.75;
+  }
+  .gb-copy-btn {
+    padding: 0.28rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid rgba(236, 72, 153, 0.35);
+    background: rgba(236, 72, 153, 0.1);
+    color: #f472b6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .gb-caption-text {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 110px;
+    overflow-y: auto;
+    opacity: 0.85;
+  }
+  @media (max-width: 640px) {
+    .gb-bar-inner {
+      flex-wrap: wrap;
+      padding: 0.55rem;
+    }
+    .gb-platform-text {
+      display: none;
+    }
+    .gb-actions {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 0.35rem;
+    }
+    .gb-submit-btn {
+      flex: 1;
+    }
+  }
+`;
 
 export function GoldenBar({
   placeholder,
@@ -328,6 +888,7 @@ export function GoldenBar({
   showHistory = true,
   showTrustBadges = true,
   onResult,
+  onExtract,
   onError,
   className = "",
 }: GoldenBarProps) {
@@ -342,22 +903,20 @@ export function GoldenBar({
   const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load recent history from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
+        const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          setRecentHistory(parsed.slice(0, 6));
+          setRecentHistory(parsed.slice(0, 6) as HistoryEntry[]);
         }
       }
     } catch {
-      // Ignore storage errors in private mode
+      // Ignore storage errors in private browsing
     }
   }, []);
 
-  // Keyboard shortcut Ctrl/Cmd + K to focus bar
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -410,7 +969,11 @@ export function GoldenBar({
   const handlePasteClipboard = async () => {
     setErrorMsg(null);
     try {
-      if (navigator.clipboard?.readText) {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.readText === "function"
+      ) {
         const clipText = await navigator.clipboard.readText();
         if (clipText && clipText.trim()) {
           setInput(clipText.trim());
@@ -441,7 +1004,7 @@ export function GoldenBar({
 
     try {
       let response: Response | null = null;
-      let payload: any = null;
+      let payload: unknown = null;
 
       // 1. Handle @username / Profile requests
       if (inputInfo.isUsername) {
@@ -487,7 +1050,7 @@ export function GoldenBar({
         }
       }
 
-      // 3. Handle Multi-Platform URLs (TikTok, FB, Pinterest, Threads, YouTube)
+      // 3. Handle Multi-Platform URLs
       if (
         !payload &&
         ["tiktok", "facebook", "pinterest", "threads", "youtube"].includes(
@@ -505,7 +1068,7 @@ export function GoldenBar({
         }
       }
 
-      // 4. Default / Primary Instagram Extractor (/api/extract)
+      // 4. Primary Instagram Extractor (/api/extract)
       if (!payload) {
         setLoadingStep("Extracting HD media from Instagram...");
         response = await fetch("/api/extract", {
@@ -518,7 +1081,6 @@ export function GoldenBar({
         });
 
         if (!response.ok) {
-          // Fallback to /api/og-extract if primary extractor fails
           const fallbackRes = await fetch("/api/og-extract", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -527,10 +1089,11 @@ export function GoldenBar({
           if (fallbackRes.ok) {
             payload = await fallbackRes.json();
           } else {
-            const errJson = await response.json().catch(() => ({}));
+            const errJson: unknown = await response.json().catch(() => ({}));
+            const errRec = isRecord(errJson) ? errJson : {};
             throw new Error(
-              errJson?.error ||
-                errJson?.message ||
+              getStr(errRec.error) ||
+                getStr(errRec.message) ||
                 "Could not extract media. Make sure the post or profile is public."
             );
           }
@@ -539,10 +1102,11 @@ export function GoldenBar({
         }
       }
 
-      if (!payload || payload.error) {
+      const payloadRec = isRecord(payload) ? payload : {};
+      if (!payload || payloadRec.error) {
         throw new Error(
-          payload?.error ||
-            payload?.message ||
+          getStr(payloadRec.error) ||
+            getStr(payloadRec.message) ||
             "Unable to fetch media right now. Please check the link and try again."
         );
       }
@@ -561,6 +1125,7 @@ export function GoldenBar({
 
       setResult(normalized);
       onResult?.(normalized);
+      onExtract?.(normalized);
 
       saveToHistory({
         input: targetInput,
@@ -568,10 +1133,11 @@ export function GoldenBar({
         title: normalized.title || targetInput,
         thumbnail: normalized.thumbnail,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.message ||
-        "Something went wrong while fetching media. Please verify the link.";
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while fetching media. Please verify the link.";
       setErrorMsg(msg);
       onError?.(msg);
     } finally {
@@ -581,15 +1147,17 @@ export function GoldenBar({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleExtract();
+    void handleExtract();
   };
 
   const handleCopyCaption = async () => {
     if (!result?.caption) return;
     try {
-      await navigator.clipboard.writeText(result.caption);
-      setCopiedCaption(true);
-      setTimeout(() => setCopiedCaption(false), 2000);
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(result.caption);
+        setCopiedCaption(true);
+        setTimeout(() => setCopiedCaption(false), 2000);
+      }
     } catch {
       // Ignore
     }
@@ -597,7 +1165,8 @@ export function GoldenBar({
 
   return (
     <div className={`gb-wrapper ${compact ? "gb-compact" : ""} ${className}`}>
-      {/* Quick Mode Selector Pills */}
+      <style dangerouslySetInnerHTML={{ __html: GOLDEN_BAR_STYLES }} />
+
       {showQuickModes && !compact && (
         <div className="gb-modes" role="tablist" aria-label="Download mode">
           {QUICK_MODES.map((m) => {
@@ -622,11 +1191,9 @@ export function GoldenBar({
         </div>
       )}
 
-      {/* Main Golden Input Form */}
       <form onSubmit={handleFormSubmit} className="gb-form" noValidate>
         <div className={`gb-bar-outer ${isLoading ? "gb-bar-loading" : ""}`}>
           <div className="gb-bar-inner">
-            {/* Detected Platform Badge */}
             <div
               className="gb-platform-chip"
               style={{
@@ -640,7 +1207,6 @@ export function GoldenBar({
               <span className="gb-platform-text">{detected.label}</span>
             </div>
 
-            {/* URL / Username Input */}
             <input
               ref={inputRef}
               type="text"
@@ -659,7 +1225,6 @@ export function GoldenBar({
               aria-label="Instagram URL or username"
             />
 
-            {/* Right Action Buttons inside Bar */}
             <div className="gb-actions">
               {input ? (
                 <button
@@ -679,7 +1244,9 @@ export function GoldenBar({
               ) : (
                 <button
                   type="button"
-                  onClick={handlePasteClipboard}
+                  onClick={() => {
+                    void handlePasteClipboard();
+                  }}
                   className="gb-paste-btn"
                   title="Paste from clipboard"
                 >
@@ -710,10 +1277,9 @@ export function GoldenBar({
         </div>
       </form>
 
-      {/* Trust & Speed Micro-Bar */}
       {showTrustBadges && !compact && (
         <div className="gb-trust-row">
-          <span className="gb-trust-item">🔒 100% Anonymous & Safe</span>
+          <span className="gb-trust-item">🔒 100% Anonymous &amp; Safe</span>
           <span className="gb-trust-sep">•</span>
           <span className="gb-trust-item">✨ Full HD / 4K Original Quality</span>
           <span className="gb-trust-sep">•</span>
@@ -721,7 +1287,6 @@ export function GoldenBar({
         </div>
       )}
 
-      {/* Recent Searches / Downloads Strip */}
       {showHistory && recentHistory.length > 0 && !result && !isLoading && (
         <div className="gb-history-bar">
           <div className="gb-history-left">
@@ -733,7 +1298,7 @@ export function GoldenBar({
                   type="button"
                   onClick={() => {
                     setInput(item.input);
-                    handleExtract(item.input);
+                    void handleExtract(item.input);
                   }}
                   className="gb-history-chip"
                   title={item.input}
@@ -762,7 +1327,6 @@ export function GoldenBar({
         </div>
       )}
 
-      {/* Error Alert Box */}
       {errorMsg && (
         <div className="gb-error-card" role="alert">
           <div className="gb-error-header">
@@ -787,10 +1351,8 @@ export function GoldenBar({
         </div>
       )}
 
-      {/* Extracted Media Result Showcase */}
       {result && (
         <div className="gb-result-card">
-          {/* Author / Profile Header */}
           {(result.author?.username || result.author?.avatar || result.title) && (
             <div className="gb-result-header">
               <div className="gb-author-box">
@@ -823,7 +1385,6 @@ export function GoldenBar({
                 </div>
               </div>
 
-              {/* Profile Stats if available */}
               {typeof result.author?.followers === "number" && (
                 <div className="gb-profile-stats">
                   <div className="gb-stat">
@@ -860,7 +1421,6 @@ export function GoldenBar({
             </div>
           )}
 
-          {/* Media Items Grid (Supports Single Video/Image or Multi-Slide Carousel) */}
           {result.media && result.media.length > 0 && (
             <div className="gb-media-grid">
               {result.media.map((item, idx) => {
@@ -925,14 +1485,15 @@ export function GoldenBar({
             </div>
           )}
 
-          {/* Caption & Quick Creator Follow-up Actions */}
           {result.caption && (
             <div className="gb-caption-box">
               <div className="gb-caption-top">
-                <span className="gb-caption-label">📝 Post Caption & Hashtags</span>
+                <span className="gb-caption-label">📝 Post Caption &amp; Hashtags</span>
                 <button
                   type="button"
-                  onClick={handleCopyCaption}
+                  onClick={() => {
+                    void handleCopyCaption();
+                  }}
                   className="gb-copy-btn"
                 >
                   {copiedCaption ? "✓ Copied!" : "📋 Copy Caption"}
@@ -943,494 +1504,6 @@ export function GoldenBar({
           )}
         </div>
       )}
-
-      <style jsx>{`
-        .gb-wrapper {
-          width: 100%;
-          max-width: 820px;
-          margin: 0 auto;
-        }
-        .gb-compact {
-          max-width: 680px;
-        }
-        .gb-modes {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 0.45rem;
-          margin-bottom: 0.9rem;
-        }
-        .gb-mode-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.38rem;
-          padding: 0.42rem 0.85rem;
-          border-radius: 999px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          border: 1px solid rgba(245, 158, 11, 0.25);
-          background: rgba(15, 23, 42, 0.04);
-          color: inherit;
-          cursor: pointer;
-          transition: all 0.18s ease;
-        }
-        .gb-mode-pill:hover {
-          border-color: rgba(245, 158, 11, 0.6);
-          transform: translateY(-1px);
-        }
-        .gb-mode-active {
-          background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6);
-          color: #ffffff;
-          border-color: transparent;
-          box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
-        }
-        .gb-form {
-          width: 100%;
-        }
-        .gb-bar-outer {
-          padding: 3px;
-          border-radius: 20px;
-          background: linear-gradient(
-            120deg,
-            #f59e0b 0%,
-            #ec4899 50%,
-            #8b5cf6 100%
-          );
-          box-shadow: 0 14px 35px -10px rgba(236, 72, 153, 0.32),
-            0 0 0 1px rgba(245, 158, 11, 0.2);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .gb-bar-outer:focus-within {
-          transform: translateY(-1px);
-          box-shadow: 0 18px 42px -10px rgba(236, 72, 153, 0.45),
-            0 0 0 3px rgba(245, 158, 11, 0.28);
-        }
-        .gb-bar-inner {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.45rem 0.5rem 0.45rem 0.75rem;
-          border-radius: 17px;
-          background: var(--background, #0f172a);
-          color: var(--foreground, #f8fafc);
-        }
-        .gb-platform-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.35rem;
-          padding: 0.38rem 0.7rem;
-          border-radius: 12px;
-          border: 1px solid;
-          font-size: 0.76rem;
-          font-weight: 700;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .gb-input {
-          flex: 1;
-          min-width: 0;
-          border: none;
-          background: transparent;
-          color: inherit;
-          font-size: 0.98rem;
-          padding: 0.65rem 0.4rem;
-          outline: none;
-        }
-        .gb-input::placeholder {
-          opacity: 0.55;
-        }
-        .gb-actions {
-          display: flex;
-          align-items: center;
-          gap: 0.45rem;
-          flex-shrink: 0;
-        }
-        .gb-paste-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          padding: 0.55rem 0.85rem;
-          border-radius: 12px;
-          border: 1px solid rgba(148, 163, 184, 0.28);
-          background: rgba(148, 163, 184, 0.1);
-          color: inherit;
-          font-size: 0.82rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.15s ease;
-        }
-        .gb-paste-btn:hover {
-          background: rgba(148, 163, 184, 0.2);
-        }
-        .gb-clear-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: none;
-          background: rgba(148, 163, 184, 0.18);
-          color: inherit;
-          cursor: pointer;
-          font-size: 0.8rem;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .gb-submit-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.45rem;
-          padding: 0.78rem 1.35rem;
-          border-radius: 13px;
-          border: none;
-          background: linear-gradient(135deg, #f59e0b 0%, #ec4899 60%, #8b5cf6 100%);
-          color: #ffffff;
-          font-size: 0.92rem;
-          font-weight: 800;
-          cursor: pointer;
-          white-space: nowrap;
-          box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
-          transition: transform 0.15s ease, opacity 0.15s ease;
-        }
-        .gb-submit-btn:hover:not(:disabled) {
-          transform: translateY(-1px);
-        }
-        .gb-submit-btn:disabled {
-          opacity: 0.75;
-          cursor: wait;
-        }
-        .gb-spinner-wrap {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .gb-spinner {
-          width: 15px;
-          height: 15px;
-          border: 2px solid rgba(255, 255, 255, 0.35);
-          border-top-color: #ffffff;
-          border-radius: 50%;
-          animation: gbSpin 0.7s linear infinite;
-        }
-        @keyframes gbSpin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .gb-trust-row {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          align-items: center;
-          gap: 0.55rem;
-          margin-top: 0.75rem;
-          font-size: 0.78rem;
-          opacity: 0.75;
-        }
-        .gb-trust-sep {
-          opacity: 0.4;
-        }
-        .gb-history-bar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-top: 0.85rem;
-          padding: 0.55rem 0.85rem;
-          border-radius: 12px;
-          background: rgba(148, 163, 184, 0.06);
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          font-size: 0.78rem;
-        }
-        .gb-history-left {
-          display: flex;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-        }
-        .gb-history-label {
-          font-weight: 700;
-          opacity: 0.75;
-        }
-        .gb-history-chips {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.35rem;
-        }
-        .gb-history-chip {
-          padding: 0.2rem 0.55rem;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.25);
-          background: transparent;
-          color: inherit;
-          font-size: 0.74rem;
-          cursor: pointer;
-        }
-        .gb-history-chip:hover {
-          border-color: #ec4899;
-          color: #ec4899;
-        }
-        .gb-history-right {
-          display: flex;
-          align-items: center;
-          gap: 0.65rem;
-        }
-        .gb-history-link {
-          color: #ec4899;
-          text-decoration: none;
-          font-weight: 600;
-        }
-        .gb-history-clear {
-          border: none;
-          background: transparent;
-          color: inherit;
-          opacity: 0.65;
-          cursor: pointer;
-          font-size: 0.74rem;
-        }
-        .gb-error-card {
-          margin-top: 1.1rem;
-          padding: 1rem 1.15rem;
-          border-radius: 16px;
-          border: 1px solid rgba(239, 68, 68, 0.35);
-          background: rgba(239, 68, 68, 0.08);
-          text-align: left;
-        }
-        .gb-error-header {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-        }
-        .gb-error-icon {
-          font-size: 1.25rem;
-        }
-        .gb-error-title {
-          margin: 0 0 0.2rem;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #f87171;
-        }
-        .gb-error-desc {
-          margin: 0;
-          font-size: 0.85rem;
-          opacity: 0.88;
-        }
-        .gb-error-tips {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.35rem;
-          margin-top: 0.65rem;
-          padding-top: 0.6rem;
-          border-top: 1px dashed rgba(239, 68, 68, 0.25);
-          font-size: 0.78rem;
-          opacity: 0.85;
-        }
-        .gb-error-link {
-          color: #f472b6;
-          font-weight: 700;
-          text-decoration: underline;
-        }
-        .gb-result-card {
-          margin-top: 1.4rem;
-          padding: 1.25rem;
-          border-radius: 20px;
-          border: 1px solid rgba(236, 72, 153, 0.28);
-          background: rgba(15, 23, 42, 0.04);
-          text-align: left;
-        }
-        .gb-result-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 0.85rem;
-          padding-bottom: 1rem;
-          margin-bottom: 1rem;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-        }
-        .gb-author-box {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        .gb-author-avatar {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 2px solid #ec4899;
-        }
-        .gb-author-name-row {
-          display: flex;
-          align-items: center;
-          gap: 0.35rem;
-        }
-        .gb-author-name {
-          font-weight: 800;
-          font-size: 1rem;
-        }
-        .gb-verified {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #3b82f6;
-          color: #fff;
-          font-size: 0.65rem;
-          font-weight: 800;
-        }
-        .gb-author-handle {
-          font-size: 0.82rem;
-          opacity: 0.7;
-        }
-        .gb-profile-stats {
-          display: flex;
-          gap: 1rem;
-        }
-        .gb-stat {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          font-size: 0.78rem;
-        }
-        .gb-dp-btn {
-          padding: 0.5rem 0.9rem;
-          border-radius: 10px;
-          background: rgba(245, 158, 11, 0.15);
-          border: 1px solid rgba(245, 158, 11, 0.4);
-          color: #fbbf24;
-          text-decoration: none;
-          font-size: 0.8rem;
-          font-weight: 700;
-        }
-        .gb-media-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 1rem;
-        }
-        .gb-media-item {
-          display: flex;
-          flex-direction: column;
-          border-radius: 14px;
-          overflow: hidden;
-          border: 1px solid rgba(148, 163, 184, 0.2);
-          background: rgba(0, 0, 0, 0.15);
-        }
-        .gb-media-preview {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4 / 5;
-          background: #000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .gb-video,
-        .gb-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .gb-quality-tag {
-          position: absolute;
-          top: 0.6rem;
-          right: 0.6rem;
-          padding: 0.2rem 0.55rem;
-          border-radius: 999px;
-          background: rgba(0, 0, 0, 0.72);
-          color: #fff;
-          font-size: 0.7rem;
-          font-weight: 700;
-        }
-        .gb-media-footer {
-          display: flex;
-          flex-direction: column;
-          gap: 0.45rem;
-          padding: 0.75rem;
-        }
-        .gb-download-primary {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.7rem 1rem;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #ec4899, #8b5cf6);
-          color: #ffffff;
-          text-decoration: none;
-          font-weight: 700;
-          font-size: 0.86rem;
-          text-align: center;
-        }
-        .gb-download-secondary {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.5rem 0.85rem;
-          border-radius: 10px;
-          border: 1px solid rgba(148, 163, 184, 0.25);
-          color: inherit;
-          text-decoration: none;
-          font-size: 0.78rem;
-          font-weight: 600;
-        }
-        .gb-caption-box {
-          margin-top: 1rem;
-          padding: 0.85rem 1rem;
-          border-radius: 12px;
-          background: rgba(148, 163, 184, 0.06);
-          border: 1px solid rgba(148, 163, 184, 0.18);
-        }
-        .gb-caption-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 0.45rem;
-        }
-        .gb-caption-label {
-          font-size: 0.78rem;
-          font-weight: 700;
-          opacity: 0.75;
-        }
-        .gb-copy-btn {
-          padding: 0.28rem 0.65rem;
-          border-radius: 8px;
-          border: 1px solid rgba(236, 72, 153, 0.35);
-          background: rgba(236, 72, 153, 0.1);
-          color: #f472b6;
-          font-size: 0.75rem;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        .gb-caption-text {
-          margin: 0;
-          font-size: 0.84rem;
-          line-height: 1.5;
-          white-space: pre-wrap;
-          max-height: 110px;
-          overflow-y: auto;
-          opacity: 0.85;
-        }
-        @media (max-width: 640px) {
-          .gb-bar-inner {
-            flex-wrap: wrap;
-            padding: 0.55rem;
-          }
-          .gb-platform-text {
-            display: none;
-          }
-          .gb-actions {
-            width: 100%;
-            justify-content: space-between;
-            margin-top: 0.35rem;
-          }
-          .gb-submit-btn {
-            flex: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }
