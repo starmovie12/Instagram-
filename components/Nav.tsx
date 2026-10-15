@@ -334,7 +334,7 @@ export default function Nav() {
           <nav
             className="nav-desktop"
             aria-label="Primary Navigation"
-            style={{ display: "flex", gap: 18, margin: "0 auto" }}
+            style={{ display: "flex", gap: 12, margin: "0 auto" }}
           >
             {LINKS.map((l) => {
               const isActive = path === l.href;
@@ -345,6 +345,7 @@ export default function Nav() {
                   aria-current={isActive ? "page" : undefined}
                   style={{
                     textDecoration: "none",
+                    whiteSpace: "nowrap",
                     fontSize: 13.5,
                     fontWeight: isActive ? 700 : 500,
                     color: isActive ? "#FF3D8B" : "#CBD5E1",
