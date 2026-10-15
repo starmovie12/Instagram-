@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign, Pencil } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { Link2, ClipboardPaste, Download, X, Clapperboard, Image as ImageIcon, CircleDashed, AtSign, Pencil, Loader2, CircleAlert } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import type { ProfileFeed } from "@/lib/media";
 import ResultCard from "./ResultCard";
@@ -73,6 +73,19 @@ function detectAny(value: string): Detected {
   return null;
 }
 
+// "Paste & go" only fires for something that is clearly a link — never for a bare word
+// that merely *could* be a username (clipboard holding "thanks" must not trigger a lookup).
+const LOOKS_LIKE_URL = /^(https?:\/\/|www\.)|^[a-z0-9-]+(\.[a-z0-9-]+)+\//i;
+
+/** Client-side ceiling so a stalled mobile connection can't leave the bar spinning forever (server maxDuration is 30s). */
+function timeoutSignal(ms: number): AbortSignal | undefined {
+  return typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(ms) : undefined;
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
+
 export default function GoldenBar({ intro = false, variant = "classic" }: { intro?: boolean; variant?: "classic" | "neon" }) {
   const neon = variant === "neon";
   const { t } = useI18n();
@@ -83,7 +96,10 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
   const [result, setResult] = useState<ExtractResult | null>(null);
   const [feed, setFeed] = useState<ProfileFeed | null>(null);
   const [flash, setFlash] = useState(false);
+  const [pasteBlocked, setPasteBlocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const msgId = `${useId()}-msg`; // ties the inline hint/error to the input for screen readers
 
   const detect_ = neon ? detectAny : detect;
   const detected = detect_(value);
@@ -136,10 +152,41 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
   }, [editing]);
 
   async function paste() {
-    try { const txt = await navigator.clipboard.readText(); if (txt) { setValue(txt.trim()); return; } } catch {}
+    setPasteBlocked(false);
+    try {
+      const txt = (await navigator.clipboard.readText())?.trim();
+      if (txt) {
+        setValue(txt);
+        // Paste & go: a recognisable link starts straight away — one tap instead of two.
+        if (LOOKS_LIKE_URL.test(txt) && detect_(txt)) go(txt);
+        return;
+      }
+    } catch { /* permission denied or API missing — fall through to the hint */ }
+    setPasteBlocked(true);
     inputRef.current?.focus(); // clipboard blocked → let the user long-press / Ctrl+V into the box
   }
-  function clear() { setValue(""); setEditing(false); inputRef.current?.focus(); }
+  function clear() { setValue(""); setEditing(false); setPasteBlocked(false); inputRef.current?.focus(); }
+
+  // Typing again dismisses a stale "not a link" message instead of leaving it on screen.
+  function onType(v: string) {
+    setValue(v);
+    if (pasteBlocked) setPasteBlocked(false);
+    if (phase === "error" && error === "INVALID_URL") { setPhase("idle"); setError(null); }
+  }
+  function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.nativeEvent.isComposing) return; // IME (Hindi / Japanese…): Enter confirms a word, it must not submit
+    if (e.key === "Enter") go();
+    else if (e.key === "Escape" && value) clear();
+  }
+
+  // Results can land below the fold on phones — bring them into view (never yank a desktop page).
+  useEffect(() => {
+    if (phase !== "success") return;
+    const el = resultsRef.current;
+    if (el && el.getBoundingClientRect().top > window.innerHeight * 0.65) {
+      el.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+    }
+  }, [phase]);
 
   function mapError(code: string | undefined): ErrorCode {
     const allowed: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
