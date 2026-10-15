@@ -6,6 +6,7 @@ import type { ProfileFeed } from "@/lib/media";
 import ResultCard from "./ResultCard";
 import ProfileFeedCard from "./ProfileFeedCard";
 import ErrorCard, { ErrorCode } from "./ErrorCard";
+import SupportedTools from "./SupportedTools";
 import AdFrame from "./AdFrame";
 import { recordSearch, getRecentSearches } from "@/lib/retention";
 import { useI18n } from "@/lib/i18n";
@@ -51,7 +52,29 @@ function detect(value: string): Detected {
   return null;
 }
 
-export default function GoldenBar({ intro = false }: { intro?: boolean }) {
+// Other platforms the unified /api/extract route resolves (used by the neon homepage box).
+const OTHER_PLATFORMS: [RegExp, string][] = [
+  [/(^|[/.])(facebook\.com|fb\.watch|fb\.me)(\/|$|\?)/i, "Facebook"],
+  [/(^|[/.])(youtube\.com|youtu\.be)(\/|$|\?)/i, "YouTube"],
+  [/(^|[/.])(twitter\.com|x\.com)(\/|$|\?)/i, "X post"],
+  [/(^|[/.])tiktok\.com(\/|$|\?)/i, "TikTok"],
+  [/(^|[/.])(pinterest\.com|pin\.it)(\/|$|\?)/i, "Pinterest"],
+  [/(^|[/.])(threads\.net|threads\.com)(\/|$|\?)/i, "Threads"],
+];
+
+/** Like detect(), but also recognises Facebook / YouTube / X / TikTok / Pinterest / Threads links. */
+function detectAny(value: string): Detected {
+  const own = detect(value);
+  if (own) return own;
+  const v = value.trim();
+  for (const [re, label] of OTHER_PLATFORMS) {
+    if (re.test(v)) return { mode: "media", label, Icon: Link2, hint: "link" };
+  }
+  return null;
+}
+
+export default function GoldenBar({ intro = false, variant = "classic" }: { intro?: boolean; variant?: "classic" | "neon" }) {
+  const neon = variant === "neon";
   const { t } = useI18n();
   const [value, setValue] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -62,7 +85,8 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   const [flash, setFlash] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const detected = detect(value);
+  const detect_ = neon ? detectAny : detect;
+  const detected = detect_(value);
   const [canPaste, setCanPaste] = useState(false);
   useEffect(() => { setCanPaste(!!navigator.clipboard?.readText); }, []);
 
@@ -75,7 +99,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         const perm = await navigator.permissions?.query?.({ name: "clipboard-read" as PermissionName });
         if (perm?.state !== "granted") return;
         const txt = (await navigator.clipboard.readText())?.trim();
-        if (!cancelled && txt && detect(txt)) setValue((v) => v || txt);
+        if (!cancelled && txt && detect_(txt)) setValue((v) => v || txt);
       } catch { /* clipboard unavailable — the paste button still works */ }
     })();
     return () => { cancelled = true; };
@@ -90,7 +114,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     function onDragOver(e: DragEvent) { e.preventDefault(); }
     function onDrop(e: DragEvent) {
       const txt = e.dataTransfer?.getData("text")?.trim();
-      if (txt && detect(txt)) {
+      if (txt && detect_(txt)) {
         e.preventDefault();
         setValue(txt);
         inputRef.current?.focus();
@@ -112,7 +136,8 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
   }, [editing]);
 
   async function paste() {
-    try { const txt = await navigator.clipboard.readText(); if (txt) setValue(txt.trim()); } catch {}
+    try { const txt = await navigator.clipboard.readText(); if (txt) { setValue(txt.trim()); return; } } catch {}
+    inputRef.current?.focus(); // clipboard blocked → let the user long-press / Ctrl+V into the box
   }
   function clear() { setValue(""); setEditing(false); inputRef.current?.focus(); }
 
@@ -125,7 +150,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
     if (phase === "loading") return;
     setEditing(false);
     setError(null); setResult(null); setFeed(null);
-    const d = detect(value);
+    const d = detect_(value);
     if (!d) {
       setInvalid(true); setTimeout(() => setInvalid(false), 300);
       setPhase("error"); setError("INVALID_URL");
@@ -171,6 +196,131 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
 
   const loading = phase === "loading";
   const showChip = detected && !loading && !editing;
+
+  const below = (
+    <>
+      {/* I10 — recent searches, one tap to re-run */}
+      {!neon && phase === "idle" && !value && recents.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
+          {recents.map((r) => (
+            <button key={r} className="chip" onClick={() => { setValue(r); inputRef.current?.focus(); }}
+              style={{ cursor: "pointer", maxWidth: 220 }} title={r}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {r.replace(/^https?:\/\/(www\.)?/, "").slice(0, 34)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {phase === "error" && error && error !== "INVALID_URL" && (
+        <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
+      )}
+      {phase === "error" && error === "INVALID_URL" && (
+        <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
+          {t("invalidLink")}
+        </p>
+      )}
+
+      {(result || feed) && (
+        <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
+          {result && <ResultCard data={result} />}
+          {feed && <ProfileFeedCard data={feed} showBulk />}
+          {/* Ad slot A — Native Banner, only after success, never inside the card */}
+          <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
+        </div>
+      )}
+
+    </>
+  );
+
+  if (neon) {
+    return (
+      <div className="nb-root">
+        <div className="nb-card">
+          <div className={`nb-field ${loading ? "loading" : ""} ${invalid ? "shake" : ""}`}>
+            <span className="nb-link" aria-hidden="true"><Link2 size={26} strokeWidth={1.8} /></span>
+            <input
+              ref={inputRef} value={value} disabled={loading}
+              onChange={e => setValue(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && go()}
+              placeholder="Paste Instagram, Facebook, or any link..."
+              aria-label="Paste a social media link or @username"
+              className="nb-input"
+              inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+            />
+            {detected && !loading && <span className="nb-tag">{detected.label}</span>}
+            {value && !loading && (
+              <button type="button" className="nb-x" onClick={clear} aria-label="Clear">
+                <X size={24} strokeWidth={1.8} />
+              </button>
+            )}
+          </div>
+
+          <div className="nb-actions">
+            <button type="button" className="nb-paste" onClick={paste} disabled={loading}>
+              <ClipboardPaste size={24} strokeWidth={1.8} /> <span>Paste Link</span>
+            </button>
+            <button type="button" className="nb-grab" onClick={go} disabled={loading}>
+              <Download size={26} strokeWidth={2} />
+              <span>{loading ? t("fetching") : "Grab Media"}</span>
+            </button>
+          </div>
+
+          <SupportedTools />
+        </div>
+
+        {phase === "error" && error === "INVALID_URL" && (
+          <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
+            That doesn&apos;t look like a supported link. Paste an Instagram, Facebook, Pinterest, X, TikTok, YouTube or Threads link — or an @username.
+          </p>
+        )}
+        {phase === "error" && error && error !== "INVALID_URL" && (
+          <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
+        )}
+        {(result || feed) && (
+          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 24 }}>
+            {result && <ResultCard data={result} />}
+            {feed && <ProfileFeedCard data={feed} showBulk />}
+            <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
+          </div>
+        )}
+
+        <style jsx>{`
+          .nb-card { padding: 14px; border-radius: 26px; border: 1.5px solid rgba(34, 228, 255, 0.45);
+            background: linear-gradient(165deg, #0A1238 0%, #0A0F34 60%, #120D38 100%);
+            box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.16), 0 0 44px -16px rgba(34, 228, 255, 0.55);
+            display: flex; flex-direction: column; gap: 14px; }
+          .nb-field { display: flex; align-items: center; gap: 10px; height: 64px; padding: 0 14px; border-radius: 18px;
+            border: 1.5px solid rgba(139, 92, 246, 0.65); background: rgba(14, 20, 62, 0.85);
+            transition: border-color 160ms ease, box-shadow 160ms ease; }
+          .nb-field:focus-within { border-color: #22E4FF; box-shadow: 0 0 0 3px rgba(34, 228, 255, 0.22); }
+          .nb-field.loading { opacity: 0.85; }
+          .nb-link { color: #EAF0FF; display: inline-flex; flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)); }
+          .nb-input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: #EAF0FF; font-size: 14px; }
+          @media (min-width: 480px) { .nb-input { font-size: 16px; } }
+          .nb-input::placeholder { color: #8A96C8; }
+          .nb-tag { flex-shrink: 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #22E4FF;
+            background: rgba(34, 228, 255, 0.12); border: 1px solid rgba(34, 228, 255, 0.35); text-transform: capitalize; }
+          .nb-x { flex-shrink: 0; display: inline-flex; background: none; border: none; cursor: pointer; color: #C9D2F5; padding: 4px; }
+          .nb-actions { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: 14px; }
+          .nb-paste, .nb-grab { height: 62px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center;
+            gap: 10px; font-weight: 700; font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.15rem); cursor: pointer; color: #fff; white-space: nowrap;
+            transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+          .nb-paste { background: rgba(14, 22, 62, 0.9); border: 1.5px solid rgba(139, 162, 255, 0.4); }
+          .nb-paste:hover { border-color: rgba(34, 228, 255, 0.7); }
+          .nb-grab { border: none; background: linear-gradient(90deg, #22E4FF 0%, #4F8CFF 52%, #A855F7 100%);
+            box-shadow: 0 10px 28px -10px rgba(34, 228, 255, 0.8), 0 0 24px -6px rgba(168, 85, 247, 0.6); }
+          .nb-grab:hover:not(:disabled) { transform: translateY(-1px); }
+          .nb-paste:active, .nb-grab:active { transform: scale(0.98); }
+          .nb-paste:disabled, .nb-grab:disabled { opacity: 0.7; cursor: progress; }
+          .nb-paste:focus-visible, .nb-grab:focus-visible, .nb-x:focus-visible { outline: 2px solid #22E4FF; outline-offset: 2px; }
+          @media (max-width: 400px) { .nb-paste span { font-size: 0.92rem; } .nb-actions { gap: 10px; } }
+        `}</style>
+      </div>
+    );
+  }
+
 
   return (
     <div style={{ width: "100%" }}>
@@ -222,37 +372,7 @@ export default function GoldenBar({ intro = false }: { intro?: boolean }) {
         </button>
       </div>
 
-      {/* I10 — recent searches, one tap to re-run */}
-      {phase === "idle" && !value && recents.length > 0 && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 14 }}>
-          {recents.map((r) => (
-            <button key={r} className="chip" onClick={() => { setValue(r); inputRef.current?.focus(); }}
-              style={{ cursor: "pointer", maxWidth: 220 }} title={r}>
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {r.replace(/^https?:\/\/(www\.)?/, "").slice(0, 34)}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {phase === "error" && error && error !== "INVALID_URL" && (
-        <div style={{ marginTop: 24 }}><ErrorCard code={error} onRetry={go} /></div>
-      )}
-      {phase === "error" && error === "INVALID_URL" && (
-        <p className="mono" style={{ color: "var(--err)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
-          {t("invalidLink")}
-        </p>
-      )}
-
-      {(result || feed) && (
-        <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
-          {result && <ResultCard data={result} />}
-          {feed && <ProfileFeedCard data={feed} showBulk />}
-          {/* Ad slot A — Native Banner, only after success, never inside the card */}
-          <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
-        </div>
-      )}
+      {below}
 
       <style jsx>{`
         .gbar{ display:flex; align-items:center; gap:8px; height:64px; padding:8px 8px 8px 20px; }
