@@ -239,22 +239,34 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
       <div className="nb-root">
         <div className="nb-card">
           <div className={`nb-field ${loading ? "loading" : ""} ${invalid ? "shake" : ""}`}>
-            <span className="nb-link" aria-hidden="true"><Link2 size={26} strokeWidth={1.8} /></span>
-            <input
-              ref={inputRef} value={value} disabled={loading}
-              onChange={e => setValue(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && go()}
-              placeholder="Paste Instagram, Facebook, or any link..."
-              aria-label="Paste a social media link or @username"
-              className="nb-input"
-              inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
-            />
-            {detected && !loading && <span className="nb-tag">{detected.label}</span>}
-            {value && !loading && (
-              <button type="button" className="nb-x" onClick={clear} aria-label="Clear">
-                <X size={24} strokeWidth={1.8} />
-              </button>
-            )}
+            <div className="nb-row">
+              <span className="nb-link" aria-hidden="true"><Link2 size={22} strokeWidth={1.8} /></span>
+              <input
+                ref={inputRef} value={value} disabled={loading}
+                onChange={e => setValue(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && go()}
+                placeholder="Paste Instagram, Facebook, or any link..."
+                aria-label="Paste a social media link or @username"
+                className="nb-input"
+                inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              />
+              {detected && !loading && <span className="nb-tag">{detected.label}</span>}
+              {value && !loading && (
+                <button type="button" className="nb-x" onClick={clear} aria-label="Clear">
+                  <X size={20} strokeWidth={1.8} />
+                </button>
+              )}
+            </div>
+
+            {/* Supported apps — chhote, sirf dikhane ke liye, click par kuch nahi hota */}
+            <div
+              className="nb-support"
+              aria-hidden="true"
+              {...({ inert: "" } as Record<string, unknown>)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            >
+              <SupportedTools />
+            </div>
           </div>
 
           <div className="nb-actions">
@@ -266,8 +278,6 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
               <span>{loading ? t("fetching") : "Grab Media"}</span>
             </button>
           </div>
-
-          <SupportedTools />
         </div>
 
         {phase === "error" && error === "INVALID_URL" && (
@@ -287,25 +297,38 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
         )}
 
         <style jsx>{`
-          .nb-card { padding: 14px; border-radius: 26px; border: 1.5px solid rgba(34, 228, 255, 0.45);
+          .nb-root { width: 100%; max-width: 760px; margin: 0 auto; }
+          .nb-card { padding: 12px; border-radius: 24px; border: 1.5px solid rgba(34, 228, 255, 0.45);
             background: linear-gradient(165deg, #0A1238 0%, #0A0F34 60%, #120D38 100%);
             box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.16), 0 0 44px -16px rgba(34, 228, 255, 0.55);
-            display: flex; flex-direction: column; gap: 14px; }
-          .nb-field { display: flex; align-items: center; gap: 10px; height: 64px; padding: 0 14px; border-radius: 18px;
+            display: flex; flex-direction: column; gap: 12px; }
+          @media (min-width: 640px) { .nb-card { padding: 14px; border-radius: 26px; gap: 14px; } }
+          .nb-field { display: flex; flex-direction: column; align-items: stretch; padding: 0 12px 8px; border-radius: 18px;
             border: 1.5px solid rgba(139, 92, 246, 0.65); background: rgba(14, 20, 62, 0.85);
             transition: border-color 160ms ease, box-shadow 160ms ease; }
           .nb-field:focus-within { border-color: #22E4FF; box-shadow: 0 0 0 3px rgba(34, 228, 255, 0.22); }
           .nb-field.loading { opacity: 0.85; }
+          .nb-row { display: flex; align-items: center; gap: 10px; height: 54px; }
+          @media (min-width: 640px) { .nb-row { height: 60px; } }
           .nb-link { color: #EAF0FF; display: inline-flex; flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)); }
-          .nb-input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: #EAF0FF; font-size: 14px; }
-          @media (min-width: 480px) { .nb-input { font-size: 16px; } }
+          /* 16px input = iPhone par focus karne par zoom nahi hota */
+          .nb-input { flex: 1; min-width: 0; height: 100%; background: none; border: none; outline: none; color: #EAF0FF; font-size: 16px; text-overflow: ellipsis; }
           .nb-input::placeholder { color: #8A96C8; }
+          /* Supported apps strip: chhote icons, non-clickable */
+          .nb-support { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
+            padding-top: 8px; border-top: 1px solid rgba(139, 162, 255, 0.16);
+            pointer-events: none; user-select: none; -webkit-user-select: none; cursor: default; }
+          .nb-support :global(*) { pointer-events: none !important; cursor: default !important; user-select: none; }
+          .nb-support :global(a), .nb-support :global(button) { text-decoration: none; }
+          .nb-support :global(svg), .nb-support :global(img) { width: 16px !important; height: 16px !important; max-width: 16px; max-height: 16px; flex-shrink: 0; }
+          @media (min-width: 640px) { .nb-support :global(svg), .nb-support :global(img) { width: 18px !important; height: 18px !important; max-width: 18px; max-height: 18px; } }
           .nb-tag { flex-shrink: 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #22E4FF;
             background: rgba(34, 228, 255, 0.12); border: 1px solid rgba(34, 228, 255, 0.35); text-transform: capitalize; }
           .nb-x { flex-shrink: 0; display: inline-flex; background: none; border: none; cursor: pointer; color: #C9D2F5; padding: 4px; }
-          .nb-actions { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: 14px; }
-          .nb-paste, .nb-grab { height: 62px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center;
-            gap: 10px; font-weight: 700; font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.15rem); cursor: pointer; color: #fff; white-space: nowrap;
+          .nb-actions { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: 10px; }
+          @media (min-width: 640px) { .nb-actions { gap: 14px; } }
+          .nb-paste, .nb-grab { height: 54px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; font-weight: 700; font-size: clamp(0.92rem, 0.8rem + 0.5vw, 1.1rem); cursor: pointer; color: #fff; white-space: nowrap;
             transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
           .nb-paste { background: rgba(14, 22, 62, 0.9); border: 1.5px solid rgba(139, 162, 255, 0.4); }
           .nb-paste:hover { border-color: rgba(34, 228, 255, 0.7); }
@@ -315,7 +338,8 @@ export default function GoldenBar({ intro = false, variant = "classic" }: { intr
           .nb-paste:active, .nb-grab:active { transform: scale(0.98); }
           .nb-paste:disabled, .nb-grab:disabled { opacity: 0.7; cursor: progress; }
           .nb-paste:focus-visible, .nb-grab:focus-visible, .nb-x:focus-visible { outline: 2px solid #22E4FF; outline-offset: 2px; }
-          @media (max-width: 400px) { .nb-paste span { font-size: 0.92rem; } .nb-actions { gap: 10px; } }
+          @media (min-width: 640px) { .nb-paste, .nb-grab { height: 60px; border-radius: 18px; gap: 10px; } }
+          @media (max-width: 400px) { .nb-paste span { font-size: 0.88rem; } .nb-actions { gap: 8px; } .nb-tag { display: none; } }
         `}</style>
       </div>
     );
