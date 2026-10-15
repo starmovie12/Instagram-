@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TextQuote, Download, GalleryHorizontalEnd, ShieldCheck } from "lucide-react";
 import Nav from "@/components/Nav";
+import InstallAppButton from "@/components/InstallAppButton";
 import Footer from "@/components/Footer";
 import GoldenBar from "@/components/GoldenBar";
 import TrustLine from "@/components/TrustLine";
@@ -41,6 +42,9 @@ export default function Home() {
       <JsonLd data={webAppJsonLd()} />
       <JsonLd data={faqJsonLd(DEFAULT_FAQ)} />
       <Nav />
+      <div className="container">
+        <InstallAppButton variant="card" />
+      </div>
       <main>
         {/* ── Hero ── */}
         <section style={{ position: "relative", padding: "96px 0 72px", textAlign: "center", overflow: "hidden" }}>
