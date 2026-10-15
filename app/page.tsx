@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import InstallAppButton from "@/components/InstallAppButton";
 import Footer from "@/components/Footer";
 import GoldenBar from "@/components/GoldenBar";
+import HeroBanner from "@/components/HeroBanner";
 import TrustLine from "@/components/TrustLine";
 import HowItWorks from "@/components/HowItWorks";
 import FAQ from "@/components/FAQ";
@@ -42,43 +43,30 @@ export default function Home() {
       <JsonLd data={webAppJsonLd()} />
       <JsonLd data={faqJsonLd(DEFAULT_FAQ)} />
       <Nav />
-      <div className="container">
-        <InstallAppButton variant="card" />
-      </div>
       <main>
-        {/* ── Hero ── */}
-        <section style={{ position: "relative", padding: "96px 0 72px", textAlign: "center", overflow: "hidden" }}>
+        {/* ── Hero: install card → banner → paste box (neon) ── */}
+        <section style={{ position: "relative", padding: "0 0 48px", overflow: "hidden" }}>
           <div
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: "-20%",
+              top: "-10%",
               left: "50%",
               transform: "translateX(-50%)",
               width: 900,
+              maxWidth: "100%",
               height: 600,
               pointerEvents: "none",
-              background: "radial-gradient(ellipse at center, rgba(210,172,100,.13), transparent 65%)",
+              background: "radial-gradient(ellipse at center, rgba(99,102,241,.16), transparent 65%)",
             }}
           />
-          <div className="container" style={{ position: "relative" }}>
-            <p className="label intro-rise" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--gold-ink)" }}>
-              <span style={{ width: 8, height: 8, borderRadius: 99, background: "var(--molten)", display: "inline-block" }} />
-              The gold standard of Instagram tools
-            </p>
-            <h1 style={{ margin: "24px auto 0", maxWidth: "16ch" }}>
-              <span className="mask"><span>Download anything</span></span>
-              <span className="mask"><span style={{ ["--dl" as string]: "140ms" }}>from Instagram,</span></span>
-              <span className="mask"><span style={{ ["--dl" as string]: "220ms" }}><em className="gilded">beautifully</em>.</span></span>
-            </h1>
-            <p className="lead intro-rise" style={{ margin: "24px auto 0", ["--dl" as string]: "300ms" }}>
-              Reels, photos, stories and carousels in flawless HD — plus the full caption
-              and every hashtag, one click away.
-            </p>
-            <div className="intro-rise" style={{ marginTop: 40, ["--dl" as string]: "400ms" }}>
-              <GoldenBar intro />
+          <div className="container" style={{ position: "relative", maxWidth: 760 }}>
+            <InstallAppButton variant="card" />
+            <HeroBanner />
+            <div style={{ marginTop: 16 }}>
+              <GoldenBar variant="neon" />
             </div>
-            <div className="intro-rise" style={{ marginTop: 20, ["--dl" as string]: "500ms" }}>
+            <div style={{ marginTop: 20 }}>
               <TrustLine />
             </div>
             <RecentTools />
