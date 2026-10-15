@@ -29,12 +29,15 @@ export interface ToolItem {
 export interface SupportedToolsProps {
   currentTool?: string;
   initialCategory?: ToolCategory;
+  category?: string;
   showSearch?: boolean;
   compact?: boolean;
   initialLimit?: number;
+  limit?: number;
   title?: string;
   subtitle?: string;
   className?: string;
+  [key: string]: unknown;
 }
 
 export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
@@ -172,6 +175,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
     description: "Browse public Instagram profiles, bios, and feeds without logging in.",
     category: "downloaders",
     icon: "🌐",
+    featured: true,
     keywords: ["account", "browse", "no login"],
   },
   {
@@ -245,6 +249,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
     description: "Download public Facebook Reels, Watch videos, and posts in HD.",
     category: "platforms",
     icon: "📘",
+    featured: true,
     keywords: ["fb", "watch", "reels"],
   },
   {
@@ -253,6 +258,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
     description: "Save Pinterest video pins, idea pins, and high-res images.",
     category: "platforms",
     icon: "📌",
+    featured: true,
     keywords: ["pin", "board", "image", "video"],
   },
   {
@@ -267,9 +273,10 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "YouTube Thumbnail Grabber",
     href: "/youtube-thumbnail-downloader",
-    description: "Extract 4K and Full HD (maxresdefault) thumbnails from any YouTube video.",
+    description: "Extract 4K and Full HD thumbnails from any YouTube video.",
     category: "platforms",
     icon: "▶️",
+    featured: true,
     keywords: ["yt", "cover", "1080p", "4k"],
   },
 
@@ -305,7 +312,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Reel Repurposer",
     href: "/reel-repurposer",
-    description: "Turn one Reel into Twitter threads, LinkedIn posts, and YouTube Shorts scripts.",
+    description: "Turn one Reel into Twitter threads, LinkedIn posts, and Shorts scripts.",
     category: "ai",
     icon: "♻️",
     badge: "AI",
@@ -341,7 +348,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Virality Score Predictor",
     href: "/virality-score",
-    description: "Analyze hooks, pacing, and captions to score your post's viral potential.",
+    description: "Analyze hooks, pacing, and captions to score your viral potential.",
     category: "ai",
     icon: "🚀",
     badge: "Hot",
@@ -359,7 +366,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Trending in India",
     href: "/trending-india",
-    description: "Discover today's viral Indian Reels audio, hashtags, and creator formats.",
+    description: "Discover viral Indian Reels audio, hashtags, and creator formats.",
     category: "ai",
     icon: "🔥",
     badge: "Hot",
@@ -381,7 +388,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Shadowban Lab",
     href: "/shadowban-lab",
-    description: "Test if your account or hashtags are restricted by the Instagram algorithm.",
+    description: "Test if your account or hashtags are restricted by the algorithm.",
     category: "analytics",
     icon: "🛡️",
     badge: "Hot",
@@ -432,7 +439,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "EMV Calculator",
     href: "/emv-calculator",
-    description: "Measure Earned Media Value (EMV) for influencer campaigns and sponsorships.",
+    description: "Measure Earned Media Value (EMV) for influencer campaigns.",
     category: "analytics",
     icon: "💎",
     keywords: ["roi", "brand", "sponsorship"],
@@ -440,7 +447,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Instagram Money Calculator",
     href: "/money-calculator",
-    description: "Estimate how much creators can charge per sponsored Reel, Story, or post.",
+    description: "Estimate how much creators can charge per sponsored Reel or post.",
     category: "analytics",
     icon: "💰",
     badge: "Popular",
@@ -466,7 +473,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Is Instagram Down?",
     href: "/is-instagram-down",
-    description: "Check live Instagram server status, outages, and regional API health.",
+    description: "Check live Instagram server status, outages, and API health.",
     category: "analytics",
     icon: "📡",
     keywords: ["status", "outage", "server down"],
@@ -476,7 +483,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Grid Planner",
     href: "/grid-planner",
-    description: "Preview and drag-and-drop your upcoming posts into a 3-column Instagram grid.",
+    description: "Preview and arrange your upcoming posts into a 3-column Instagram grid.",
     category: "visual",
     icon: "📅",
     badge: "Popular",
@@ -484,7 +491,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
     keywords: ["aesthetic", "layout", "preview"],
   },
   {
-    name: "Grid Splitter (3x3 / Panorama)",
+    name: "Grid Splitter (3x3)",
     href: "/grid-splitter",
     description: "Slice one large photo into 3, 6, or 9 seamless tiles for your profile grid.",
     category: "visual",
@@ -503,7 +510,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "DP Ring Maker",
     href: "/dp-ring-maker",
-    description: "Add glowing Story gradient rings and verification-style borders to your DP.",
+    description: "Add glowing Story gradient rings and borders to your profile picture.",
     category: "visual",
     icon: "🍩",
     badge: "Popular",
@@ -528,7 +535,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Image Compressor",
     href: "/image-compressor",
-    description: "Optimize image file size without losing sharpness to prevent IG compression.",
+    description: "Optimize image file size without losing sharpness before uploading.",
     category: "visual",
     icon: "🗜️",
     keywords: ["shrink", "optimize", "quality"],
@@ -552,7 +559,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Privacy Blur Tool",
     href: "/blur-tool",
-    description: "Blur sensitive faces, usernames, or backgrounds in screenshots before sharing.",
+    description: "Blur sensitive faces, usernames, or backgrounds in screenshots.",
     category: "visual",
     icon: "🌫️",
     keywords: ["censor", "redact", "background blur"],
@@ -560,7 +567,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Quote Post Maker",
     href: "/quote-maker",
-    description: "Create shareable typography quote graphics for Instagram feeds and Stories.",
+    description: "Create shareable typography quote graphics for feeds and Stories.",
     category: "visual",
     icon: "💬",
     keywords: ["text post", "motivational", "graphic"],
@@ -614,7 +621,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Hashtag Counter",
     href: "/hashtag-counter",
-    description: "Count hashtags in real time and stay within Instagram's 30-tag limit.",
+    description: "Count hashtags in real time and stay within the 30-tag limit.",
     category: "utilities",
     icon: "🔢",
     keywords: ["limit", "30 tags", "count"],
@@ -622,7 +629,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Hashtag Extractor",
     href: "/hashtag-extractor",
-    description: "Pull and clean all hashtags from top-performing competitor posts.",
+    description: "Pull and clean all hashtags from top-performing posts.",
     category: "utilities",
     icon: "🧲",
     keywords: ["scrape tags", "copy hashtags"],
@@ -638,15 +645,15 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Case Converter",
     href: "/case-converter",
-    description: "Switch text between Title Case, UPPERCASE, lowercase, and aesthetic spacing.",
+    description: "Switch text between Title Case, UPPERCASE, and lowercase.",
     category: "utilities",
     icon: "🔡",
     keywords: ["uppercase", "lowercase", "capitalize"],
   },
   {
-    name: "Invisible Character (Line Break)",
+    name: "Invisible Character",
     href: "/invisible-character",
-    description: "Copy invisible blank spaces for clean Instagram bio centering and line breaks.",
+    description: "Copy invisible blank spaces for clean bio centering and line breaks.",
     category: "utilities",
     icon: "⬜",
     keywords: ["blank space", "empty", "line break"],
@@ -662,7 +669,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "UTM Link Builder",
     href: "/utm-builder",
-    description: "Generate trackable campaign URLs for Instagram bio links and ads.",
+    description: "Generate trackable campaign URLs for bio links and promotions.",
     category: "utilities",
     icon: "🎯",
     keywords: ["analytics", "tracking", "marketing"],
@@ -670,7 +677,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Instagram DM Link Generator",
     href: "/dm-link-generator",
-    description: "Create a direct 'Message Me on Instagram' click-to-DM link for clients.",
+    description: "Create a direct click-to-DM link for your Instagram profile.",
     category: "utilities",
     icon: "✉️",
     badge: "New",
@@ -732,7 +739,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Profile Battle (1v1)",
     href: "/profile-battle",
-    description: "Pit two Instagram accounts head-to-head to see who wins the clout war.",
+    description: "Pit two Instagram accounts head-to-head to see who wins.",
     category: "fun",
     icon: "⚔️",
     badge: "Popular",
@@ -751,7 +758,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Insta Wrapped",
     href: "/insta-wrapped",
-    description: "Generate a Spotify-Wrapped style recap card for any Instagram profile.",
+    description: "Generate a Wrapped-style recap card for any Instagram profile.",
     category: "fun",
     icon: "🎉",
     badge: "Popular",
@@ -769,7 +776,7 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Insta Guess Game",
     href: "/insta-guess",
-    description: "Play the interactive guessing game with cropped posts and creator stats.",
+    description: "Play the interactive guessing game with creator stats.",
     category: "fun",
     icon: "🎮",
     keywords: ["quiz", "trivia", "game"],
@@ -784,6 +791,9 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
     keywords: ["milestone", "memory", "goals"],
   },
 ];
+
+export const SUPPORTED_TOOLS = ALL_SUPPORTED_TOOLS;
+export const TOOLS = ALL_SUPPORTED_TOOLS;
 
 const CATEGORIES: { id: ToolCategory; label: string; icon: string }[] = [
   { id: "all", label: "All Tools", icon: "✨" },
@@ -824,17 +834,308 @@ const BADGE_STYLES: Record<ToolBadge, { bg: string; color: string; border: strin
   },
 };
 
+const COMPONENT_STYLES = `
+  .st-root {
+    width: 100%;
+    padding: 3.5rem 1rem;
+  }
+  .st-compact {
+    padding: 2rem 0.75rem;
+  }
+  .st-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .st-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 2rem;
+  }
+  .st-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: rgba(236, 72, 153, 0.1);
+    border: 1px solid rgba(236, 72, 153, 0.25);
+    color: #ec4899;
+    margin-bottom: 0.85rem;
+  }
+  .st-pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ec4899;
+    box-shadow: 0 0 8px #ec4899;
+  }
+  .st-title {
+    font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin: 0 0 0.65rem;
+    color: inherit;
+  }
+  .st-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    opacity: 0.76;
+    margin: 0;
+  }
+  .st-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+  .st-search-wrap {
+    position: relative;
+    max-width: 560px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .st-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .st-search-input {
+    width: 100%;
+    padding: 0.82rem 2.6rem 0.82rem 2.75rem;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(15, 23, 42, 0.04);
+    color: inherit;
+    font-size: 0.94rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .st-search-input:focus {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+  }
+  .st-clear-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(148, 163, 184, 0.2);
+    color: inherit;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .st-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .st-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(148, 163, 184, 0.06);
+    color: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .st-tab:hover {
+    border-color: rgba(236, 72, 153, 0.45);
+    transform: translateY(-1px);
+  }
+  .st-tab-active {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.28);
+  }
+  .st-tab-count {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.42rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.14);
+    opacity: 0.9;
+  }
+  .st-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+    gap: 1rem;
+  }
+  .st-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.15rem 1.2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(148, 163, 184, 0.04);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .st-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(236, 72, 153, 0.45);
+    background: rgba(236, 72, 153, 0.04);
+    box-shadow: 0 12px 28px -10px rgba(236, 72, 153, 0.22);
+  }
+  .st-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .st-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    background: rgba(236, 72, 153, 0.1);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+  }
+  .st-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .st-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.18rem 0.52rem;
+    border-radius: 999px;
+    border: 1px solid;
+  }
+  .st-arrow {
+    font-size: 0.95rem;
+    opacity: 0.45;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .st-card:hover .st-arrow {
+    transform: translate(2px, -2px);
+    opacity: 0.95;
+    color: #ec4899;
+  }
+  .st-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.38rem;
+    line-height: 1.35;
+  }
+  .st-card-desc {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    opacity: 0.74;
+    margin: 0;
+  }
+  .st-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    border-radius: 16px;
+    border: 1px dashed rgba(148, 163, 184, 0.3);
+  }
+  .st-empty-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+  }
+  .st-empty-sub {
+    font-size: 0.88rem;
+    opacity: 0.7;
+    margin: 0 0 1rem;
+  }
+  .st-reset-btn,
+  .st-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.35rem;
+    border-radius: 999px;
+    border: 1px solid rgba(236, 72, 153, 0.4);
+    background: rgba(236, 72, 153, 0.1);
+    color: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .st-reset-btn:hover,
+  .st-expand-btn:hover {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #ffffff;
+    border-color: transparent;
+    transform: translateY(-1px);
+  }
+  .st-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  @media (max-width: 640px) {
+    .st-root {
+      padding: 2.25rem 0.85rem;
+    }
+    .st-grid {
+      grid-template-columns: 1fr;
+    }
+    .st-tabs {
+      justify-content: flex-start;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 0.35rem;
+    }
+    .st-tab {
+      white-space: nowrap;
+    }
+  }
+`;
+
 export function SupportedTools({
   currentTool,
   initialCategory = "all",
+  category,
   showSearch = true,
   compact = false,
   initialLimit = 18,
+  limit,
   title = "Complete Instagram & Creator Toolkit",
   subtitle = "Explore 70+ free downloaders, AI generators, profile audits, and visual grid utilities — no login required.",
   className = "",
 }: SupportedToolsProps) {
-  const [activeCategory, setActiveCategory] = useState<ToolCategory>(initialCategory);
+  const resolvedInitialCategory = (
+    category && CATEGORIES.some((c) => c.id === category)
+      ? category
+      : initialCategory
+  ) as ToolCategory;
+
+  const resolvedLimit = typeof limit === "number" ? limit : initialLimit;
+
+  const [activeCategory, setActiveCategory] = useState<ToolCategory>(
+    resolvedInitialCategory
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -888,7 +1189,7 @@ export function SupportedTools({
     !isExpanded &&
     !searchQuery.trim() &&
     activeCategory === "all" &&
-    filteredTools.length > initialLimit;
+    filteredTools.length > resolvedLimit;
 
   const visibleTools = useMemo(() => {
     if (!shouldTruncate) return filteredTools;
@@ -896,16 +1197,17 @@ export function SupportedTools({
       ...filteredTools.filter((t) => t.featured),
       ...filteredTools.filter((t) => !t.featured),
     ];
-    return featuredFirst.slice(0, initialLimit);
-  }, [filteredTools, shouldTruncate, initialLimit]);
+    return featuredFirst.slice(0, resolvedLimit);
+  }, [filteredTools, shouldTruncate, resolvedLimit]);
 
   return (
     <section
       className={`st-root ${compact ? "st-compact" : ""} ${className}`}
       aria-label="Supported Instagram Tools"
     >
+      <style dangerouslySetInnerHTML={{ __html: COMPONENT_STYLES }} />
+
       <div className="st-container">
-        {/* Header */}
         <div className="st-header">
           <div className="st-pill">
             <span className="st-pill-dot" />
@@ -915,7 +1217,6 @@ export function SupportedTools({
           {!compact && <p className="st-subtitle">{subtitle}</p>}
         </div>
 
-        {/* Search & Filter Controls */}
         <div className="st-controls">
           {showSearch && (
             <div className="st-search-wrap">
@@ -946,7 +1247,6 @@ export function SupportedTools({
             </div>
           )}
 
-          {/* Category Tabs */}
           <div className="st-tabs" role="tablist" aria-label="Tool categories">
             {CATEGORIES.map((cat) => {
               const isActive = activeCategory === cat.id;
@@ -971,7 +1271,6 @@ export function SupportedTools({
           </div>
         </div>
 
-        {/* Tools Grid */}
         {visibleTools.length > 0 ? (
           <div className="st-grid">
             {visibleTools.map((tool) => {
@@ -1029,8 +1328,7 @@ export function SupportedTools({
           </div>
         )}
 
-        {/* Expand / Collapse Footer */}
-        {filteredTools.length > initialLimit &&
+        {filteredTools.length > resolvedLimit &&
           !searchQuery.trim() &&
           activeCategory === "all" && (
             <div className="st-footer">
@@ -1057,286 +1355,6 @@ export function SupportedTools({
             </div>
           )}
       </div>
-
-      <style jsx>{`
-        .st-root {
-          width: 100%;
-          padding: 3.5rem 1rem;
-        }
-        .st-compact {
-          padding: 2rem 0.75rem;
-        }
-        .st-container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        .st-header {
-          text-align: center;
-          max-width: 720px;
-          margin: 0 auto 2rem;
-        }
-        .st-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.35rem 0.85rem;
-          border-radius: 999px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          letter-spacing: 0.02em;
-          background: rgba(236, 72, 153, 0.1);
-          border: 1px solid rgba(236, 72, 153, 0.25);
-          color: #ec4899;
-          margin-bottom: 0.85rem;
-        }
-        .st-pill-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #ec4899;
-          box-shadow: 0 0 8px #ec4899;
-        }
-        .st-title {
-          font-size: clamp(1.65rem, 3.2vw, 2.35rem);
-          font-weight: 800;
-          letter-spacing: -0.025em;
-          line-height: 1.2;
-          margin: 0 0 0.65rem;
-          color: var(--foreground, inherit);
-        }
-        .st-subtitle {
-          font-size: 0.98rem;
-          line-height: 1.6;
-          opacity: 0.76;
-          margin: 0;
-        }
-        .st-controls {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-bottom: 1.75rem;
-        }
-        .st-search-wrap {
-          position: relative;
-          max-width: 560px;
-          width: 100%;
-          margin: 0 auto;
-        }
-        .st-search-icon {
-          position: absolute;
-          left: 1rem;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 0.95rem;
-          pointer-events: none;
-          opacity: 0.7;
-        }
-        .st-search-input {
-          width: 100%;
-          padding: 0.82rem 2.6rem 0.82rem 2.75rem;
-          border-radius: 14px;
-          border: 1px solid rgba(148, 163, 184, 0.25);
-          background: rgba(15, 23, 42, 0.04);
-          color: inherit;
-          font-size: 0.94rem;
-          outline: none;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .st-search-input:focus {
-          border-color: #ec4899;
-          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
-        }
-        .st-clear-btn {
-          position: absolute;
-          right: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
-          border: none;
-          background: rgba(148, 163, 184, 0.2);
-          color: inherit;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 0.75rem;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .st-tabs {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 0.5rem;
-        }
-        .st-tab {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.42rem;
-          padding: 0.5rem 0.9rem;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.22);
-          background: rgba(148, 163, 184, 0.06);
-          color: inherit;
-          font-size: 0.84rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.18s ease;
-        }
-        .st-tab:hover {
-          border-color: rgba(236, 72, 153, 0.45);
-          transform: translateY(-1px);
-        }
-        .st-tab-active {
-          background: linear-gradient(135deg, #ec4899, #8b5cf6);
-          color: #ffffff;
-          border-color: transparent;
-          box-shadow: 0 6px 18px rgba(236, 72, 153, 0.28);
-        }
-        .st-tab-count {
-          font-size: 0.72rem;
-          padding: 0.1rem 0.42rem;
-          border-radius: 999px;
-          background: rgba(0, 0, 0, 0.14);
-          opacity: 0.9;
-        }
-        .st-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
-          gap: 1rem;
-        }
-        .st-card {
-          display: flex;
-          flex-direction: column;
-          padding: 1.15rem 1.2rem;
-          border-radius: 16px;
-          border: 1px solid rgba(148, 163, 184, 0.2);
-          background: rgba(148, 163, 184, 0.04);
-          text-decoration: none;
-          color: inherit;
-          transition: transform 0.2s ease, border-color 0.2s ease,
-            box-shadow 0.2s ease, background 0.2s ease;
-        }
-        .st-card:hover {
-          transform: translateY(-3px);
-          border-color: rgba(236, 72, 153, 0.45);
-          background: rgba(236, 72, 153, 0.04);
-          box-shadow: 0 12px 28px -10px rgba(236, 72, 153, 0.22);
-        }
-        .st-card-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 0.75rem;
-        }
-        .st-icon-box {
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.25rem;
-          background: rgba(236, 72, 153, 0.1);
-          border: 1px solid rgba(236, 72, 153, 0.2);
-        }
-        .st-card-meta {
-          display: flex;
-          align-items: center;
-          gap: 0.45rem;
-        }
-        .st-badge {
-          font-size: 0.68rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          padding: 0.18rem 0.52rem;
-          border-radius: 999px;
-          border: 1px solid;
-        }
-        .st-arrow {
-          font-size: 0.95rem;
-          opacity: 0.45;
-          transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-        .st-card:hover .st-arrow {
-          transform: translate(2px, -2px);
-          opacity: 0.95;
-          color: #ec4899;
-        }
-        .st-card-title {
-          font-size: 1rem;
-          font-weight: 700;
-          margin: 0 0 0.38rem;
-          line-height: 1.35;
-        }
-        .st-card-desc {
-          font-size: 0.84rem;
-          line-height: 1.5;
-          opacity: 0.74;
-          margin: 0;
-        }
-        .st-empty {
-          text-align: center;
-          padding: 3rem 1rem;
-          border-radius: 16px;
-          border: 1px dashed rgba(148, 163, 184, 0.3);
-        }
-        .st-empty-title {
-          font-size: 1.1rem;
-          font-weight: 700;
-          margin: 0 0 0.35rem;
-        }
-        .st-empty-sub {
-          font-size: 0.88rem;
-          opacity: 0.7;
-          margin: 0 0 1rem;
-        }
-        .st-reset-btn,
-        .st-expand-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.7rem 1.35rem;
-          border-radius: 999px;
-          border: 1px solid rgba(236, 72, 153, 0.4);
-          background: rgba(236, 72, 153, 0.1);
-          color: inherit;
-          font-size: 0.88rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        .st-reset-btn:hover,
-        .st-expand-btn:hover {
-          background: linear-gradient(135deg, #ec4899, #8b5cf6);
-          color: #ffffff;
-          border-color: transparent;
-          transform: translateY(-1px);
-        }
-        .st-footer {
-          display: flex;
-          justify-content: center;
-          margin-top: 2rem;
-        }
-        @media (max-width: 640px) {
-          .st-root {
-            padding: 2.25rem 0.85rem;
-          }
-          .st-grid {
-            grid-template-columns: 1fr;
-          }
-          .st-tabs {
-            justify-content: flex-start;
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 0.35rem;
-          }
-          .st-tab {
-            white-space: nowrap;
-          }
-        }
-      `}</style>
     </section>
   );
 }
