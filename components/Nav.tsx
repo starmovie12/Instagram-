@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Menu,
   X,
+  Crown,
   History,
   Settings,
   ShieldCheck,
@@ -13,11 +13,9 @@ import {
   Trash2,
   RotateCcw,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "./LanguagePicker";
-import InstallAppButton from "./InstallAppButton";
 import { bumpStreak } from "@/lib/retention";
 
 const LINKS = [
@@ -59,9 +57,9 @@ function StreakBadge() {
       style={{
         fontSize: 12,
         fontWeight: 700,
-        color: "#00F5D4",
-        background: "rgba(0, 245, 212, 0.1)",
-        border: "1px solid rgba(0, 245, 212, 0.3)",
+        color: "#FF3D8B",
+        background: "rgba(255, 61, 139, 0.1)",
+        border: "1px solid rgba(255, 61, 139, 0.3)",
         borderRadius: 999,
         padding: "5px 10px",
         whiteSpace: "nowrap",
@@ -72,60 +70,51 @@ function StreakBadge() {
   );
 }
 
-/** Frame-Grab Cyber Logo */
-function OmniGrabLogo() {
+/** InstaGrab logo — dark tile, gradient border, viewfinder + download arrow */
+function InstaGrabLogo() {
   return (
     <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
+      width="44"
+      height="44"
+      viewBox="0 0 44 44"
       fill="none"
       aria-hidden="true"
       style={{
-        borderRadius: 10,
-        boxShadow: "0 4px 16px rgba(0, 245, 212, 0.3)",
+        borderRadius: 13,
+        boxShadow: "0 4px 18px rgba(255, 61, 139, 0.35)",
         flexShrink: 0,
       }}
     >
-      <rect width="36" height="36" rx="10" fill="url(#omni_bg)" />
+      <defs>
+        <linearGradient id="ig_logo_stroke" x1="0" y1="44" x2="44" y2="0" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FF7A3D" />
+          <stop offset="0.5" stopColor="#FF3D8B" />
+          <stop offset="1" stopColor="#8B3DFF" />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="42" height="42" rx="12" fill="#0B0816" stroke="url(#ig_logo_stroke)" strokeWidth="2" />
       {/* Viewfinder corners */}
       <path
-        d="M8 13V10C8 8.89543 8.89543 8 10 8H13M23 8H26C27.1046 8 28 8.89543 28 10V13M28 23V26C28 27.1046 27.1046 28 26 28H23M13 28H10C8.89543 28 8 27.1046 8 26V23"
-        stroke="white"
+        d="M12 17V14.5C12 13.12 13.12 12 14.5 12H17M27 12H29.5C30.88 12 32 13.12 32 14.5V17M32 27V29.5C32 30.88 30.88 32 29.5 32H27M17 32H14.5C13.12 32 12 30.88 12 29.5V27"
+        stroke="url(#ig_logo_stroke)"
         strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeOpacity="0.9"
       />
-      {/* Center Download Arrow */}
+      {/* Download arrow */}
       <path
-        d="M18 12.5V22.5M18 22.5L14 18.5M18 22.5L22 18.5"
-        stroke="white"
-        strokeWidth="2.5"
+        d="M22 16.5V26M22 26L18 22M22 26L26 22"
+        stroke="url(#ig_logo_stroke)"
+        strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <defs>
-        <linearGradient
-          id="omni_bg"
-          x1="0"
-          y1="36"
-          x2="36"
-          y2="0"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#00F5D4" />
-          <stop offset="0.5" stopColor="#6366F1" />
-          <stop offset="1" stopColor="#A855F7" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
 
 export default function Nav() {
   const path = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Quick-Return Header State (Master Prompt v11 Step 2: Slide out on scroll down, slide in on 15px scroll up)
   const [headerHidden, setHeaderHidden] = useState(false);
@@ -286,10 +275,10 @@ export default function Nav() {
           top: 0,
           zIndex: 80,
           height: 68,
-          background: "rgba(10, 13, 24, 0.85)",
+          background: "rgba(8, 6, 20, 0.88)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
           transform: headerHidden ? "translateY(-100%)" : "translateY(0)",
           transition: "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)",
           willChange: "transform",
@@ -308,45 +297,35 @@ export default function Nav() {
           {/* Brand Logo */}
           <Link
             href="/"
+            aria-label="InstaGrab home"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
+              gap: 12,
               textDecoration: "none",
               color: "inherit",
             }}
           >
-            <OmniGrabLogo />
-            <span style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+            <InstaGrabLogo />
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: 26,
+                lineHeight: 1,
+                letterSpacing: "-0.03em",
+                color: "#FFFFFF",
+              }}
+            >
+              Insta
               <span
                 style={{
-                  fontWeight: 800,
-                  fontSize: 19,
-                  letterSpacing: "-0.03em",
-                  color: "#F8FAFC",
+                  background: "linear-gradient(135deg, #FF3D8B 0%, #E11D9A 60%, #C026D3 100%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
                 }}
               >
-                Omni
-                <span
-                  style={{
-                    background: "linear-gradient(135deg, #00F5D4 0%, #6366F1 55%, #A855F7 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  Grab
-                </span>
-              </span>
-              <span
-                style={{
-                  fontSize: 9.5,
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "#94A3B8",
-                }}
-              >
-                Super App · 94 Tools
+                Grab
               </span>
             </span>
           </Link>
@@ -368,7 +347,7 @@ export default function Nav() {
                     textDecoration: "none",
                     fontSize: 13.5,
                     fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#00F5D4" : "#CBD5E1",
+                    color: isActive ? "#FF3D8B" : "#CBD5E1",
                     padding: "6px 8px",
                     borderRadius: 8,
                     transition: "color 150ms ease, background 150ms ease",
@@ -380,10 +359,13 @@ export default function Nav() {
             })}
           </nav>
 
-          {/* Right Action Bar (44-48dp Touch Targets) */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto" }}>
-            <InstallAppButton />
-            <StreakBadge />
+          {/* Right Action Bar: crown (history) + settings gear */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: "auto" }}>
+            <span className="nav-desktop-only">
+              <StreakBadge />
+              <LanguagePicker />
+              <ThemeToggle />
+            </span>
 
             <button
               type="button"
@@ -392,31 +374,31 @@ export default function Nav() {
                 setConfirmClearAll(false);
                 setShowHistoryModal(true);
               }}
-              aria-label="Download history"
-              title="Recent Grabs History"
+              aria-label="Recent grabs"
+              title="Recent Grabs"
               style={{
                 position: "relative",
-                width: 42,
-                height: 42,
-                borderRadius: 12,
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#F8FAFC",
+                width: 46,
+                height: 46,
+                borderRadius: 14,
+                background: "rgba(245, 184, 61, 0.10)",
+                border: "1px solid rgba(245, 184, 61, 0.18)",
+                color: "#F5B83D",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
               }}
             >
-              <History size={18} />
+              <Crown size={22} strokeWidth={2} fill="currentColor" fillOpacity={0.9} />
               {history.length > 0 && (
                 <span
                   style={{
                     position: "absolute",
                     top: -4,
                     right: -4,
-                    background: "linear-gradient(135deg, #00F5D4, #6366F1)",
-                    color: "#050811",
+                    background: "linear-gradient(135deg, #FF3D8B, #C026D3)",
+                    color: "#FFFFFF",
                     fontSize: 10,
                     fontWeight: 800,
                     borderRadius: 999,
@@ -435,152 +417,45 @@ export default function Nav() {
                 loadStoredData();
                 setShowSettingsModal(true);
               }}
-              aria-label="Extractor settings"
-              title="Session ID & Cobalt Settings"
+              aria-label="Settings"
+              title="Settings"
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#F8FAFC",
+                width: 46,
+                height: 46,
+                borderRadius: 14,
+                background: "transparent",
+                border: "none",
+                color: "#A5A3B8",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
               }}
             >
-              <Settings size={18} />
-            </button>
-
-            <LanguagePicker />
-            <ThemeToggle />
-
-            <button
-              type="button"
-              className="nav-burger"
-              aria-label="Open menu"
-              onClick={() => setMobileMenuOpen(true)}
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#F8FAFC",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <Menu size={20} />
+              <Settings size={22} strokeWidth={1.8} />
             </button>
           </div>
         </div>
 
         <style jsx>{`
-          .nav-burger {
-            display: none;
+          .nav-desktop-only {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
           }
           @media (max-width: 1023px) {
-            .nav-desktop {
+            .nav-desktop,
+            .nav-desktop-only {
               display: none !important;
             }
-            .nav-burger {
-              display: inline-flex !important;
+          }
+          @media (min-width: 1024px) {
+            .nav-mobile-only {
+              display: none !important;
             }
           }
         `}</style>
       </header>
-
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(4, 6, 14, 0.72)",
-            backdropFilter: "blur(8px)",
-            zIndex: 120,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: 310,
-              maxWidth: "85vw",
-              background: "#0D1120",
-              borderLeft: "1px solid rgba(255, 255, 255, 0.1)",
-              padding: 20,
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-              overflowY: "auto",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingBottom: 12,
-                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-              }}
-            >
-              <span style={{ fontWeight: 800, fontSize: 16, color: "#F8FAFC" }}>
-                ⚡ Quick Navigation
-              </span>
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: "rgba(255, 255, 255, 0.06)",
-                  border: "none",
-                  color: "#F8FAFC",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  textDecoration: "none",
-                  padding: "13px 10px",
-                  borderRadius: 10,
-                  borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-                  fontWeight: 600,
-                  fontSize: 14.5,
-                  color: path === l.href ? "#00F5D4" : "#E2E8F0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span>{l.label}</span>
-                <ExternalLink size={14} style={{ opacity: 0.5 }} />
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Settings Modal (Session ID & Cobalt Instance — from instagrab-main) */}
       {showSettingsModal && (
@@ -606,6 +481,8 @@ export default function Nav() {
               borderRadius: 20,
               width: "100%",
               maxWidth: 480,
+              maxHeight: "88vh",
+              overflowY: "auto",
               padding: 24,
               color: "#F8FAFC",
               boxShadow: "0 20px 60px rgba(0, 0, 0, 0.65)",
@@ -629,8 +506,8 @@ export default function Nav() {
                   margin: 0,
                 }}
               >
-                <Settings size={20} color="#00F5D4" />
-                <span>OmniGrab Engine Settings</span>
+                <Settings size={20} color="#FF3D8B" />
+                <span>InstaGrab Settings</span>
               </h3>
               <button
                 type="button"
@@ -646,6 +523,49 @@ export default function Nav() {
               >
                 <X size={20} />
               </button>
+            </div>
+
+            {/* Quick navigation + language/theme (phones — the header stays minimal) */}
+            <div className="nav-mobile-only" style={{ marginBottom: 20 }}>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "#94A3B8",
+                  marginBottom: 10,
+                }}
+              >
+                Quick Navigation
+              </span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {LINKS.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setShowSettingsModal(false)}
+                    style={{
+                      textDecoration: "none",
+                      padding: "9px 14px",
+                      borderRadius: 999,
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      color: path === l.href ? "#FF3D8B" : "#E2E8F0",
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: path === l.href ? "1px solid rgba(255, 61, 139, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    }}
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                <LanguagePicker />
+                <ThemeToggle />
+              </div>
+              <div style={{ height: 1, background: "rgba(255, 255, 255, 0.08)", marginTop: 16 }} />
             </div>
 
             <div style={{ marginBottom: 16 }}>
@@ -687,7 +607,7 @@ export default function Nav() {
               >
                 <ShieldCheck
                   size={13}
-                  color="#00F5D4"
+                  color="#FF3D8B"
                   style={{ display: "inline", marginRight: 4, verticalAlign: "middle" }}
                 />
                 Saved strictly in your browser. Lets you grab stories/posts from accounts you follow and bypasses public rate-limits.
@@ -743,8 +663,8 @@ export default function Nav() {
                 height: 48,
                 borderRadius: 12,
                 border: "none",
-                background: "linear-gradient(135deg, #00F5D4 0%, #6366F1 55%, #A855F7 100%)",
-                color: "#040711",
+                background: "linear-gradient(135deg, #FF7A59 0%, #FF3D8B 50%, #C026D3 100%)",
+                color: "#FFFFFF",
                 fontWeight: 800,
                 fontSize: 15,
                 cursor: "pointer",
@@ -814,7 +734,7 @@ export default function Nav() {
                   margin: 0,
                 }}
               >
-                <History size={20} color="#00F5D4" />
+                <History size={20} color="#FF3D8B" />
                 <span>Recent Grabs ({history.length})</span>
               </h3>
               <button
@@ -842,8 +762,8 @@ export default function Nav() {
                   justifyContent: "space-between",
                   padding: "10px 14px",
                   borderRadius: 12,
-                  background: "rgba(99, 102, 241, 0.18)",
-                  border: "1px solid rgba(99, 102, 241, 0.45)",
+                  background: "rgba(192, 38, 211, 0.18)",
+                  border: "1px solid rgba(192, 38, 211, 0.45)",
                   fontSize: 13,
                 }}
               >
@@ -852,7 +772,7 @@ export default function Nav() {
                   type="button"
                   onClick={handleUndoDelete}
                   style={{
-                    background: "#00F5D4",
+                    background: "#FF3D8B",
                     color: "#040711",
                     border: "none",
                     borderRadius: 8,
@@ -929,7 +849,7 @@ export default function Nav() {
                               width: 44,
                               height: 44,
                               borderRadius: 9,
-                              background: "linear-gradient(135deg, #6366F1, #00F5D4)",
+                              background: "linear-gradient(135deg, #C026D3, #FF3D8B)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -971,9 +891,9 @@ export default function Nav() {
                             width: 38,
                             height: 38,
                             borderRadius: 9,
-                            background: "rgba(0, 245, 212, 0.12)",
-                            border: "1px solid rgba(0, 245, 212, 0.3)",
-                            color: "#00F5D4",
+                            background: "rgba(255, 61, 139, 0.12)",
+                            border: "1px solid rgba(255, 61, 139, 0.3)",
+                            color: "#FF3D8B",
                             display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
