@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import GoldenBar from "@/components/GoldenBar";
 import { ToolsAutoSupported } from "@/components/PlatformIcons";
 import HeroBanner from "@/components/HeroBanner";
-import TrustLine from "@/components/TrustLine";
+import TrustFootBar from "@/components/TrustFootBar";
 import HowItWorks from "@/components/HowItWorks";
 import FAQ from "@/components/FAQ";
 import AdFrame from "@/components/AdFrame";
@@ -65,10 +65,7 @@ export default function Home() {
             <InstallAppButton variant="card" />
             <HeroBanner />
             <div style={{ marginTop: 16 }}>
-              <GoldenBar variant="neon" buttonText="Grab Media" footer={<ToolsAutoSupported />} />
-            </div>
-            <div style={{ marginTop: 20 }}>
-              <TrustLine />
+              <GoldenBar variant="neon" buttonText="Grab Media" footer={<><ToolsAutoSupported /><TrustFootBar /></>} />
             </div>
             <RecentTools />
             <ToolOfTheDay />
