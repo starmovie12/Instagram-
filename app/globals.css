@@ -1825,3 +1825,47 @@ section[id] { scroll-margin-top: 88px; }
   .gb-neon .gbn-spinner { animation-duration: 2.4s; }
   .gb-neon .gbn-tools .pf-strip { scroll-behavior: auto; }
 }
+
+/* ── Neon card ki bottom trust strip (photo jaisi): dono taraf halki dandi + shield-lock + text ── */
+.gb-neon .gbn-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  min-height: 48px;
+  padding: 6px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--gbn-edge);
+  background: var(--gbn-sub);
+}
+.gb-neon .gbn-foot__rule {
+  flex: 1 1 0;
+  max-width: 150px;
+  height: 1px;
+  border-radius: 1px;
+}
+/* dandi text ki taraf se gehri, bahar ki taraf fade */
+.gb-neon .gbn-foot__rule--l { background: linear-gradient(90deg, transparent, var(--gbn-edge-hi)); }
+.gb-neon .gbn-foot__rule--r { background: linear-gradient(270deg, transparent, var(--gbn-edge-hi)); }
+.gb-neon .gbn-foot__text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.gb-neon .gbn-foot__icon { flex: 0 0 auto; color: var(--gold-ink); }
+.gb-neon .gbn-foot__part { display: inline-flex; align-items: center; gap: 8px; }
+.gb-neon .gbn-foot__dot { color: var(--gold-ink); font-weight: 700; }
+@media (max-width: 560px) {
+  .gb-neon .gbn-foot { gap: 8px; padding: 8px 10px; }
+  .gb-neon .gbn-foot__rule { display: none; }
+  .gb-neon .gbn-foot__text { font-size: 13px; }
+}
