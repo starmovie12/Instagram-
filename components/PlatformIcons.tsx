@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useId } from "react";
-import { ArrowRight, Zap } from "lucide-react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ArrowRight, ChevronRight, Zap } from "lucide-react";
 
 /**
  * Rounded-square brand tiles used by the homepage hero illustration and the
@@ -685,7 +685,7 @@ export function ToolsAutoSupported({
             <Zap size={18} strokeWidth={2} fill="currentColor" />
           </span>
           <span className="gbn-tools__count">{count}</span>
-          <span className="gbn-tools__label">Tools Auto-Supported:</span>
+          <span className="gbn-tools__label">Tools Auto-Supported</span>
         </p>
         <a className="gbn-tools__all" href={href}>
           <span>View All</span>
