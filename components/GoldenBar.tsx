@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { ArrowRight, ClipboardPaste, Download, Link2, Sparkles, X } from "lucide-react";
+import { ArrowRight, ClipboardPaste, Download, Link2, ShieldCheck, Sparkles, X, Zap } from "lucide-react";
 
 export type GoldenBarMode =
   | "auto"
@@ -878,6 +878,83 @@ const GOLDEN_BAR_STYLES = `
       flex: 1;
     }
   }
+
+  /* ── NEON: photo jaisa look (globals.css ke BAAD inject hota hai, isliye yahan override chalta hai) ── */
+
+  /* Link icon: gol badge (✕ button ke saath mirror) */
+  .gb-neon .gbn-field { padding: 0 8px; }
+  .gb-neon .gbn-field__icon {
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--gbn-edge);
+    background: var(--surface-3);
+  }
+
+  /* Paste Link + Grab Media: poori pill shape */
+  .gb-neon .gbn-btn { border-radius: 999px; }
+
+  /* Trust row: card ke ANDAR, buttons aur Tools sub-card ke beech */
+  .gb-neon .gbn-trust {
+    display: flex;
+    flex-direction: column;
+    margin: 12px 0 0;
+    padding: 4px 12px;
+    list-style: none;
+    border-radius: 20px;
+    border: 1px solid var(--gbn-edge);
+    background: var(--gbn-sub);
+  }
+  .gb-neon .gbn-trust__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 8px;
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .gb-neon .gbn-trust__item + .gbn-trust__item {
+    border-top: 1px solid var(--gbn-edge);
+  }
+  .gb-neon .gbn-trust__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    color: var(--gold-ink);
+  }
+  @media (min-width: 768px) {
+    .gb-neon .gbn-trust {
+      flex-direction: row;
+      align-items: center;
+      padding: 0 8px;
+    }
+    .gb-neon .gbn-trust__item {
+      flex: 1 1 auto;
+      min-height: 52px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+    .gb-neon .gbn-trust__item + .gbn-trust__item {
+      border-top: 0;
+    }
+    /* Items ke beech vertical divider (photo wali "|" line) */
+    .gb-neon .gbn-trust__item + .gbn-trust__item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      height: 24px;
+      transform: translateY(-50%);
+      border-left: 1px solid var(--gbn-edge);
+    }
+  }
 `;
 
 export function GoldenBar({
@@ -1294,6 +1371,30 @@ export function GoldenBar({
             </div>
           </form>
 
+          {/* B2) Trust row — photo jaisa: 3 items, vertical dividers, card ke andar */}
+          {showTrustBadges && !compact && (
+            <ul className="gbn-trust" aria-label="Why people trust InstaGrab">
+              <li className="gbn-trust__item">
+                <span className="gbn-trust__icon" aria-hidden="true">
+                  <ShieldCheck size={20} strokeWidth={2} />
+                </span>
+                <span>100% Anonymous &amp; Safe</span>
+              </li>
+              <li className="gbn-trust__item">
+                <span className="gbn-trust__icon" aria-hidden="true">
+                  <Sparkles size={20} strokeWidth={2} />
+                </span>
+                <span>Full HD / 4K Original Quality</span>
+              </li>
+              <li className="gbn-trust__item">
+                <span className="gbn-trust__icon" aria-hidden="true">
+                  <Zap size={20} strokeWidth={2} fill="currentColor" />
+                </span>
+                <span>No Login or Watermark</span>
+              </li>
+            </ul>
+          )}
+
           {/* C) Sub-card slot (page.tsx se <ToolsAutoSupported /> aata hai) */}
           {footer}
         </div>
@@ -1385,7 +1486,7 @@ export function GoldenBar({
       </form>
       )}
 
-      {showTrustBadges && !compact && (
+      {showTrustBadges && !compact && !isNeon && (
         <div className="gb-trust-row">
           <span className="gb-trust-item">🔒 100% Anonymous &amp; Safe</span>
           <span className="gb-trust-sep">•</span>
