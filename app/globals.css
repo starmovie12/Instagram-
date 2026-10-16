@@ -1334,3 +1334,494 @@ section[id] { scroll-margin-top: 88px; }
   70% { transform: scale(1.02); }
   100% { opacity: 1; transform: scale(1); }
 }
+
+
+
+/* ==========================================================================
+   GB-NEON — "Paste box" glass card  (GoldenBar variant="neon")
+   --------------------------------------------------------------------------
+   Rules:
+   • Sirf tokens: --gold-*, --surface*, --ink*, --line*, --molten, --focus-ring.
+     Koi hard-coded rang nahi (mask ka `black` sirf alpha hai, rang nahi).
+   • --molten gradient SIRF "Grab Media" button par (ek screen = ek molten).
+     Baaki sab solid surface + token-tint border/glow. Koi aur gradient nahi.
+   • Glow/edge ka rang color-mix(var(--gold-*)) se aata hai — isliye tokens
+     badle (gold <-> cyber) to card khud follow karega. color-mix na ho to
+     @supports se solid token fallback (--line-strong) lagta hai.
+   • Specificity: GoldenBar ka purana <style> component ke andar, globals.css
+     ke BAAD inject hota hai. Isliye purani classes chhoone wale selectors
+     `.gb-wrapper.gb-neon` / `.gb-neon .pf-*` (0,2,0+) hain, aur naye elements
+     ke liye naya prefix `gbn-` (koi purana conflict nahi).
+   • Markup contract (files 2–4):
+       .gb-wrapper.gb-neon
+         .gbn-card[data-loading]
+           form.gbn-form
+             .gbn-field > .gbn-field__icon + input.gbn-input + button.gbn-clear
+             .gbn-actions > button.gbn-btn.gbn-btn--paste + button.gbn-btn.gbn-btn--grab
+               (andar: .gbn-btn__icon, .gbn-btn__label, .gbn-btn__tail, .gbn-spinner)
+           .gbn-tools[data-start][data-end]
+             .gbn-tools__head > .gbn-tools__title (.gbn-tools__bolt, .gbn-tools__count,
+                                 .gbn-tools__label) + a.gbn-tools__all
+             .gbn-tools__row > ul.pf-strip (PlatformStrip) + button.gbn-tools__next
+   ========================================================================== */
+
+/* ── Design tokens (scoped, sirf .gb-neon ke andar) ── */
+.gb-neon {
+  /* fallbacks: color-mix na ho to plain tokens */
+  --gbn-edge: var(--line-strong);
+  --gbn-edge-hi: var(--line-strong);
+  --gbn-glow: var(--line-strong);
+  --gbn-glow-soft: var(--line);
+  --gbn-hi: var(--line);
+  --gbn-glass: var(--surface);
+  --gbn-field: var(--surface-2);
+  --gbn-sub: var(--surface-2);
+  --gbn-btn2: var(--surface-2);
+  --gbn-drop: 0 0 0 0 transparent;
+  --gbn-on-molten: var(--bg); /* molten par gehra text (dark theme) */
+  --gbn-icon: 48px;           /* tile icon size — PlatformStrip iconSize={48} */
+  --gbn-ease: var(--ease-silk, cubic-bezier(0.22, 1, 0.36, 1));
+  --pf-focus: var(--gold-400); /* PlatformTile focus outline ka rang */
+}
+
+/* Light (Porcelain): saaf safed card, halka border, soft shadow */
+[data-theme="light"] .gb-neon {
+  --gbn-glass: var(--surface);
+  --gbn-field: var(--surface-2);
+  --gbn-sub: var(--surface-2);
+  --gbn-btn2: var(--surface);
+  --gbn-hi: var(--surface);
+  --gbn-drop: var(--shadow-2);
+  --gbn-on-molten: var(--ink); /* light mein --ink gehra hai */
+}
+
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  /* Dark (Obsidian) = base: deep glass + soft glow */
+  .gb-neon {
+    --gbn-edge: color-mix(in srgb, var(--gold-400) 30%, transparent);
+    --gbn-edge-hi: color-mix(in srgb, var(--gold-400) 62%, transparent);
+    --gbn-glow: color-mix(in srgb, var(--gold-400) 30%, transparent);
+    --gbn-glow-soft: color-mix(in srgb, var(--gold-400) 16%, transparent);
+    --gbn-hi: color-mix(in srgb, var(--ink) 7%, transparent);
+    --gbn-glass: color-mix(in srgb, var(--surface) 80%, transparent);
+    --gbn-field: color-mix(in srgb, var(--bg) 62%, var(--surface));
+    --gbn-sub: color-mix(in srgb, var(--surface-2) 72%, transparent);
+    --gbn-btn2: color-mix(in srgb, var(--gold-400) 9%, var(--surface-2));
+  }
+  /* Light: gold-500 (gehra) se tint — safed par gold-400 phika padta hai */
+  [data-theme="light"] .gb-neon {
+    --gbn-edge: color-mix(in srgb, var(--gold-500) 32%, transparent);
+    --gbn-edge-hi: color-mix(in srgb, var(--gold-500) 60%, transparent);
+    --gbn-glow: color-mix(in srgb, var(--gold-500) 22%, transparent);
+    --gbn-glow-soft: color-mix(in srgb, var(--gold-500) 10%, transparent);
+    --gbn-glass: var(--surface);
+    --gbn-field: var(--surface-2);
+    --gbn-sub: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
+    --gbn-btn2: color-mix(in srgb, var(--gold-500) 6%, var(--surface));
+  }
+}
+
+/* View All → #all-tools par sticky nav ke neeche na chhupe */
+#all-tools { scroll-margin-top: 88px; }
+
+/* ── Wrapper ── */
+.gb-wrapper.gb-neon { max-width: 760px; }
+
+/* ── Glass card ── */
+.gb-neon .gbn-card {
+  position: relative;
+  isolation: isolate;
+  padding: 12px;
+  border-radius: 24px;
+  border: 1px solid var(--gbn-edge);
+  background: var(--surface); /* solid fallback */
+  box-shadow:
+    var(--gbn-drop),
+    0 22px 56px -24px var(--gbn-glow),
+    0 0 36px -10px var(--gbn-glow-soft),
+    inset 0 1px 0 var(--gbn-hi);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .gb-neon .gbn-card {
+    background: var(--gbn-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
+  }
+}
+.gb-neon .gbn-form { margin: 0; }
+
+/* ── A) Input pill ── */
+.gb-neon .gbn-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 8px 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--gbn-edge);
+  background: var(--gbn-field);
+  box-shadow: inset 0 1px 0 var(--gbn-hi);
+  transition: border-color 0.2s var(--gbn-ease), box-shadow 0.2s var(--gbn-ease);
+}
+.gb-neon .gbn-field:focus-within {
+  border-color: var(--gbn-edge-hi);
+  box-shadow: var(--focus-ring), inset 0 1px 0 var(--gbn-hi);
+}
+.gb-neon .gbn-card[data-loading="true"] .gbn-field {
+  border-color: var(--gbn-edge-hi);
+}
+.gb-neon .gbn-field__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--gold-ink);
+}
+.gb-neon .gbn-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 54px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem; /* 16px: iOS zoom nahi karega */
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+.gb-neon .gbn-input::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+  text-overflow: ellipsis;
+}
+.gb-neon .gbn-input:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+/* ✕ clear — sirf tab dikhta hai jab text ho (TSX decide karta hai) */
+.gb-neon .gbn-clear {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--gbn-edge);
+  background: var(--surface-3);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color 0.2s var(--gbn-ease), border-color 0.2s var(--gbn-ease),
+    transform 0.15s var(--gbn-ease);
+}
+.gb-neon .gbn-clear::after { /* 48px tap area */
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+}
+.gb-neon .gbn-clear:hover { color: var(--ink); border-color: var(--gbn-edge-hi); }
+.gb-neon .gbn-clear:active { transform: scale(0.94); }
+.gb-neon .gbn-clear:focus-visible {
+  outline: 2px solid transparent; /* forced-colors mein dikhega */
+  box-shadow: var(--focus-ring);
+}
+
+/* ── B) Paste Link + Grab Media ── */
+.gb-neon .gbn-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.gb-neon .gbn-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.18s var(--gbn-ease), box-shadow 0.2s var(--gbn-ease),
+    border-color 0.2s var(--gbn-ease), background-color 0.2s var(--gbn-ease);
+}
+.gb-neon .gbn-btn__icon { flex: 0 0 auto; display: inline-flex; }
+.gb-neon .gbn-btn__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gb-neon .gbn-btn__tail {
+  flex: 0 0 auto;
+  display: inline-flex;
+  opacity: 0.75;
+  transition: transform 0.2s var(--gbn-ease), opacity 0.2s var(--gbn-ease);
+}
+
+/* secondary: solid surface + gold-tint border */
+.gb-neon .gbn-btn--paste {
+  background: var(--gbn-btn2);
+  border-color: var(--gbn-edge);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 var(--gbn-hi);
+}
+
+/* primary: THE molten element (sirf yehi gradient) */
+.gb-neon .gbn-btn--grab {
+  background: var(--molten);
+  color: var(--gbn-on-molten);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow:
+    0 14px 30px -12px var(--gbn-glow),
+    0 0 26px -8px var(--gbn-glow-soft),
+    inset 0 1px 0 var(--gbn-hi);
+}
+.gb-neon .gbn-btn--grab:disabled {
+  cursor: progress;
+  opacity: 0.92;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gb-neon .gbn-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .gb-neon .gbn-btn--paste:hover:not(:disabled) { border-color: var(--gbn-edge-hi); }
+  .gb-neon .gbn-btn--paste:hover .gbn-btn__tail { transform: translateX(3px); opacity: 1; }
+  .gb-neon .gbn-btn--grab:hover:not(:disabled) {
+    box-shadow:
+      0 18px 36px -12px var(--gbn-glow),
+      0 0 34px -8px var(--gbn-glow-soft),
+      inset 0 1px 0 var(--gbn-hi);
+  }
+  .gb-neon .gbn-btn--grab:hover .gbn-btn__tail { opacity: 1; }
+}
+.gb-neon .gbn-btn:active:not(:disabled) { transform: scale(0.97); }
+.gb-neon .gbn-btn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+/* Loading spinner (Grab Media ke andar, currentColor = on-molten text) */
+.gb-neon .gbn-spinner {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+  border-top-color: transparent;
+  animation: gbn-spin 0.8s linear infinite;
+}
+@keyframes gbn-spin { to { transform: rotate(360deg); } }
+
+/* ── C) "N Tools Auto-Supported" sub-card ── */
+.gb-neon .gbn-tools {
+  position: relative;
+  margin-top: 12px;
+  padding: 0 0 6px;
+  border-radius: 20px;
+  border: 1px solid var(--gbn-edge);
+  background: var(--gbn-sub);
+  /* fade mask: JS data-start / data-end set karta hai (scroll position ke hisaab se) */
+  --gbn-mask: linear-gradient(90deg, transparent 0, black 14px, black calc(100% - 64px), transparent 100%);
+}
+.gb-neon .gbn-tools[data-start="true"] {
+  --gbn-mask: linear-gradient(90deg, black 0, black calc(100% - 64px), transparent 100%);
+}
+.gb-neon .gbn-tools[data-end="true"] {
+  --gbn-mask: linear-gradient(90deg, transparent 0, black 14px, black 100%);
+}
+.gb-neon .gbn-tools[data-start="true"][data-end="true"] { --gbn-mask: none; }
+
+.gb-neon .gbn-tools__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+}
+.gb-neon .gbn-tools__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.gb-neon .gbn-tools__bolt { flex: 0 0 auto; display: inline-flex; color: var(--gold-ink); }
+.gb-neon .gbn-tools__count {
+  flex: 0 0 auto;
+  color: var(--gold-ink);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.gb-neon .gbn-tools__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.gb-neon .gbn-tools__all {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 0 2px;
+  border-radius: 10px;
+  color: var(--gold-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gb-neon .gbn-tools__all > svg { transition: transform 0.2s var(--gbn-ease); }
+.gb-neon .gbn-tools__all:hover { text-decoration: underline; text-underline-offset: 3px; }
+.gb-neon .gbn-tools__all:hover > svg { transform: translateX(3px); }
+.gb-neon .gbn-tools__all:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+.gb-neon .gbn-tools__row { position: relative; }
+
+/* PlatformStrip (.pf-strip) ko neon mein HAMESHA ek scrollable row rakhna hai
+   (PlatformIcons ka 768px+ wrap/center yahan override) */
+.gb-neon .gbn-tools .pf-strip {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 8px 56px 8px 12px;
+  overflow-x: auto;
+  scroll-padding: 0 12px;
+  -webkit-mask-image: var(--gbn-mask);
+  mask-image: var(--gbn-mask);
+}
+.gb-neon .gbn-tools .pf-strip .pf-tile { min-width: 64px; }
+
+/* Tile: brand icon ke around gold-tint ring + soft glow */
+.gb-neon .pf-tile > svg {
+  box-shadow: 0 0 0 1px var(--gbn-edge), 0 8px 16px -10px var(--gbn-glow);
+  transition: box-shadow 0.2s var(--gbn-ease);
+}
+.gb-neon .pf-tile__label {
+  color: var(--ink-2);
+  font-size: 0.72rem;
+  opacity: 1;
+  transition: color 0.2s var(--gbn-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gb-neon .pf-tile[data-interactive="true"]:hover { transform: translateY(-2px); }
+  .gb-neon .pf-tile[data-interactive="true"]:hover > svg {
+    box-shadow: 0 0 0 1px var(--gbn-edge-hi), 0 10px 20px -8px var(--gbn-glow);
+  }
+  .gb-neon .pf-tile[data-interactive="true"]:hover .pf-tile__label { color: var(--ink); }
+}
+
+/* Circular "›" scroll button (visual 36px, tap area 48px) */
+.gb-neon .gbn-tools__next {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  top: calc(10px + var(--gbn-icon) / 2); /* strip padding 8 + tile padding 2 + icon/2 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-top: -18px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--gbn-edge-hi);
+  background: var(--surface);
+  color: var(--gold-ink);
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px var(--gbn-glow);
+  transition: transform 0.15s var(--gbn-ease), opacity 0.2s var(--gbn-ease),
+    visibility 0.2s var(--gbn-ease), border-color 0.2s var(--gbn-ease);
+}
+.gb-neon .gbn-tools__next::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+}
+.gb-neon .gbn-tools__next:hover { border-color: var(--gold-ink); }
+.gb-neon .gbn-tools__next:active { transform: scale(0.94); }
+.gb-neon .gbn-tools__next:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+/* End par ho to hide (visibility => tab order se bhi bahar) */
+.gb-neon .gbn-tools[data-end="true"] .gbn-tools__next,
+.gb-neon .gbn-tools__next:disabled {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 419px) {
+  /* 360px par jagah kam: decorative arrow/sparkle hata do */
+  .gb-neon .gbn-btn__tail { display: none; }
+}
+@media (min-width: 400px) {
+  .gb-neon .gbn-tools__title,
+  .gb-neon .gbn-tools__all { font-size: 0.92rem; }
+}
+@media (min-width: 480px) {
+  .gb-neon .gbn-card { padding: 16px; border-radius: 28px; }
+  .gb-neon .gbn-field { min-height: 60px; padding: 0 10px 0 20px; }
+  .gb-neon .gbn-input { height: 58px; }
+  .gb-neon .gbn-actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 12px; }
+  .gb-neon .gbn-btn { min-height: 64px; padding: 0 16px; font-size: 1.05rem; gap: 10px; }
+  .gb-neon .gbn-tools__head { padding: 0 16px; }
+  .gb-neon .gbn-tools .pf-strip { padding-left: 16px; scroll-padding: 0 16px; gap: 8px; }
+}
+@media (min-width: 640px) {
+  .gb-neon .gbn-card { padding: 20px; }
+  .gb-neon .gbn-tools .pf-strip .pf-tile { min-width: 72px; }
+}
+
+/* ── Reduced motion: transform/transition band, spinner dheema ── */
+@media (prefers-reduced-motion: reduce) {
+  .gb-neon .gbn-field,
+  .gb-neon .gbn-clear,
+  .gb-neon .gbn-btn,
+  .gb-neon .gbn-btn__tail,
+  .gb-neon .gbn-tools__all > svg,
+  .gb-neon .gbn-tools__next,
+  .gb-neon .pf-tile,
+  .gb-neon .pf-tile > svg,
+  .gb-neon .pf-tile__label { transition: none; }
+  .gb-neon .gbn-btn:hover:not(:disabled),
+  .gb-neon .gbn-btn:active:not(:disabled),
+  .gb-neon .gbn-btn--paste:hover .gbn-btn__tail,
+  .gb-neon .gbn-clear:active,
+  .gb-neon .gbn-tools__next:active,
+  .gb-neon .gbn-tools__all:hover > svg,
+  .gb-neon .pf-tile[data-interactive="true"]:hover,
+  .gb-neon .pf-tile[data-interactive="true"]:active { transform: none; }
+  .gb-neon .gbn-spinner { animation-duration: 2.4s; }
+  .gb-neon .gbn-tools .pf-strip { scroll-behavior: auto; }
+}
