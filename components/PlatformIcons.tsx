@@ -1,4 +1,7 @@
-import React, { useId } from "react";
+"use client";
+
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ArrowRight, ChevronRight, Zap } from "lucide-react";
 
 /**
  * Rounded-square brand tiles used by the homepage hero illustration and the
@@ -204,8 +207,10 @@ const CSS = `
     -webkit-mask-image:none;mask-image:none}
   .pf-strip .pf-tile{min-width:72px}
 }
+.pf-strip:focus-visible{outline:2px solid var(--pf-focus,#3B6BFF);outline-offset:-2px;border-radius:14px}
 @media (forced-colors:active){
   .pf-tile:focus-visible{outline:3px solid Highlight}
+  .pf-strip:focus-visible{outline:2px solid Highlight}
 }
 `;
 
@@ -268,6 +273,10 @@ export function PlatformStrip({
   showLabels = true,
   iconSize = 44,
   ariaLabel = "Supported platforms",
+  labels,
+  listRef,
+  onScroll,
+  focusable = false,
   style,
 }: {
   items?: PlatformKey[];
@@ -276,18 +285,34 @@ export function PlatformStrip({
   showLabels?: boolean;
   iconSize?: number | string;
   ariaLabel?: string;
+  /** Chhote naam (IG, FB, P...) — na do to PLATFORM_LABEL use hota hai. */
+  labels?: Partial<Record<PlatformKey, string>>;
+  /** Scroll karne ke liye <ul> ka ref (ToolsAutoSupported ka › button isse chalata hai). */
+  listRef?: React.Ref<HTMLUListElement>;
+  onScroll?: React.UIEventHandler<HTMLUListElement>;
+  /** true => keyboard se row par focus (tiles clickable nahi hon tab bhi scroll ho sake). */
+  focusable?: boolean;
   style?: React.CSSProperties;
 }) {
   return (
     <>
       <PlatformStyles />
-      <ul className="pf-strip" aria-label={ariaLabel} style={style}>
+      <ul
+        ref={listRef}
+        className="pf-strip"
+        role="list"
+        aria-label={ariaLabel}
+        tabIndex={focusable ? 0 : undefined}
+        onScroll={onScroll}
+        style={style}
+      >
         {items.map((name) => (
           <li key={name}>
             <PlatformTile
               name={name}
               size={iconSize}
               showLabel={showLabels}
+              label={labels?.[name]}
               href={hrefs?.[name]}
               onClick={onSelect ? () => onSelect(name) : undefined}
               withStyles={false}
@@ -296,5 +321,120 @@ export function PlatformStrip({
         ))}
       </ul>
     </>
+  );
+}
+
+
+/* ------------------------------------------------------------------ */
+/* "N Tools Auto-Supported" sub-card (GoldenBar variant="neon" ke neeche) */
+/* ------------------------------------------------------------------ */
+
+/** Screenshot jaise chhote naam. Baaki platforms ka naam PLATFORM_LABEL se aata hai. */
+export const TOOLS_SHORT_LABEL: Partial<Record<PlatformKey, string>> = {
+  instagram: "IG",
+  facebook: "FB",
+  pinterest: "P",
+  youtube: "YT",
+};
+
+const TOOLS_ITEMS: PlatformKey[] = [
+  "instagram", "facebook", "pinterest", "x", "tiktok", "youtube", "reels", "story", "threads",
+];
+
+/**
+ * Header (⚡ + count + "View All →") + scrollable tile row + circular "›" button.
+ * `count` prop hai (default 33): SupportedTools.tsx ek "use client" module hai, isliye
+ * yahan se ALL_SUPPORTED_TOOLS import nahi karte — parent number pass kare.
+ * Styles: app/globals.css ke `.gb-neon .gbn-tools*` (GoldenBar neon card ke andar hi dikhta hai).
+ */
+export function ToolsAutoSupported({
+  count = 33,
+  items = TOOLS_ITEMS,
+  href = "#all-tools",
+  style,
+}: {
+  count?: number;
+  items?: PlatformKey[];
+  href?: string;
+  style?: React.CSSProperties;
+}) {
+  const listRef = useRef<HTMLUListElement>(null);
+  const [edge, setEdge] = useState({ start: true, end: false });
+
+  // Scroll position se fade-mask + › button ki state (start / end)
+  const measure = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const start = el.scrollLeft <= 2;
+    const end = max <= 2 || el.scrollLeft >= max - 2;
+    setEdge((prev) => (prev.start === start && prev.end === end ? prev : { start, end }));
+  }, []);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener("resize", measure);
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined" && listRef.current) {
+      ro = new ResizeObserver(measure);
+      ro.observe(listRef.current);
+    }
+    return () => {
+      window.removeEventListener("resize", measure);
+      ro?.disconnect();
+    };
+  }, [measure]);
+
+  const scrollNext = () => {
+    const el = listRef.current;
+    if (!el) return;
+    const reduce =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({
+      left: Math.max(el.clientWidth * 0.8, 160),
+      behavior: reduce ? "auto" : "smooth",
+    });
+  };
+
+  const fullNames = items.map((k) => PLATFORM_LABEL[k]).join(", ");
+
+  return (
+    <div className="gbn-tools" data-start={edge.start} data-end={edge.end} style={style}>
+      <div className="gbn-tools__head">
+        <p className="gbn-tools__title">
+          <span className="gbn-tools__bolt" aria-hidden="true">
+            <Zap size={18} strokeWidth={2} fill="currentColor" />
+          </span>
+          <span className="gbn-tools__count">{count}</span>
+          <span className="gbn-tools__label">Tools Auto-Supported:</span>
+        </p>
+        <a className="gbn-tools__all" href={href}>
+          <span>View All</span>
+          <ArrowRight size={16} strokeWidth={2.2} aria-hidden="true" />
+        </a>
+      </div>
+
+      <div className="gbn-tools__row">
+        <PlatformStrip
+          items={items}
+          iconSize={48}
+          labels={TOOLS_SHORT_LABEL}
+          listRef={listRef}
+          onScroll={measure}
+          focusable
+          ariaLabel={`Supported platforms: ${fullNames}`}
+        />
+        <button
+          type="button"
+          className="gbn-tools__next"
+          onClick={scrollNext}
+          disabled={edge.end}
+          aria-label="Scroll platforms right"
+        >
+          <ChevronRight size={18} strokeWidth={2.4} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
   );
 }
