@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import InstallAppButton from "@/components/InstallAppButton";
 import Footer from "@/components/Footer";
 import GoldenBar from "@/components/GoldenBar";
+import { ToolsAutoSupported } from "@/components/PlatformIcons";
 import HeroBanner from "@/components/HeroBanner";
 import TrustLine from "@/components/TrustLine";
 import HowItWorks from "@/components/HowItWorks";
@@ -64,7 +65,7 @@ export default function Home() {
             <InstallAppButton variant="card" />
             <HeroBanner />
             <div style={{ marginTop: 16 }}>
-              <GoldenBar variant="neon" />
+              <GoldenBar variant="neon" buttonText="Grab Media" footer={<ToolsAutoSupported />} />
             </div>
             <div style={{ marginTop: 20 }}>
               <TrustLine />
@@ -108,7 +109,8 @@ export default function Home() {
 
         {/* ── Focused Core Tools Grid ── */}
         <section id="tools" className="section" style={{ paddingTop: 0 }}>
-          <div className="container">
+          {/* "View All →" (ToolsAutoSupported) is anchor par aata hai; id="tools" pehle jaisa rakha */}
+          <div id="all-tools" className="container">
             <Reveal>
               <span className="label">Core Toolkit</span>
               <h2 style={{ marginTop: 12, marginBottom: 8 }}>One bar, every core extractor.</h2>
