@@ -1,1827 +1,1619 @@
-@import "./tokens.css";
-@import "./motion.css";
+"use client";
 
-/* ==========================================================================
-   OMNIGRAB SUPER-APP THEME OVERRIDES & CYBER-NEON DESIGN SYSTEM
-   Merges instagrab-main dark glass aesthetics + Instagram--main 98-page tokens
-   ========================================================================== */
-:root,
-[data-theme="dark"] {
-  --bg: #070913;
-  --bg-dark: #070913;
-  --surface: #101426;
-  --surface-2: #161B33;
-  --surface-3: #1E2544;
-  --bg-card: #101426;
-  --bg-card-hover: #171D36;
-  --bg-surface: rgba(16, 20, 38, 0.78);
-  --bg-glass: rgba(20, 26, 48, 0.65);
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import Link from "next/link";
+import { ArrowRight, ClipboardPaste, Download, Link2, Sparkles, X } from "lucide-react";
 
-  --brand-cyan: #00F5D4;
-  --brand-violet: #6366F1;
-  --brand-purple: #A855F7;
-  --brand-pink: #EC4899;
-  --brand-amber: #F59E0B;
-  --brand-grab: #38BDF8;
+export type GoldenBarMode =
+  | "auto"
+  | "reel"
+  | "story"
+  | "photo"
+  | "video"
+  | "carousel"
+  | "dp"
+  | "profile"
+  | "audio"
+  | "highlights"
+  | "tiktok"
+  | "twitter"
+  | "facebook"
+  | "pinterest"
+  | "threads"
+  | "youtube";
 
-  /* Override Gold tokens with Cyber Cyan-Violet so all 98 pages match */
-  --gold-100: #E0F2FE;
-  --gold-200: #A5F3FC;
-  --gold-300: #38BDF8;
-  --gold-400: #00F5D4;
-  --gold-500: #6366F1;
-  --gold-600: #4F46E5;
-  --gold-700: #3730A3;
-  --gold-ink: #00F5D4;
+export interface MediaItem {
+  url: string;
+  type: "video" | "image" | "audio";
+  thumbnail?: string;
+  quality?: string;
+  width?: number;
+  height?: number;
+  filename?: string;
+}
 
-  --molten: linear-gradient(135deg, #00F5D4 0%, #6366F1 52%, #A855F7 100%);
-  --gradient-brand: linear-gradient(135deg, #00F5D4 0%, #6366F1 52%, #A855F7 100%);
-  --gradient-glow: linear-gradient(
-    135deg,
-    rgba(0, 245, 212, 0.2) 0%,
-    rgba(99, 102, 241, 0.22) 50%,
-    rgba(168, 85, 247, 0.2) 100%
+export interface ExtractedResult {
+  success?: boolean;
+  platform?: string;
+  type?: string;
+  title?: string;
+  caption?: string;
+  author?: {
+    username?: string;
+    fullName?: string;
+    avatar?: string;
+    verified?: boolean;
+    followers?: number;
+    following?: number;
+    postsCount?: number;
+    bio?: string;
+  };
+  thumbnail?: string;
+  url?: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+  media?: MediaItem[];
+  items?: MediaItem[];
+  shortcode?: string;
+  timestamp?: number;
+  likes?: number;
+  comments?: number;
+  views?: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  input: string;
+  platform: string;
+  title: string;
+  thumbnail?: string;
+  timestamp: number;
+}
+
+export interface GoldenBarProps {
+  placeholder?: string;
+  mode?: GoldenBarMode | string;
+  toolType?: string;
+  platform?: string;
+  initialValue?: string;
+  defaultUrl?: string;
+  buttonText?: string;
+  compact?: boolean;
+  autoFocus?: boolean;
+  /** "neon" = naya glass card (input → Paste Link + Grab Media). Na do to purana look. */
+  variant?: "default" | "neon";
+  /** Neon card ke andar form ke neeche ka slot (jaise <ToolsAutoSupported />). */
+  footer?: React.ReactNode;
+  showQuickModes?: boolean;
+  showHistory?: boolean;
+  showTrustBadges?: boolean;
+  onResult?: (data: ExtractedResult) => void;
+  onExtract?: (data: ExtractedResult) => void;
+  onError?: (message: string) => void;
+  className?: string;
+  [key: string]: unknown;
+}
+
+interface DetectedPlatform {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  isUsername?: boolean;
+}
+
+const QUICK_MODES: { id: GoldenBarMode; label: string; icon: string; hint: string }[] = [
+  { id: "auto", label: "Auto Detect", icon: "✨", hint: "Paste any link or @username..." },
+  { id: "reel", label: "Reels HD", icon: "🎬", hint: "Paste Instagram Reel link..." },
+  { id: "story", label: "Stories", icon: "⭕", hint: "Paste Story link or @username..." },
+  { id: "photo", label: "Photo / Carousel", icon: "🖼️", hint: "Paste Instagram Post or Carousel URL..." },
+  { id: "dp", label: "HD DP / Profile", icon: "👤", hint: "Enter Instagram @username or profile URL..." },
+  { id: "audio", label: "Reel to MP3", icon: "🎵", hint: "Paste Reel link to extract MP3 audio..." },
+];
+
+const HISTORY_STORAGE_KEY = "ig_goldenbar_recent_v1";
+
+function isRecord(val: unknown): val is Record<string, unknown> {
+  return typeof val === "object" && val !== null && !Array.isArray(val);
+}
+
+function getStr(val: unknown): string | undefined {
+  return typeof val === "string" && val.trim().length > 0 ? val.trim() : undefined;
+}
+
+function getNum(val: unknown): number | undefined {
+  return typeof val === "number" && !Number.isNaN(val) ? val : undefined;
+}
+
+function getBool(val: unknown): boolean {
+  return Boolean(val);
+}
+
+function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
+  const val = raw.trim();
+  if (!val) {
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
+  }
+
+  const lower = val.toLowerCase();
+
+  if (lower.includes("instagram.com") || lower.includes("instagr.am")) {
+    if (lower.includes("/reel/") || lower.includes("/reels/")) {
+      return { id: "ig-reel", label: "IG Reel", icon: "🎬", color: "#ec4899" };
+    }
+    if (lower.includes("/stories/")) {
+      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "#f59e0b" };
+    }
+    if (lower.includes("/p/") || lower.includes("/tv/")) {
+      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "#8b5cf6" };
+    }
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
+  }
+
+  if (lower.includes("tiktok.com")) {
+    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "#14b8a6" };
+  }
+  if (lower.includes("twitter.com") || lower.includes("x.com")) {
+    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "#3b82f6" };
+  }
+  if (lower.includes("facebook.com") || lower.includes("fb.watch")) {
+    return { id: "facebook", label: "Facebook", icon: "📘", color: "#2563eb" };
+  }
+  if (lower.includes("pinterest.") || lower.includes("pin.it")) {
+    return { id: "pinterest", label: "Pinterest", icon: "📌", color: "#ef4444" };
+  }
+  if (lower.includes("threads.net") || lower.includes("threads.com")) {
+    return { id: "threads", label: "Threads", icon: "🧵", color: "#a855f7" };
+  }
+  if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
+    return { id: "youtube", label: "YouTube", icon: "▶️", color: "#ef4444" };
+  }
+
+  const cleanHandle = val.replace(/^@/, "");
+  const isHandlePattern = /^[a-zA-Z0-9._]{1,30}$/.test(cleanHandle);
+  if (
+    val.startsWith("@") ||
+    (isHandlePattern && !val.includes("/") && !val.includes(":")) ||
+    fallbackMode === "dp" ||
+    fallbackMode === "profile"
+  ) {
+    return {
+      id: "username",
+      label: `@${cleanHandle || "username"}`,
+      icon: "👤",
+      color: "#f59e0b",
+      isUsername: true,
+    };
+  }
+
+  return { id: "url", label: "Web Link", icon: "🔗", color: "#8b5cf6" };
+}
+
+function buildDownloadProxyUrl(mediaUrl: string, filename = "instagram-media"): string {
+  if (!mediaUrl) return "#";
+  return `/api/download?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(filename)}`;
+}
+
+function normalizeApiResponse(rawPayload: unknown, inputVal: string): ExtractedResult {
+  const root = isRecord(rawPayload) ? rawPayload : {};
+  const data = isRecord(root.data)
+    ? root.data
+    : isRecord(root.result)
+    ? root.result
+    : root;
+
+  const mediaList: MediaItem[] = [];
+
+  if (Array.isArray(data.media)) {
+    for (const item of data.media) {
+      if (typeof item === "string") {
+        mediaList.push({
+          url: item,
+          type: item.includes(".mp4") ? "video" : "image",
+        });
+      } else if (isRecord(item)) {
+        const itemUrl =
+          getStr(item.url) ||
+          getStr(item.videoUrl) ||
+          getStr(item.imageUrl) ||
+          getStr(item.src);
+        if (itemUrl) {
+          const isVid =
+            item.type === "video" ||
+            getBool(item.isVideo) ||
+            Boolean(getStr(item.videoUrl));
+          mediaList.push({
+            url: itemUrl,
+            type: isVid ? "video" : item.type === "audio" ? "audio" : "image",
+            thumbnail:
+              getStr(item.thumbnail) ||
+              getStr(item.poster) ||
+              getStr(item.preview),
+            quality: getStr(item.quality) || "HD",
+          });
+        }
+      }
+    }
+  } else if (Array.isArray(data.items)) {
+    for (const item of data.items) {
+      if (isRecord(item)) {
+        const u =
+          getStr(item.url) ||
+          getStr(item.video_url) ||
+          getStr(item.display_url) ||
+          getStr(item.src);
+        if (u) {
+          const isVid =
+            item.type === "video" ||
+            getBool(item.is_video) ||
+            Boolean(getStr(item.video_url));
+          mediaList.push({
+            url: u,
+            type: isVid ? "video" : "image",
+            thumbnail: getStr(item.thumbnail) || getStr(item.display_url),
+            quality: getStr(item.quality) || "HD",
+          });
+        }
+      }
+    }
+  }
+
+  const singleVideo =
+    getStr(data.videoUrl) ||
+    getStr(data.video_url) ||
+    getStr(data.video) ||
+    (data.type === "video" ? getStr(data.url) : undefined);
+
+  const singleImage =
+    getStr(data.imageUrl) ||
+    getStr(data.display_url) ||
+    getStr(data.profilePicHd) ||
+    getStr(data.profile_pic_url_hd) ||
+    getStr(data.avatar) ||
+    getStr(data.thumbnail) ||
+    (data.type === "image" ? getStr(data.url) : undefined);
+
+  const singleAudio =
+    getStr(data.audioUrl) || getStr(data.audio_url) || getStr(data.musicUrl);
+
+  if (mediaList.length === 0) {
+    if (singleVideo) {
+      mediaList.push({
+        url: singleVideo,
+        type: "video",
+        thumbnail: singleImage || getStr(data.thumbnail),
+        quality: "Full HD",
+      });
+    } else if (singleImage) {
+      mediaList.push({
+        url: singleImage,
+        type: "image",
+        thumbnail: singleImage,
+        quality: "Original HD",
+      });
+    } else {
+      const directUrl = getStr(data.url);
+      if (directUrl) {
+        mediaList.push({
+          url: directUrl,
+          type: directUrl.includes(".mp4") ? "video" : "image",
+          thumbnail: getStr(data.thumbnail),
+          quality: "HD",
+        });
+      }
+    }
+  }
+
+  if (Array.isArray(data.posts) && mediaList.length <= 1) {
+    for (const post of data.posts) {
+      if (isRecord(post)) {
+        const postUrl =
+          getStr(post.videoUrl) ||
+          getStr(post.video_url) ||
+          getStr(post.displayUrl) ||
+          getStr(post.display_url) ||
+          getStr(post.url);
+        if (postUrl) {
+          const isVid =
+            getBool(post.isVideo) ||
+            getBool(post.is_video) ||
+            Boolean(getStr(post.videoUrl));
+          mediaList.push({
+            url: postUrl,
+            type: isVid ? "video" : "image",
+            thumbnail:
+              getStr(post.thumbnail) ||
+              getStr(post.displayUrl) ||
+              getStr(post.display_url),
+            quality: "Feed Post",
+          });
+        }
+      }
+    }
+  }
+
+  const authorRec = isRecord(data.author) ? data.author : {};
+  const ownerRec = isRecord(data.owner) ? data.owner : {};
+  const followedByRec = isRecord(data.edge_followed_by) ? data.edge_followed_by : {};
+  const followRec = isRecord(data.edge_follow) ? data.edge_follow : {};
+  const timelineRec = isRecord(data.edge_owner_to_timeline_media)
+    ? data.edge_owner_to_timeline_media
+    : {};
+
+  const username =
+    getStr(authorRec.username) ||
+    getStr(data.username) ||
+    getStr(ownerRec.username) ||
+    (inputVal.startsWith("@") ? inputVal.slice(1) : undefined);
+
+  const captionText =
+    getStr(data.caption) || getStr(data.description) || getStr(data.bio) || "";
+
+  const authorAvatar =
+    getStr(authorRec.avatar) ||
+    getStr(data.profilePicHd) ||
+    getStr(data.profile_pic_url_hd) ||
+    getStr(data.profilePic) ||
+    getStr(data.avatar);
+
+  return {
+    success: true,
+    platform: getStr(data.platform) || "instagram",
+    type: getStr(data.type) || (mediaList[0]?.type ?? "media"),
+    title:
+      getStr(data.title) ||
+      (captionText ? captionText.slice(0, 90) : undefined) ||
+      (username ? `@${username}` : "Instagram Media"),
+    caption: captionText,
+    author: {
+      username,
+      fullName:
+        getStr(authorRec.fullName) ||
+        getStr(data.fullName) ||
+        getStr(data.full_name) ||
+        getStr(ownerRec.full_name),
+      avatar: authorAvatar,
+      verified:
+        getBool(authorRec.verified) ||
+        getBool(data.isVerified) ||
+        getBool(data.is_verified),
+      followers: getNum(data.followers) ?? getNum(followedByRec.count),
+      following: getNum(data.following) ?? getNum(followRec.count),
+      postsCount: getNum(data.postsCount) ?? getNum(timelineRec.count),
+      bio: getStr(data.bio) || getStr(data.biography),
+    },
+    thumbnail:
+      getStr(data.thumbnail) ||
+      mediaList[0]?.thumbnail ||
+      singleImage ||
+      authorAvatar,
+    url: mediaList[0]?.url || singleVideo || singleImage,
+    videoUrl: singleVideo || mediaList.find((m) => m.type === "video")?.url,
+    imageUrl: singleImage || mediaList.find((m) => m.type === "image")?.url,
+    audioUrl: singleAudio,
+    media: mediaList,
+    likes: getNum(data.likes) ?? getNum(data.like_count),
+    comments: getNum(data.comments) ?? getNum(data.comment_count),
+    views: getNum(data.views) ?? getNum(data.view_count),
+  };
+}
+
+const GOLDEN_BAR_STYLES = `
+  .gb-wrapper {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+  .gb-compact {
+    max-width: 680px;
+  }
+  .gb-modes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+  }
+  .gb-mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: rgba(15, 23, 42, 0.04);
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .gb-mode-pill:hover {
+    border-color: rgba(245, 158, 11, 0.6);
+    transform: translateY(-1px);
+  }
+  .gb-mode-active {
+    background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+  }
+  .gb-form {
+    width: 100%;
+  }
+  .gb-bar-outer {
+    padding: 3px;
+    border-radius: 20px;
+    background: linear-gradient(120deg, #f59e0b 0%, #ec4899 50%, #8b5cf6 100%);
+    box-shadow: 0 14px 35px -10px rgba(236, 72, 153, 0.32), 0 0 0 1px rgba(245, 158, 11, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .gb-bar-outer:focus-within {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 42px -10px rgba(236, 72, 153, 0.45), 0 0 0 3px rgba(245, 158, 11, 0.28);
+  }
+  .gb-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.75rem;
+    border-radius: 17px;
+    background: var(--background, #0f172a);
+    color: var(--foreground, #f8fafc);
+  }
+  .gb-platform-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.7rem;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .gb-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 0.98rem;
+    padding: 0.65rem 0.4rem;
+    outline: none;
+  }
+  .gb-input::placeholder {
+    opacity: 0.55;
+  }
+  .gb-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+  }
+  .gb-paste-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(148, 163, 184, 0.1);
+    color: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .gb-paste-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+  }
+  .gb-clear-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(148, 163, 184, 0.18);
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gb-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.78rem 1.35rem;
+    border-radius: 13px;
+    border: none;
+    background: linear-gradient(135deg, #f59e0b 0%, #ec4899 60%, #8b5cf6 100%);
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .gb-submit-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .gb-submit-btn:disabled {
+    opacity: 0.75;
+    cursor: wait;
+  }
+  .gb-spinner-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .gb-spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: gbSpin 0.7s linear infinite;
+  }
+  @keyframes gbSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .gb-trust-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    opacity: 0.75;
+  }
+  .gb-trust-sep {
+    opacity: 0.4;
+  }
+  .gb-history-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    font-size: 0.78rem;
+  }
+  .gb-history-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .gb-history-label {
+    font-weight: 700;
+    opacity: 0.75;
+  }
+  .gb-history-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .gb-history-chip {
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: transparent;
+    color: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+  }
+  .gb-history-chip:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+  .gb-history-right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .gb-history-link {
+    color: #ec4899;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .gb-history-clear {
+    border: none;
+    background: transparent;
+    color: inherit;
+    opacity: 0.65;
+    cursor: pointer;
+    font-size: 0.74rem;
+  }
+  .gb-error-card {
+    margin-top: 1.1rem;
+    padding: 1rem 1.15rem;
+    border-radius: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.08);
+    text-align: left;
+  }
+  .gb-error-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .gb-error-icon {
+    font-size: 1.25rem;
+  }
+  .gb-error-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f87171;
+  }
+  .gb-error-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.88;
+  }
+  .gb-error-tips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed rgba(239, 68, 68, 0.25);
+    font-size: 0.78rem;
+    opacity: 0.85;
+  }
+  .gb-error-link {
+    color: #f472b6;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+  .gb-result-card {
+    margin-top: 1.4rem;
+    padding: 1.25rem;
+    border-radius: 20px;
+    border: 1px solid rgba(236, 72, 153, 0.28);
+    background: rgba(15, 23, 42, 0.04);
+    text-align: left;
+  }
+  .gb-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .gb-author-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .gb-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ec4899;
+  }
+  .gb-author-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .gb-author-name {
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .gb-verified {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+  }
+  .gb-author-handle {
+    font-size: 0.82rem;
+    opacity: 0.7;
+  }
+  .gb-profile-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  .gb-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.78rem;
+  }
+  .gb-dp-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .gb-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  .gb-media-item {
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .gb-media-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gb-video,
+  .gb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .gb-quality-tag {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .gb-media-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.75rem;
+  }
+  .gb-download-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.86rem;
+    text-align: center;
+  }
+  .gb-download-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .gb-caption-box {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .gb-caption-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+  }
+  .gb-caption-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.75;
+  }
+  .gb-copy-btn {
+    padding: 0.28rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid rgba(236, 72, 153, 0.35);
+    background: rgba(236, 72, 153, 0.1);
+    color: #f472b6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .gb-caption-text {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 110px;
+    overflow-y: auto;
+    opacity: 0.85;
+  }
+  @media (max-width: 640px) {
+    .gb-bar-inner {
+      flex-wrap: wrap;
+      padding: 0.55rem;
+    }
+    .gb-platform-text {
+      display: none;
+    }
+    .gb-actions {
+      width: 100%;
+      justify-content: space-between;
+      margin-top: 0.35rem;
+    }
+    .gb-submit-btn {
+      flex: 1;
+    }
+  }
+`;
+
+export function GoldenBar({
+  placeholder,
+  mode = "auto",
+  toolType,
+  initialValue = "",
+  defaultUrl = "",
+  buttonText,
+  compact = false,
+  autoFocus = false,
+  variant = "default",
+  footer,
+  showQuickModes = true,
+  showHistory = true,
+  showTrustBadges = true,
+  onResult,
+  onExtract,
+  onError,
+  className = "",
+}: GoldenBarProps) {
+  const effectiveInitialMode = (toolType || mode || "auto") as GoldenBarMode;
+  const [selectedMode, setSelectedMode] = useState<GoldenBarMode>(effectiveInitialMode);
+  const [input, setInput] = useState<string>(initialValue || defaultUrl || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingStep, setLoadingStep] = useState<string>("Connecting...");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [result, setResult] = useState<ExtractedResult | null>(null);
+  const [copiedCaption, setCopiedCaption] = useState<boolean>(false);
+  const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isNeon = variant === "neon";
+  // Neon mein default "Grab Media"; purane look mein pehle jaisa "Download HD"
+  const submitLabel = buttonText ?? (isNeon ? "Grab Media" : "Download HD");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (raw) {
+        const parsed: unknown = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setRecentHistory(parsed.slice(0, 6) as HistoryEntry[]);
+        }
+      }
+    } catch {
+      // Ignore storage errors in private browsing
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const detected = useMemo(
+    () => detectInputType(input, selectedMode),
+    [input, selectedMode]
   );
-  --gradient-button: linear-gradient(135deg, #00F5D4 0%, #6366F1 60%, #A855F7 100%);
-  --gradient-button-hover: linear-gradient(135deg, #22D3EE 0%, #818CF8 60%, #C084FC 100%);
-
-  --ink: #F8FAFC;
-  --ink-2: #94A3B8;
-  --ink-3: #64748B;
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --text-dim: #64748B;
-
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(0, 245, 212, 0.28);
-  --border-color: rgba(255, 255, 255, 0.09);
-  --border-focus: rgba(0, 245, 212, 0.55);
-  --border-glow: rgba(99, 102, 241, 0.45);
-
-  --ok: #10B981;
-  --err: #EF4444;
-  --warn: #F59E0B;
-  --grain: 0.025;
-  --focus-ring: 0 0 0 3px rgba(0, 245, 212, 0.3);
-
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
-  --radius-full: 9999px;
-
-  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.55);
-  --shadow-glow: 0 0 35px rgba(0, 245, 212, 0.18), 0 0 70px rgba(99, 102, 241, 0.18);
-}
-
-[data-theme="light"] {
-  --bg: #F8FAFC;
-  --bg-dark: #F8FAFC;
-  --surface: #FFFFFF;
-  --surface-2: #F1F5F9;
-  --surface-3: #E2E8F0;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F5F9;
-  --bg-surface: rgba(255, 255, 255, 0.9);
-  --bg-glass: rgba(255, 255, 255, 0.85);
-  --ink: #0F172A;
-  --ink-2: #475569;
-  --ink-3: #64748B;
-  --text-main: #0F172A;
-  --text-muted: #475569;
-  --text-dim: #64748B;
-  --gold-ink: #4F46E5;
-  --line: rgba(15, 23, 42, 0.09);
-  --line-strong: rgba(79, 70, 229, 0.3);
-  --border-color: rgba(15, 23, 42, 0.1);
-}
-
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background-color: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-  font-size: var(--t-body);
-  line-height: 1.6;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  position: relative;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Ambient Background Atmosphere Glows (from instagrab-main) */
-.ambient-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 640px;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 18% 14%, rgba(0, 245, 212, 0.13) 0%, transparent 45%),
-    radial-gradient(circle at 82% 18%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
-    radial-gradient(circle at 50% 36%, rgba(168, 85, 247, 0.1) 0%, transparent 45%);
-}
-
-/* Subtle grain overlay */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-  opacity: var(--grain);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-h1 {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: clamp(2rem, 1.2rem + 4vw, 3.4rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
-  margin: 0;
-}
-
-h2 {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: clamp(1.45rem, 1.1rem + 1.8vw, 2.2rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  margin: 0;
-}
-
-h3 {
-  font-family: var(--font-sans), sans-serif;
-  font-size: var(--t-h3);
-  font-weight: 700;
-  margin: 0;
-}
-
-p { margin: 0; }
-a { color: inherit; }
-button, input { font: inherit; color: inherit; }
-input:focus { outline: none; }
-
-.lead {
-  font-size: var(--t-lead);
-  line-height: 1.6;
-  color: var(--ink-2);
-  max-width: 56ch;
-}
-
-.label {
-  font-family: var(--font-mono), monospace;
-  font-size: var(--t-label);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-.mono {
-  font-family: var(--font-mono), monospace;
-}
-
-.gilded {
-  font-style: normal;
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-/* ==========================================================================
-   CONTAINERS & LEGACY PAGE CLASSES (Keeps all 97 inner pages working)
-   ========================================================================== */
-.container {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.superapp-shell {
-  position: relative;
-  z-index: 1;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 20px 16px 64px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-section[id] { scroll-margin-top: 88px; }
-.section { padding: 72px 0; }
-@media (max-width: 768px) { .section { padding: 48px 0; } }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 22px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: var(--t-small);
-  text-decoration: none;
-  border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn:active { transform: scale(0.98); }
-.btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-
-.btn-molten {
-  background: var(--gradient-brand);
-  color: #040711;
-  height: 48px;
-  font-weight: 800;
-  box-shadow: 0 6px 20px rgba(0, 245, 212, 0.28);
-}
-.btn-molten:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 26px rgba(0, 245, 212, 0.42);
-}
-
-.btn-secondary {
-  background: var(--surface);
-  border-color: var(--line);
-  color: var(--ink);
-}
-.btn-secondary:hover {
-  border-color: var(--line-strong);
-  background: var(--surface-2);
-}
-.btn-secondary.gold {
-  border-color: var(--brand-cyan);
-  color: var(--brand-cyan);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--ink-2);
-  border-color: transparent;
-}
-.btn-ghost:hover { background: var(--surface-2); }
-
-.btn-icon {
-  width: 42px;
-  min-height: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-icon:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--line-strong);
-  transform: translateY(-1px);
-}
-.btn-icon:active { transform: scale(0.95); }
-
-.medallion {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(0, 245, 212, 0.1);
-  border: 1px solid rgba(0, 245, 212, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand-cyan);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-}
-
-.well {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  font-family: var(--font-mono), monospace;
-  font-size: 13px;
-  color: var(--ink-2);
-  cursor: pointer;
-  transition: transform 200ms ease, border-color 200ms ease;
-}
-.chip:hover {
-  transform: translateY(-1px);
-  border-color: var(--brand-cyan);
-  color: var(--ink);
-}
-
-.ad-frame {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 12px;
-  min-height: var(--slot-h, 110px);
-}
-.ad-frame::before {
-  content: "SPONSORED";
-  display: block;
-  font-family: var(--font-mono), monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--ink-3);
-  margin-bottom: 8px;
-}
-
-.tool-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px;
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.tool-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
-}
-
-.article { max-width: 66ch; }
-.article h2 {
-  font-size: var(--t-h3);
-  margin: 2em 0 0.6em;
-  padding-top: 1em;
-  border-top: 1px solid var(--line);
-}
-.article p { margin: 0 0 1em; color: var(--ink-2); }
-.article strong { color: var(--ink); }
-.article ul, .article ol { margin: 0 0 1.2em; padding-left: 1.3em; color: var(--ink-2); }
-.article li { margin-bottom: 0.55em; }
-.article li::marker { color: var(--brand-cyan); }
-.article a { color: var(--brand-cyan); text-underline-offset: 3px; }
-.article code {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.88em;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 2px 6px;
-}
-
-/* ==========================================================================
-   DONOR REPO (instagrab-main) HERO, SMART INPUT CARD & PROGRESS ANIMATIONS
-   ========================================================================== */
-.hero-compact {
-  text-align: center;
-  padding: 12px 0 4px 0;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(0, 245, 212, 0.35);
-  color: #00F5D4;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 5px 14px;
-  border-radius: var(--radius-full);
-  margin-bottom: 12px;
-}
-
-.hero-title {
-  font-size: clamp(1.85rem, 1.2rem + 3vw, 2.55rem);
-  font-weight: 800;
-  line-height: 1.14;
-  letter-spacing: -0.035em;
-  margin-bottom: 10px;
-  color: var(--text-main);
-}
-
-.hero-title span {
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero-subtitle {
-  color: var(--text-muted);
-  font-size: 0.94rem;
-  line-height: 1.5;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-/* Floating Clipboard Notification Pill */
-.clipboard-toast {
-  background: var(--bg-card);
-  border: 1px solid var(--brand-cyan);
-  box-shadow: 0 8px 30px rgba(0, 245, 212, 0.22);
-  border-radius: var(--radius-full);
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  animation: bounceIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-}
-
-.clipboard-toast-text {
-  font-size: 0.84rem;
-  color: var(--text-main);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.clipboard-toast-btn {
-  background: var(--gradient-brand);
-  color: #040711;
-  border: none;
-  font-size: 0.76rem;
-  font-weight: 800;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-/* Smart Auto-Detect Input Card */
-.input-card {
-  background: var(--bg-surface);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 10px;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  transition: all 0.25s ease;
-}
-
-.input-card:focus-within {
-  border-color: var(--border-focus);
-  box-shadow: var(--shadow-glow);
-}
-
-.input-row {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.input-icon {
-  position: absolute;
-  left: 14px;
-  color: var(--brand-cyan);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-}
-
-.input-field {
-  width: 100%;
-  min-height: 50px;
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  font-size: 0.96rem;
-  padding: 12px 42px 12px 44px;
-  outline: none;
-}
-
-.input-field::placeholder {
-  color: var(--text-dim);
-}
-
-.btn-clear {
-  position: absolute;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-clear:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.input-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.btn-paste {
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 0 16px;
-  border-radius: var(--radius-md);
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn-paste:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: var(--line-strong);
-}
-
-.btn-grab {
-  flex: 1;
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--gradient-button);
-  color: #040711;
-  border: none;
-  padding: 0 20px;
-  border-radius: var(--radius-md);
-  font-size: 0.96rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 6px 20px rgba(0, 245, 212, 0.32);
-}
-
-.btn-grab:hover:not(:disabled) {
-  background: var(--gradient-button-hover);
-  box-shadow: 0 8px 26px rgba(0, 245, 212, 0.48);
-  transform: translateY(-1px);
-}
-
-.btn-grab:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.btn-grab:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ==========================================================================
-   HORIZONTAL 33-TOOLS AUTO-SUPPORTED STRIP (Bottom of Text Box)
-   ========================================================================== */
-.supported-strip-wrap {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.supported-strip-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.73rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  padding: 0 4px;
-}
-
-.supported-strip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  overflow-x: auto;
-  padding: 2px 2px 4px 2px;
-  scrollbar-width: none;
-}
-.supported-strip::-webkit-scrollbar {
-  display: none;
-}
-
-.supported-pill {
-  min-height: 36px;
-  padding: 0 11px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
-  font-size: 0.76rem;
-  font-weight: 700;
-  white-space: nowrap;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.supported-pill:hover {
-  background: rgba(0, 245, 212, 0.12);
-  border-color: rgba(0, 245, 212, 0.4);
-  color: #00F5D4;
-  transform: translateY(-1px);
-}
-
-.supported-pill-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   LOADING, ERROR & RESULT CARD WITH REAL-TIME STREAMING PROGRESS BAR
-   ========================================================================== */
-.loading-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 36px 20px;
-  text-align: center;
-  backdrop-filter: blur(20px);
-}
-
-.spinner {
-  width: 44px;
-  height: 44px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--brand-cyan);
-  border-right-color: var(--brand-violet);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 14px auto;
-}
-
-.error-box {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.38);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.error-title {
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: #FCA5A5;
-  margin-bottom: 4px;
-}
-
-.error-message {
-  font-size: 0.85rem;
-  color: #E2E8F0;
-  line-height: 1.45;
-}
-
-.error-action {
-  margin-top: 10px;
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(239, 68, 68, 0.22);
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  color: #FECACA;
-  padding: 0 14px;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Result Media Card */
-.result-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  animation: fadeIn 0.35s ease;
-}
-
-.result-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.result-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.author-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--bg-surface);
-  border: 2px solid var(--brand-cyan);
-}
-
-.author-username {
-  font-weight: 800;
-  font-size: 0.94rem;
-  color: var(--text-main);
-}
-
-.author-link {
-  font-size: 0.75rem;
-  color: var(--brand-cyan);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.platform-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  margin-right: 6px;
-  text-transform: uppercase;
-}
-
-.platform-pill.facebook {
-  background: rgba(24, 119, 242, 0.2);
-  color: #60A5FA;
-  border: 1px solid rgba(24, 119, 242, 0.4);
-}
-
-.platform-pill.instagram {
-  background: rgba(0, 245, 212, 0.15);
-  color: #00F5D4;
-  border: 1px solid rgba(0, 245, 212, 0.35);
-}
-
-.media-badge {
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.45);
-  color: #C7D2FE;
-  font-size: 0.74rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  text-transform: uppercase;
-}
-
-.media-preview-area {
-  position: relative;
-  background: #000;
-  min-height: 260px;
-  max-height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.media-video,
-.media-image {
-  width: 100%;
-  max-height: 500px;
-  display: block;
-  object-fit: contain;
-}
-
-.carousel-nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(7, 9, 19, 0.75);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 5;
-  backdrop-filter: blur(8px);
-}
-.carousel-prev { left: 12px; }
-.carousel-next { right: 12px; }
-
-.carousel-indicator {
-  position: absolute;
-  bottom: 12px;
-  background: rgba(7, 9, 19, 0.8);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.carousel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 8px;
-  padding: 12px 16px 0 16px;
-}
-
-.carousel-thumb-item {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-}
-.carousel-thumb-item.active {
-  border: 2px solid var(--brand-cyan);
-}
-.carousel-thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.carousel-thumb-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.result-body {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.result-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.btn-download-primary {
-  min-height: 52px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--gradient-brand);
-  color: #040711;
-  padding: 14px 20px;
-  border-radius: var(--radius-md);
-  font-size: 0.98rem;
-  font-weight: 800;
-  border: none;
-  box-shadow: 0 6px 22px rgba(0, 245, 212, 0.35);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-download-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(0, 245, 212, 0.5);
-}
-
-.btn-download-primary:disabled {
-  opacity: 0.75;
-  cursor: wait;
-}
-
-.result-secondary-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.btn-action-secondary {
-  min-height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 0 14px;
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-
-.btn-action-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--line-strong);
-}
-
-/* Download Progress Bar Feedback (from instagrab-main) */
-.download-progress-card {
-  background: rgba(16, 20, 38, 0.95);
-  border: 1px solid rgba(0, 245, 212, 0.45);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(0, 245, 212, 0.15);
-  animation: fadeIn 0.25s ease-out;
-}
-
-.download-progress-card.status-completed {
-  border-color: rgba(16, 185, 129, 0.65);
-}
-
-.download-progress-card.status-error {
-  border-color: rgba(239, 68, 68, 0.65);
-}
-
-.progress-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.progress-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.progress-spinner {
-  color: var(--brand-cyan);
-  flex-shrink: 0;
-  animation: spin 0.8s linear infinite;
-}
-
-.progress-title {
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--text-main);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.progress-percentage-badge {
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: #040711;
-  background: var(--gradient-brand);
-  padding: 2px 9px;
-  border-radius: var(--radius-full);
-}
-
-.progress-track {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--gradient-brand);
-  border-radius: var(--radius-full);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 12px rgba(0, 245, 212, 0.5);
-}
-
-.progress-shimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 100%
+
+  const activePlaceholder = useMemo(() => {
+    if (placeholder) return placeholder;
+    if (isNeon && selectedMode === "auto") return "Paste Instagram, Facebook, or any link...";
+    const found = QUICK_MODES.find((m) => m.id === selectedMode);
+    return found ? found.hint : "Paste Instagram Reel, Story, Photo link or @username...";
+  }, [placeholder, selectedMode, isNeon]);
+
+  const saveToHistory = useCallback((entry: Omit<HistoryEntry, "id" | "timestamp">) => {
+    try {
+      const newItem: HistoryEntry = {
+        ...entry,
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+      };
+      setRecentHistory((prev) => {
+        const filtered = prev.filter((item) => item.input !== entry.input);
+        const updated = [newItem, ...filtered].slice(0, 6);
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch {
+      // Ignore storage write error
+    }
+  }, []);
+
+  const clearHistory = () => {
+    try {
+      localStorage.removeItem(HISTORY_STORAGE_KEY);
+      setRecentHistory([]);
+    } catch {
+      // Ignore
+    }
+  };
+
+  // ✕ — input, result aur error teeno saaf (purane clear button jaisa hi)
+  const handleClearInput = () => {
+    setInput("");
+    setErrorMsg(null);
+    setResult(null);
+    inputRef.current?.focus();
+  };
+
+  const handlePasteClipboard = async () => {
+    setErrorMsg(null);
+    try {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.readText === "function"
+      ) {
+        const clipText = await navigator.clipboard.readText();
+        if (clipText && clipText.trim()) {
+          setInput(clipText.trim());
+          inputRef.current?.focus();
+          return;
+        }
+      }
+      inputRef.current?.focus();
+    } catch {
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleExtract = async (overrideInput?: string) => {
+    const targetInput = (overrideInput ?? input).trim();
+    if (!targetInput) {
+      setErrorMsg("Please paste an Instagram link or enter an @username first.");
+      inputRef.current?.focus();
+      return;
+    }
+
+    setErrorMsg(null);
+    setResult(null);
+    setIsLoading(true);
+    setLoadingStep("Analyzing link...");
+
+    const inputInfo = detectInputType(targetInput, selectedMode);
+
+    try {
+      let response: Response | null = null;
+      let payload: unknown = null;
+
+      // 1. Handle @username / Profile requests
+      if (inputInfo.isUsername) {
+        const cleanUsername = targetInput
+          .replace(/^@/, "")
+          .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
+          .split("/")[0]
+          .split("?")[0]
+          .trim();
+
+        setLoadingStep(`Fetching @${cleanUsername} profile...`);
+        response = await fetch(
+          `/api/profile?username=${encodeURIComponent(cleanUsername)}`,
+          {
+            method: "GET",
+            headers: { Accept: "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          response = await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: cleanUsername }),
+          });
+        }
+
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 2. Handle Twitter / X URLs
+      if (!payload && inputInfo.id === "twitter") {
+        setLoadingStep("Extracting X / Twitter video...");
+        response = await fetch("/api/twitter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: targetInput }),
+        });
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 3. Handle Multi-Platform URLs
+      if (
+        !payload &&
+        ["tiktok", "facebook", "pinterest", "threads", "youtube"].includes(
+          inputInfo.id
+        )
+      ) {
+        setLoadingStep(`Extracting ${inputInfo.label} media...`);
+        response = await fetch("/api/og-extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: targetInput }),
+        });
+        if (response.ok) {
+          payload = await response.json();
+        }
+      }
+
+      // 4. Primary Instagram Extractor (/api/extract)
+      if (!payload) {
+        setLoadingStep("Extracting HD media from Instagram...");
+        response = await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: targetInput,
+            mode: selectedMode,
+          }),
+        });
+
+        if (!response.ok) {
+          const fallbackRes = await fetch("/api/og-extract", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: targetInput }),
+          });
+          if (fallbackRes.ok) {
+            payload = await fallbackRes.json();
+          } else {
+            const errJson: unknown = await response.json().catch(() => ({}));
+            const errRec = isRecord(errJson) ? errJson : {};
+            throw new Error(
+              getStr(errRec.error) ||
+                getStr(errRec.message) ||
+                "Could not extract media. Make sure the post or profile is public."
+            );
+          }
+        } else {
+          payload = await response.json();
+        }
+      }
+
+      const payloadRec = isRecord(payload) ? payload : {};
+      if (!payload || payloadRec.error) {
+        throw new Error(
+          getStr(payloadRec.error) ||
+            getStr(payloadRec.message) ||
+            "Unable to fetch media right now. Please check the link and try again."
+        );
+      }
+
+      const normalized = normalizeApiResponse(payload, targetInput);
+
+      if (
+        (!normalized.media || normalized.media.length === 0) &&
+        !normalized.author?.avatar &&
+        !normalized.url
+      ) {
+        throw new Error(
+          "No downloadable media found for this link. Ensure the account is public."
+        );
+      }
+
+      setResult(normalized);
+      onResult?.(normalized);
+      onExtract?.(normalized);
+
+      saveToHistory({
+        input: targetInput,
+        platform: inputInfo.label,
+        title: normalized.title || targetInput,
+        thumbnail: normalized.thumbnail,
+      });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while fetching media. Please verify the link.";
+      setErrorMsg(msg);
+      onError?.(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void handleExtract();
+  };
+
+  const handleCopyCaption = async () => {
+    if (!result?.caption) return;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(result.caption);
+        setCopiedCaption(true);
+        setTimeout(() => setCopiedCaption(false), 2000);
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
+  return (
+    <div className={`gb-wrapper ${isNeon ? "gb-neon" : ""} ${compact ? "gb-compact" : ""} ${className}`}>
+      <style dangerouslySetInnerHTML={{ __html: GOLDEN_BAR_STYLES }} />
+
+      {showQuickModes && !compact && !isNeon && (
+        <div className="gb-modes" role="tablist" aria-label="Download mode">
+          {QUICK_MODES.map((m) => {
+            const active = selectedMode === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => {
+                  setSelectedMode(m.id);
+                  setErrorMsg(null);
+                }}
+                className={`gb-mode-pill ${active ? "gb-mode-active" : ""}`}
+              >
+                <span aria-hidden="true">{m.icon}</span>
+                <span>{m.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {isNeon ? (
+        <div className="gbn-card" data-loading={isLoading ? "true" : "false"}>
+          <form onSubmit={handleFormSubmit} className="gbn-form" noValidate>
+            {/* A) Input pill: link icon → input → ✕ (sirf text hone par) */}
+            <div className="gbn-field">
+              <span className="gbn-field__icon" aria-hidden="true">
+                <Link2 size={22} strokeWidth={2} />
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                placeholder={activePlaceholder}
+                autoFocus={autoFocus}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={isLoading}
+                className="gbn-input"
+                aria-label="Instagram URL or username"
+              />
+              {input && (
+                <button
+                  type="button"
+                  onClick={handleClearInput}
+                  className="gbn-clear"
+                  aria-label="Clear input"
+                  title="Clear"
+                >
+                  <X size={18} strokeWidth={2.4} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+
+            {/* B) Paste Link (secondary) + Grab Media (primary, molten) */}
+            <div className="gbn-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  void handlePasteClipboard();
+                }}
+                disabled={isLoading}
+                className="gbn-btn gbn-btn--paste"
+                title="Paste from clipboard"
+              >
+                <span className="gbn-btn__icon" aria-hidden="true">
+                  <ClipboardPaste size={22} strokeWidth={2} />
+                </span>
+                <span className="gbn-btn__label">Paste Link</span>
+                <span className="gbn-btn__tail" aria-hidden="true">
+                  <ArrowRight size={20} strokeWidth={2.2} />
+                </span>
+              </button>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                aria-busy={isLoading}
+                className="gbn-btn gbn-btn--grab"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="gbn-spinner" aria-hidden="true" />
+                    <span className="gbn-btn__label" role="status">{loadingStep}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="gbn-btn__icon" aria-hidden="true">
+                      <Download size={22} strokeWidth={2.2} />
+                    </span>
+                    <span className="gbn-btn__label">{submitLabel}</span>
+                    <span className="gbn-btn__tail" aria-hidden="true">
+                      <Sparkles size={20} strokeWidth={2} />
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* C) Sub-card slot (page.tsx se <ToolsAutoSupported /> aata hai) */}
+          {footer}
+        </div>
+      ) : (
+      <form onSubmit={handleFormSubmit} className="gb-form" noValidate>
+        <div className={`gb-bar-outer ${isLoading ? "gb-bar-loading" : ""}`}>
+          <div className="gb-bar-inner">
+            <div
+              className="gb-platform-chip"
+              style={{
+                borderColor: `${detected.color}40`,
+                backgroundColor: `${detected.color}18`,
+                color: detected.color,
+              }}
+              title={`Detected: ${detected.label}`}
+            >
+              <span aria-hidden="true">{detected.icon}</span>
+              <span className="gb-platform-text">{detected.label}</span>
+            </div>
+
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (errorMsg) setErrorMsg(null);
+              }}
+              placeholder={activePlaceholder}
+              autoFocus={autoFocus}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              disabled={isLoading}
+              className="gb-input"
+              aria-label="Instagram URL or username"
+            />
+
+            <div className="gb-actions">
+              {input ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInput("");
+                    setErrorMsg(null);
+                    setResult(null);
+                    inputRef.current?.focus();
+                  }}
+                  className="gb-clear-btn"
+                  aria-label="Clear input"
+                  title="Clear"
+                >
+                  ✕
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handlePasteClipboard();
+                  }}
+                  className="gb-paste-btn"
+                  title="Paste from clipboard"
+                >
+                  <span aria-hidden="true">📋</span>
+                  <span>Paste</span>
+                </button>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="gb-submit-btn"
+              >
+                {isLoading ? (
+                  <span className="gb-spinner-wrap">
+                    <span className="gb-spinner" aria-hidden="true" />
+                    <span>{loadingStep}</span>
+                  </span>
+                ) : (
+                  <>
+                    <span>{submitLabel}</span>
+                    <span aria-hidden="true">⚡</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+      )}
+
+      {showTrustBadges && !compact && (
+        <div className="gb-trust-row">
+          <span className="gb-trust-item">🔒 100% Anonymous &amp; Safe</span>
+          <span className="gb-trust-sep">•</span>
+          <span className="gb-trust-item">✨ Full HD / 4K Original Quality</span>
+          <span className="gb-trust-sep">•</span>
+          <span className="gb-trust-item">⚡ No Login or Watermark</span>
+        </div>
+      )}
+
+      {showHistory && recentHistory.length > 0 && !result && !isLoading && (
+        <div className="gb-history-bar">
+          <div className="gb-history-left">
+            <span className="gb-history-label">🕒 Recent:</span>
+            <div className="gb-history-chips">
+              {recentHistory.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setInput(item.input);
+                    void handleExtract(item.input);
+                  }}
+                  className="gb-history-chip"
+                  title={item.input}
+                >
+                  <span>
+                    {item.input.length > 28
+                      ? `${item.input.slice(0, 28)}...`
+                      : item.input}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="gb-history-right">
+            <Link href="/history" className="gb-history-link">
+              Full History
+            </Link>
+            <button
+              type="button"
+              onClick={clearHistory}
+              className="gb-history-clear"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="gb-error-card" role="alert">
+          <div className="gb-error-header">
+            <span className="gb-error-icon" aria-hidden="true">
+              ⚠️
+            </span>
+            <div>
+              <h4 className="gb-error-title">Could not fetch media</h4>
+              <p className="gb-error-desc">{errorMsg}</p>
+            </div>
+          </div>
+          <div className="gb-error-tips">
+            <span>Tip: Make sure the account is public, or try our</span>
+            <Link href="/story-viewer" className="gb-error-link">
+              Story Viewer
+            </Link>
+            <span>or</span>
+            <Link href="/profile-viewer" className="gb-error-link">
+              Profile Viewer
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {result && (
+        <div className="gb-result-card">
+          {(result.author?.username || result.author?.avatar || result.title) && (
+            <div className="gb-result-header">
+              <div className="gb-author-box">
+                {result.author?.avatar && (
+                  <img
+                    src={buildDownloadProxyUrl(result.author.avatar, "avatar")}
+                    alt={result.author.username || "Creator"}
+                    className="gb-author-avatar"
+                  />
+                )}
+                <div>
+                  <div className="gb-author-name-row">
+                    <span className="gb-author-name">
+                      {result.author?.fullName ||
+                        (result.author?.username
+                          ? `@${result.author.username}`
+                          : result.title)}
+                    </span>
+                    {result.author?.verified && (
+                      <span className="gb-verified" title="Verified">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  {result.author?.username && (
+                    <span className="gb-author-handle">
+                      @{result.author.username}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {typeof result.author?.followers === "number" && (
+                <div className="gb-profile-stats">
+                  <div className="gb-stat">
+                    <strong>{result.author.followers.toLocaleString()}</strong>
+                    <span>Followers</span>
+                  </div>
+                  {typeof result.author.following === "number" && (
+                    <div className="gb-stat">
+                      <strong>{result.author.following.toLocaleString()}</strong>
+                      <span>Following</span>
+                    </div>
+                  )}
+                  {typeof result.author.postsCount === "number" && (
+                    <div className="gb-stat">
+                      <strong>{result.author.postsCount.toLocaleString()}</strong>
+                      <span>Posts</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {result.author?.avatar && (
+                <a
+                  href={buildDownloadProxyUrl(
+                    result.author.avatar,
+                    `${result.author.username || "profile"}-dp.jpg`
+                  )}
+                  download
+                  className="gb-dp-btn"
+                >
+                  ⬇️ Download HD DP
+                </a>
+              )}
+            </div>
+          )}
+
+          {result.media && result.media.length > 0 && (
+            <div className="gb-media-grid">
+              {result.media.map((item, idx) => {
+                const ext = item.type === "video" ? "mp4" : "jpg";
+                const fname = `${
+                  result.author?.username || "instagram"
+                }-${idx + 1}.${ext}`;
+                const downloadHref = buildDownloadProxyUrl(item.url, fname);
+
+                return (
+                  <div key={`${item.url}-${idx}`} className="gb-media-item">
+                    <div className="gb-media-preview">
+                      {item.type === "video" ? (
+                        <video
+                          src={item.url}
+                          poster={item.thumbnail || result.thumbnail}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="gb-video"
+                        />
+                      ) : (
+                        <img
+                          src={buildDownloadProxyUrl(item.url, fname)}
+                          alt={`Slide ${idx + 1}`}
+                          loading="lazy"
+                          className="gb-image"
+                        />
+                      )}
+                      <span className="gb-quality-tag">
+                        {item.quality || (item.type === "video" ? "HD MP4" : "HD JPG")}
+                      </span>
+                    </div>
+
+                    <div className="gb-media-footer">
+                      <a
+                        href={downloadHref}
+                        download={fname}
+                        className="gb-download-primary"
+                      >
+                        <span>
+                          ⬇️ Download {item.type === "video" ? "Video (MP4)" : "Photo (HD)"}
+                        </span>
+                      </a>
+
+                      {item.thumbnail && item.type === "video" && (
+                        <a
+                          href={buildDownloadProxyUrl(
+                            item.thumbnail,
+                            `${result.author?.username || "reel"}-thumb.jpg`
+                          )}
+                          download
+                          className="gb-download-secondary"
+                        >
+                          🖼️ Cover Thumbnail
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {result.caption && (
+            <div className="gb-caption-box">
+              <div className="gb-caption-top">
+                <span className="gb-caption-label">📝 Post Caption &amp; Hashtags</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleCopyCaption();
+                  }}
+                  className="gb-copy-btn"
+                >
+                  {copiedCaption ? "✓ Copied!" : "📋 Copy Caption"}
+                </button>
+              </div>
+              <p className="gb-caption-text">{result.caption}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
-  animation: shimmer 1.4s infinite;
 }
 
-.progress-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.76rem;
-  color: var(--text-muted);
-}
-
-.progress-live-pulse {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--brand-cyan);
-  font-weight: 700;
-}
-
-.progress-live-pulse::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--brand-cyan);
-  border-radius: 50%;
-  animation: pulse 1s infinite;
-}
-
-/* ==========================================================================
-   OTT SUPER-APP ICON LAUNCHER BOX (All 94 Tools in Clean App Icons)
-   ========================================================================== */
-.ott-launcher-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 18px 16px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.ott-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.ott-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ott-title {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.ott-count-badge {
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(0, 245, 212, 0.14);
-  color: var(--brand-cyan);
-  border: 1px solid rgba(0, 245, 212, 0.3);
-}
-
-.ott-search-input {
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-main);
-  font-size: 0.82rem;
-  width: 190px;
-}
-.ott-search-input:focus {
-  border-color: var(--brand-cyan);
-}
-
-.ott-cat-tabs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-.ott-cat-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.ott-cat-pill {
-  min-height: 36px;
-  padding: 0 13px;
-  border-radius: 999px;
-  border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ott-cat-pill.active {
-  background: var(--gradient-brand);
-  color: #040711;
-  border-color: transparent;
-  font-weight: 800;
-}
-
-/* OTT App Icon Grid: 4 per row on Mobile, 6 per row on Tablet/Desktop */
-.ott-icon-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-@media (min-width: 560px) {
-  .ott-icon-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-  }
-}
-
-.ott-app-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 7px;
-  padding: 10px 4px;
-  border-radius: 14px;
-  text-decoration: none;
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid transparent;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  text-align: center;
-}
-
-.ott-app-tile:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(0, 245, 212, 0.35);
-  transform: translateY(-3px);
-}
-
-.ott-app-tile:active {
-  transform: scale(0.95);
-}
-
-.ott-app-squircle {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-  position: relative;
-  transition: transform 0.2s ease;
-}
-
-.ott-app-tile:hover .ott-app-squircle {
-  transform: scale(1.06);
-}
-
-.ott-mini-badge {
-  position: absolute;
-  top: -4px;
-  right: -6px;
-  font-size: 0.56rem;
-  font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 99px;
-  background: #00F5D4;
-  color: #040711;
-  text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-.ott-app-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--text-main);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 100%;
-}
-
-/* 3-Step Mobile Guide Cards */
-.guide-steps {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-@media (min-width: 540px) {
-  .guide-steps {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.step-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  transition: all 0.2s ease;
-}
-
-.step-number {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--gradient-brand);
-  color: #040711;
-  font-weight: 800;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-/* Keyframe Animations */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes bounceIn {
-  0% { opacity: 0; transform: scale(0.92); }
-  70% { transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-
-
-/* ==========================================================================
-   GB-NEON — "Paste box" glass card  (GoldenBar variant="neon")
-   --------------------------------------------------------------------------
-   Rules:
-   • Sirf tokens: --gold-*, --surface*, --ink*, --line*, --molten, --focus-ring.
-     Koi hard-coded rang nahi (mask ka `black` sirf alpha hai, rang nahi).
-   • --molten gradient SIRF "Grab Media" button par (ek screen = ek molten).
-     Baaki sab solid surface + token-tint border/glow. Koi aur gradient nahi.
-   • Glow/edge ka rang color-mix(var(--gold-*)) se aata hai — isliye tokens
-     badle (gold <-> cyber) to card khud follow karega. color-mix na ho to
-     @supports se solid token fallback (--line-strong) lagta hai.
-   • Specificity: GoldenBar ka purana <style> component ke andar, globals.css
-     ke BAAD inject hota hai. Isliye purani classes chhoone wale selectors
-     `.gb-wrapper.gb-neon` / `.gb-neon .pf-*` (0,2,0+) hain, aur naye elements
-     ke liye naya prefix `gbn-` (koi purana conflict nahi).
-   • Markup contract (files 2–4):
-       .gb-wrapper.gb-neon
-         .gbn-card[data-loading]
-           form.gbn-form
-             .gbn-field > .gbn-field__icon + input.gbn-input + button.gbn-clear
-             .gbn-actions > button.gbn-btn.gbn-btn--paste + button.gbn-btn.gbn-btn--grab
-               (andar: .gbn-btn__icon, .gbn-btn__label, .gbn-btn__tail, .gbn-spinner)
-           .gbn-tools[data-start][data-end]
-             .gbn-tools__head > .gbn-tools__title (.gbn-tools__bolt, .gbn-tools__count,
-                                 .gbn-tools__label) + a.gbn-tools__all
-             .gbn-tools__row > ul.pf-strip (PlatformStrip) + button.gbn-tools__next
-   ========================================================================== */
-
-/* ── Design tokens (scoped, sirf .gb-neon ke andar) ── */
-.gb-neon {
-  /* fallbacks: color-mix na ho to plain tokens */
-  --gbn-edge: var(--line-strong);
-  --gbn-edge-hi: var(--line-strong);
-  --gbn-glow: var(--line-strong);
-  --gbn-glow-soft: var(--line);
-  --gbn-hi: var(--line);
-  --gbn-glass: var(--surface);
-  --gbn-field: var(--surface-2);
-  --gbn-sub: var(--surface-2);
-  --gbn-btn2: var(--surface-2);
-  --gbn-drop: 0 0 0 0 transparent;
-  --gbn-on-molten: var(--bg); /* molten par gehra text (dark theme) */
-  --gbn-icon: 48px;           /* tile icon size — PlatformStrip iconSize={48} */
-  --gbn-ease: var(--ease-silk, cubic-bezier(0.22, 1, 0.36, 1));
-  --pf-focus: var(--gold-400); /* PlatformTile focus outline ka rang */
-}
-
-/* Light (Porcelain): saaf safed card, halka border, soft shadow */
-[data-theme="light"] .gb-neon {
-  --gbn-glass: var(--surface);
-  --gbn-field: var(--surface-2);
-  --gbn-sub: var(--surface-2);
-  --gbn-btn2: var(--surface);
-  --gbn-hi: var(--surface);
-  --gbn-drop: var(--shadow-2);
-  --gbn-on-molten: var(--ink); /* light mein --ink gehra hai */
-}
-
-@supports (color: color-mix(in srgb, red 50%, blue)) {
-  /* Dark (Obsidian) = base: deep glass + soft glow */
-  .gb-neon {
-    --gbn-edge: color-mix(in srgb, var(--gold-400) 30%, transparent);
-    --gbn-edge-hi: color-mix(in srgb, var(--gold-400) 62%, transparent);
-    --gbn-glow: color-mix(in srgb, var(--gold-400) 30%, transparent);
-    --gbn-glow-soft: color-mix(in srgb, var(--gold-400) 16%, transparent);
-    --gbn-hi: color-mix(in srgb, var(--ink) 7%, transparent);
-    --gbn-glass: color-mix(in srgb, var(--surface) 80%, transparent);
-    --gbn-field: color-mix(in srgb, var(--bg) 62%, var(--surface));
-    --gbn-sub: color-mix(in srgb, var(--surface-2) 72%, transparent);
-    --gbn-btn2: color-mix(in srgb, var(--gold-400) 9%, var(--surface-2));
-  }
-  /* Light: gold-500 (gehra) se tint — safed par gold-400 phika padta hai */
-  [data-theme="light"] .gb-neon {
-    --gbn-edge: color-mix(in srgb, var(--gold-500) 32%, transparent);
-    --gbn-edge-hi: color-mix(in srgb, var(--gold-500) 60%, transparent);
-    --gbn-glow: color-mix(in srgb, var(--gold-500) 22%, transparent);
-    --gbn-glow-soft: color-mix(in srgb, var(--gold-500) 10%, transparent);
-    --gbn-glass: var(--surface);
-    --gbn-field: var(--surface-2);
-    --gbn-sub: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
-    --gbn-btn2: color-mix(in srgb, var(--gold-500) 6%, var(--surface));
-  }
-}
-
-/* View All → #all-tools par sticky nav ke neeche na chhupe */
-#all-tools { scroll-margin-top: 88px; }
-
-/* ── Wrapper ── */
-.gb-wrapper.gb-neon { max-width: 760px; }
-
-/* ── Glass card ── */
-.gb-neon .gbn-card {
-  position: relative;
-  isolation: isolate;
-  padding: 12px;
-  border-radius: 24px;
-  border: 1px solid var(--gbn-edge);
-  background: var(--surface); /* solid fallback */
-  box-shadow:
-    var(--gbn-drop),
-    0 22px 56px -24px var(--gbn-glow),
-    0 0 36px -10px var(--gbn-glow-soft),
-    inset 0 1px 0 var(--gbn-hi);
-}
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .gb-neon .gbn-card {
-    background: var(--gbn-glass);
-    -webkit-backdrop-filter: blur(14px) saturate(1.15);
-    backdrop-filter: blur(14px) saturate(1.15);
-  }
-}
-.gb-neon .gbn-form { margin: 0; }
-
-/* ── A) Input pill ── */
-.gb-neon .gbn-field {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 56px;
-  padding: 0 8px 0 16px;
-  border-radius: 999px;
-  border: 1px solid var(--gbn-edge);
-  background: var(--gbn-field);
-  box-shadow: inset 0 1px 0 var(--gbn-hi);
-  transition: border-color 0.2s var(--gbn-ease), box-shadow 0.2s var(--gbn-ease);
-}
-.gb-neon .gbn-field:focus-within {
-  border-color: var(--gbn-edge-hi);
-  box-shadow: var(--focus-ring), inset 0 1px 0 var(--gbn-hi);
-}
-.gb-neon .gbn-card[data-loading="true"] .gbn-field {
-  border-color: var(--gbn-edge-hi);
-}
-.gb-neon .gbn-field__icon {
-  flex: 0 0 auto;
-  display: inline-flex;
-  color: var(--gold-ink);
-}
-.gb-neon .gbn-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 54px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 1rem; /* 16px: iOS zoom nahi karega */
-  line-height: 1.2;
-  text-overflow: ellipsis;
-}
-.gb-neon .gbn-input::placeholder {
-  color: var(--ink-3);
-  opacity: 1;
-  text-overflow: ellipsis;
-}
-.gb-neon .gbn-input:disabled {
-  opacity: 0.65;
-  cursor: progress;
-}
-
-/* ✕ clear — sirf tab dikhta hai jab text ho (TSX decide karta hai) */
-.gb-neon .gbn-clear {
-  position: relative;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid var(--gbn-edge);
-  background: var(--surface-3);
-  color: var(--ink-2);
-  cursor: pointer;
-  transition: color 0.2s var(--gbn-ease), border-color 0.2s var(--gbn-ease),
-    transform 0.15s var(--gbn-ease);
-}
-.gb-neon .gbn-clear::after { /* 48px tap area */
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-}
-.gb-neon .gbn-clear:hover { color: var(--ink); border-color: var(--gbn-edge-hi); }
-.gb-neon .gbn-clear:active { transform: scale(0.94); }
-.gb-neon .gbn-clear:focus-visible {
-  outline: 2px solid transparent; /* forced-colors mein dikhega */
-  box-shadow: var(--focus-ring);
-}
-
-/* ── B) Paste Link + Grab Media ── */
-.gb-neon .gbn-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 10px;
-  margin-top: 12px;
-}
-.gb-neon .gbn-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 0;
-  min-height: 60px;
-  padding: 0 12px;
-  border-radius: 20px;
-  border: 1px solid transparent;
-  font: inherit;
-  font-size: 0.98rem;
-  font-weight: 700;
-  line-height: 1.1;
-  white-space: nowrap;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: manipulation;
-  transition: transform 0.18s var(--gbn-ease), box-shadow 0.2s var(--gbn-ease),
-    border-color 0.2s var(--gbn-ease), background-color 0.2s var(--gbn-ease);
-}
-.gb-neon .gbn-btn__icon { flex: 0 0 auto; display: inline-flex; }
-.gb-neon .gbn-btn__label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.gb-neon .gbn-btn__tail {
-  flex: 0 0 auto;
-  display: inline-flex;
-  opacity: 0.75;
-  transition: transform 0.2s var(--gbn-ease), opacity 0.2s var(--gbn-ease);
-}
-
-/* secondary: solid surface + gold-tint border */
-.gb-neon .gbn-btn--paste {
-  background: var(--gbn-btn2);
-  border-color: var(--gbn-edge);
-  color: var(--ink);
-  box-shadow: inset 0 1px 0 var(--gbn-hi);
-}
-
-/* primary: THE molten element (sirf yehi gradient) */
-.gb-neon .gbn-btn--grab {
-  background: var(--molten);
-  color: var(--gbn-on-molten);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  box-shadow:
-    0 14px 30px -12px var(--gbn-glow),
-    0 0 26px -8px var(--gbn-glow-soft),
-    inset 0 1px 0 var(--gbn-hi);
-}
-.gb-neon .gbn-btn--grab:disabled {
-  cursor: progress;
-  opacity: 0.92;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .gb-neon .gbn-btn:hover:not(:disabled) { transform: translateY(-2px); }
-  .gb-neon .gbn-btn--paste:hover:not(:disabled) { border-color: var(--gbn-edge-hi); }
-  .gb-neon .gbn-btn--paste:hover .gbn-btn__tail { transform: translateX(3px); opacity: 1; }
-  .gb-neon .gbn-btn--grab:hover:not(:disabled) {
-    box-shadow:
-      0 18px 36px -12px var(--gbn-glow),
-      0 0 34px -8px var(--gbn-glow-soft),
-      inset 0 1px 0 var(--gbn-hi);
-  }
-  .gb-neon .gbn-btn--grab:hover .gbn-btn__tail { opacity: 1; }
-}
-.gb-neon .gbn-btn:active:not(:disabled) { transform: scale(0.97); }
-.gb-neon .gbn-btn:focus-visible {
-  outline: 2px solid transparent;
-  box-shadow: var(--focus-ring);
-}
-
-/* Loading spinner (Grab Media ke andar, currentColor = on-molten text) */
-.gb-neon .gbn-spinner {
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2.5px solid currentColor;
-  border-top-color: transparent;
-  animation: gbn-spin 0.8s linear infinite;
-}
-@keyframes gbn-spin { to { transform: rotate(360deg); } }
-
-/* ── C) "N Tools Auto-Supported" sub-card ── */
-.gb-neon .gbn-tools {
-  position: relative;
-  margin-top: 12px;
-  padding: 0 0 6px;
-  border-radius: 20px;
-  border: 1px solid var(--gbn-edge);
-  background: var(--gbn-sub);
-  /* fade mask: JS data-start / data-end set karta hai (scroll position ke hisaab se) */
-  --gbn-mask: linear-gradient(90deg, transparent 0, black 14px, black calc(100% - 64px), transparent 100%);
-}
-.gb-neon .gbn-tools[data-start="true"] {
-  --gbn-mask: linear-gradient(90deg, black 0, black calc(100% - 64px), transparent 100%);
-}
-.gb-neon .gbn-tools[data-end="true"] {
-  --gbn-mask: linear-gradient(90deg, transparent 0, black 14px, black 100%);
-}
-.gb-neon .gbn-tools[data-start="true"][data-end="true"] { --gbn-mask: none; }
-
-.gb-neon .gbn-tools__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 48px;
-  padding: 0 12px;
-}
-.gb-neon .gbn-tools__title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  margin: 0;
-  color: var(--ink);
-  font-size: 0.82rem;
-  font-weight: 600;
-  line-height: 1.2;
-}
-.gb-neon .gbn-tools__bolt { flex: 0 0 auto; display: inline-flex; color: var(--gold-ink); }
-.gb-neon .gbn-tools__count {
-  flex: 0 0 auto;
-  color: var(--gold-ink);
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.gb-neon .gbn-tools__label {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.gb-neon .gbn-tools__all {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 48px;
-  padding: 0 2px;
-  border-radius: 10px;
-  color: var(--gold-ink);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.gb-neon .gbn-tools__all > svg { transition: transform 0.2s var(--gbn-ease); }
-.gb-neon .gbn-tools__all:hover { text-decoration: underline; text-underline-offset: 3px; }
-.gb-neon .gbn-tools__all:hover > svg { transform: translateX(3px); }
-.gb-neon .gbn-tools__all:focus-visible {
-  outline: 2px solid transparent;
-  box-shadow: var(--focus-ring);
-}
-
-.gb-neon .gbn-tools__row { position: relative; }
-
-/* PlatformStrip (.pf-strip) ko neon mein HAMESHA ek scrollable row rakhna hai
-   (PlatformIcons ka 768px+ wrap/center yahan override) */
-.gb-neon .gbn-tools .pf-strip {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 8px 56px 8px 12px;
-  overflow-x: auto;
-  scroll-padding: 0 12px;
-  -webkit-mask-image: var(--gbn-mask);
-  mask-image: var(--gbn-mask);
-}
-.gb-neon .gbn-tools .pf-strip .pf-tile { min-width: 64px; }
-
-/* Tile: brand icon ke around gold-tint ring + soft glow */
-.gb-neon .pf-tile > svg {
-  box-shadow: 0 0 0 1px var(--gbn-edge), 0 8px 16px -10px var(--gbn-glow);
-  transition: box-shadow 0.2s var(--gbn-ease);
-}
-.gb-neon .pf-tile__label {
-  color: var(--ink-2);
-  font-size: 0.72rem;
-  opacity: 1;
-  transition: color 0.2s var(--gbn-ease);
-}
-@media (hover: hover) and (pointer: fine) {
-  .gb-neon .pf-tile[data-interactive="true"]:hover { transform: translateY(-2px); }
-  .gb-neon .pf-tile[data-interactive="true"]:hover > svg {
-    box-shadow: 0 0 0 1px var(--gbn-edge-hi), 0 10px 20px -8px var(--gbn-glow);
-  }
-  .gb-neon .pf-tile[data-interactive="true"]:hover .pf-tile__label { color: var(--ink); }
-}
-
-/* Circular "›" scroll button (visual 36px, tap area 48px) */
-.gb-neon .gbn-tools__next {
-  position: absolute;
-  z-index: 2;
-  right: 10px;
-  top: calc(10px + var(--gbn-icon) / 2); /* strip padding 8 + tile padding 2 + icon/2 */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-top: -18px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid var(--gbn-edge-hi);
-  background: var(--surface);
-  color: var(--gold-ink);
-  cursor: pointer;
-  box-shadow: 0 6px 16px -6px var(--gbn-glow);
-  transition: transform 0.15s var(--gbn-ease), opacity 0.2s var(--gbn-ease),
-    visibility 0.2s var(--gbn-ease), border-color 0.2s var(--gbn-ease);
-}
-.gb-neon .gbn-tools__next::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-}
-.gb-neon .gbn-tools__next:hover { border-color: var(--gold-ink); }
-.gb-neon .gbn-tools__next:active { transform: scale(0.94); }
-.gb-neon .gbn-tools__next:focus-visible {
-  outline: 2px solid transparent;
-  box-shadow: var(--focus-ring);
-}
-/* End par ho to hide (visibility => tab order se bhi bahar) */
-.gb-neon .gbn-tools[data-end="true"] .gbn-tools__next,
-.gb-neon .gbn-tools__next:disabled {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* ── Responsive ── */
-@media (max-width: 419px) {
-  /* 360px par jagah kam: decorative arrow/sparkle hata do */
-  .gb-neon .gbn-btn__tail { display: none; }
-}
-@media (min-width: 400px) {
-  .gb-neon .gbn-tools__title,
-  .gb-neon .gbn-tools__all { font-size: 0.92rem; }
-}
-@media (min-width: 480px) {
-  .gb-neon .gbn-card { padding: 16px; border-radius: 28px; }
-  .gb-neon .gbn-field { min-height: 60px; padding: 0 10px 0 20px; }
-  .gb-neon .gbn-input { height: 58px; }
-  .gb-neon .gbn-actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 12px; }
-  .gb-neon .gbn-btn { min-height: 64px; padding: 0 16px; font-size: 1.05rem; gap: 10px; }
-  .gb-neon .gbn-tools__head { padding: 0 16px; }
-  .gb-neon .gbn-tools .pf-strip { padding-left: 16px; scroll-padding: 0 16px; gap: 8px; }
-}
-@media (min-width: 640px) {
-  .gb-neon .gbn-card { padding: 20px; }
-  .gb-neon .gbn-tools .pf-strip .pf-tile { min-width: 72px; }
-}
-
-/* ── Reduced motion: transform/transition band, spinner dheema ── */
-@media (prefers-reduced-motion: reduce) {
-  .gb-neon .gbn-field,
-  .gb-neon .gbn-clear,
-  .gb-neon .gbn-btn,
-  .gb-neon .gbn-btn__tail,
-  .gb-neon .gbn-tools__all > svg,
-  .gb-neon .gbn-tools__next,
-  .gb-neon .pf-tile,
-  .gb-neon .pf-tile > svg,
-  .gb-neon .pf-tile__label { transition: none; }
-  .gb-neon .gbn-btn:hover:not(:disabled),
-  .gb-neon .gbn-btn:active:not(:disabled),
-  .gb-neon .gbn-btn--paste:hover .gbn-btn__tail,
-  .gb-neon .gbn-clear:active,
-  .gb-neon .gbn-tools__next:active,
-  .gb-neon .gbn-tools__all:hover > svg,
-  .gb-neon .pf-tile[data-interactive="true"]:hover,
-  .gb-neon .pf-tile[data-interactive="true"]:active { transform: none; }
-  .gb-neon .gbn-spinner { animation-duration: 2.4s; }
-  .gb-neon .gbn-tools .pf-strip { scroll-behavior: auto; }
-}
+export default GoldenBar;
