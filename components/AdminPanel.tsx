@@ -176,7 +176,7 @@ export default function AdminPanel() {
 
         <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>
           <input type="checkbox" checked={useFallback} onChange={(e) => setUseFallback(e.target.checked)}
-            style={{ accentColor: "var(--gold-ink, #A67C35)", width: 16, height: 16 }} />
+            style={{ accentColor: "var(--gold-ink)", width: 16, height: 16 }} />
           Always use the fallback API first (skip direct Instagram)
         </label>
 

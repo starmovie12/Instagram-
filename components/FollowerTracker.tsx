@@ -33,14 +33,14 @@ function Chart({ points }: { points: Point[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }} role="img" aria-label="Follower growth chart">
       <defs>
         <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#D2AC64" stopOpacity=".35" />
-          <stop offset="100%" stopColor="#D2AC64" stopOpacity="0" />
+          <stop offset="0%" stopColor="#22E4FF" stopOpacity=".35" />
+          <stop offset="100%" stopColor="#22E4FF" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#tg)" />
-      <path d={path} fill="none" stroke="#D2AC64" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={path} fill="none" stroke="#22E4FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       {points.map((p, i) => (
-        <circle key={p.date} cx={x(i)} cy={y(p.followers)} r="3.5" fill="var(--surface, #fff)" stroke="#A67C35" strokeWidth="2" />
+        <circle key={p.date} cx={x(i)} cy={y(p.followers)} r="3.5" fill="var(--surface, #fff)" stroke="#6366F1" strokeWidth="2" />
       ))}
     </svg>
   );

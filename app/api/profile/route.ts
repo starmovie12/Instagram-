@@ -12,6 +12,7 @@ import { IG_CONFIG } from "@/lib/instagram-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 function clientIp(req: NextRequest): string {
   return (
@@ -35,7 +36,14 @@ function statusFor(code: string): number {
   }
 }
 
-export async function POST(req: NextRequest) {
+type ProfileRequest = {
+  type: string;
+  username: string;
+  highlightId: string;
+  sessionId: string | null;
+};
+
+async function handle(req: NextRequest, r: ProfileRequest) {
   const ip = clientIp(req);
   if (isRateLimited(ip, IG_CONFIG.rateLimitPerMinute)) {
     return NextResponse.json(
@@ -43,36 +51,25 @@ export async function POST(req: NextRequest) {
       { status: 429 }
     );
   }
-
-  let type = "";
-  let username = "";
-  let highlightId = "";
-  try {
-    const body = await req.json();
-    type = String(body?.type ?? "");
-    username = String(body?.username ?? "");
-    highlightId = String(body?.highlightId ?? "");
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const { type, username, highlightId, sessionId } = r;
 
   try {
     switch (type) {
       case "dp": {
-        const profile = await extractProfile(username);
+        const profile = await extractProfile(username, { sessionId });
         return NextResponse.json(profile);
       }
       case "feed": {
-        return NextResponse.json(await extractProfileFeed(username));
+        return NextResponse.json(await extractProfileFeed(username, { sessionId }));
       }
       case "stories": {
-        return NextResponse.json(await extractStories(username));
+        return NextResponse.json(await extractStories(username, { sessionId }));
       }
       case "highlights": {
-        return NextResponse.json(await extractHighlights(username));
+        return NextResponse.json(await extractHighlights(username, { sessionId }));
       }
       case "highlight-items": {
-        return NextResponse.json({ items: await extractHighlightItems(highlightId) });
+        return NextResponse.json({ items: await extractHighlightItems(highlightId, { sessionId }) });
       }
       default:
         return NextResponse.json({ error: "Unknown request type." }, { status: 400 });
@@ -87,4 +84,29 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/** GET /api/profile?username=xyz  (purana GoldenBar flow pehle GET try karta hai) → DP/profile */
+export async function GET(req: NextRequest) {
+  const username = req.nextUrl.searchParams.get("username") ?? "";
+  return handle(req, { type: "dp", username, highlightId: "", sessionId: null });
+}
+
+export async function POST(req: NextRequest) {
+  let type = "";
+  let username = "";
+  let highlightId = "";
+  let sessionId: string | null = null;
+  try {
+    const body = await req.json();
+    username = String(body?.username ?? "");
+    highlightId = String(body?.highlightId ?? "");
+    // Purana GoldenBar sirf { username } bhejta hai (type nahi) — usse DP maano.
+    type = String(body?.type ?? "") || (username ? "dp" : "");
+    // Session ID: sirf POST body, log/store/echo nahi
+    if (typeof body?.sessionId === "string" && body.sessionId.length <= 600) sessionId = body.sessionId;
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+  return handle(req, { type, username, highlightId, sessionId });
 }

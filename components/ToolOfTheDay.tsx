@@ -18,15 +18,15 @@ export default function ToolOfTheDay() {
 
   return (
     <Link href={tool.href} className="card" style={{
-      display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", textDecoration: "none",
+      display: "flex", alignItems: "center", gap: "clamp(10px, 8px + .6vw, 16px)", padding: "clamp(10px, 7px + 1vw, 16px) clamp(12px, 8px + 1vw, 20px)", textDecoration: "none",
       borderColor: "var(--gold-300)", maxWidth: 720, margin: "28px auto 0",
     }}>
       <span className="medallion" style={{ flexShrink: 0 }}><tool.Icon size={22} strokeWidth={1.5} /></span>
       <span style={{ minWidth: 0, flex: 1, textAlign: "left" }}>
-        <span className="label" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--gold-ink)", fontSize: 9 }}>
+        <span className="label" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--gold-ink)", fontSize: 11 }}>
           <Sparkles size={10} strokeWidth={1.5} /> Tool of the day
         </span>
-        <b style={{ display: "block", fontSize: 15, color: "var(--ink)", marginTop: 2 }}>{tool.title}</b>
+        <b style={{ display: "block", fontSize: "clamp(14px, 13px + .3vw, 15px)", color: "var(--ink)", marginTop: 2 }}>{tool.title}</b>
         <span style={{ display: "block", fontSize: 12.5, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tool.desc}</span>
       </span>
       <ArrowRight size={18} strokeWidth={1.5} style={{ color: "var(--gold-ink)", flexShrink: 0 }} />

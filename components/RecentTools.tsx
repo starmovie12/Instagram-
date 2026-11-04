@@ -20,11 +20,11 @@ export default function RecentTools() {
   if (recent.length === 0) return null;
 
   return (
-    <div className="intro-rise" style={{ marginTop: 28 }}>
-      <span className="label" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--gold-ink)", marginBottom: 12 }}>
+    <div className="intro-rise" style={{ marginTop: "clamp(18px, 3vw, 28px)" }}>
+      <span className="label" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--gold-ink)", marginBottom: 8, fontSize: "clamp(11px, 10px + .3vw, 12px)" }}>
         <History size={12} strokeWidth={1.5} /> Pick up where you left off
       </span>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginTop: 10 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginTop: 6 }}>
         {recent.map((t) => (
           <Link key={t.href} href={t.href} className="chip" style={{ textDecoration: "none" }}>
             <t.Icon size={13} strokeWidth={1.5} style={{ color: "var(--gold-ink)" }} />

@@ -22,45 +22,9 @@ export type GoldenBarMode =
   | "threads"
   | "youtube";
 
-export interface MediaItem {
-  url: string;
-  type: "video" | "image" | "audio";
-  thumbnail?: string;
-  quality?: string;
-  width?: number;
-  height?: number;
-  filename?: string;
-}
-
-export interface ExtractedResult {
-  success?: boolean;
-  platform?: string;
-  type?: string;
-  title?: string;
-  caption?: string;
-  author?: {
-    username?: string;
-    fullName?: string;
-    avatar?: string;
-    verified?: boolean;
-    followers?: number;
-    following?: number;
-    postsCount?: number;
-    bio?: string;
-  };
-  thumbnail?: string;
-  url?: string;
-  videoUrl?: string;
-  imageUrl?: string;
-  audioUrl?: string;
-  media?: MediaItem[];
-  items?: MediaItem[];
-  shortcode?: string;
-  timestamp?: number;
-  likes?: number;
-  comments?: number;
-  views?: number;
-}
+import { isRecord, getStr, buildDownloadProxyUrl, normalizeApiResponse } from "@/lib/normalize";
+import type { MediaItem, ExtractedResult } from "@/lib/normalize";
+export type { MediaItem, ExtractedResult } from "@/lib/normalize";
 
 export interface HistoryEntry {
   id: string;
@@ -114,22 +78,6 @@ const QUICK_MODES: { id: GoldenBarMode; label: string; icon: string; hint: strin
 
 const HISTORY_STORAGE_KEY = "ig_goldenbar_recent_v1";
 
-function isRecord(val: unknown): val is Record<string, unknown> {
-  return typeof val === "object" && val !== null && !Array.isArray(val);
-}
-
-function getStr(val: unknown): string | undefined {
-  return typeof val === "string" && val.trim().length > 0 ? val.trim() : undefined;
-}
-
-function getNum(val: unknown): number | undefined {
-  return typeof val === "number" && !Number.isNaN(val) ? val : undefined;
-}
-
-function getBool(val: unknown): boolean {
-  return Boolean(val);
-}
-
 function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
   const val = raw.trim();
   if (!val) {
@@ -143,19 +91,19 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
       return { id: "ig-reel", label: "IG Reel", icon: "🎬", color: "#ec4899" };
     }
     if (lower.includes("/stories/")) {
-      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "#f59e0b" };
+      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "#22E4FF" };
     }
     if (lower.includes("/p/") || lower.includes("/tv/")) {
-      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "#8b5cf6" };
+      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "#7C3AED" };
     }
     return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
   }
 
   if (lower.includes("tiktok.com")) {
-    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "#14b8a6" };
+    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "#22E4FF" };
   }
   if (lower.includes("twitter.com") || lower.includes("x.com")) {
-    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "#3b82f6" };
+    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "#38BDF8" };
   }
   if (lower.includes("facebook.com") || lower.includes("fb.watch")) {
     return { id: "facebook", label: "Facebook", icon: "📘", color: "#2563eb" };
@@ -164,7 +112,7 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
     return { id: "pinterest", label: "Pinterest", icon: "📌", color: "#ef4444" };
   }
   if (lower.includes("threads.net") || lower.includes("threads.com")) {
-    return { id: "threads", label: "Threads", icon: "🧵", color: "#a855f7" };
+    return { id: "threads", label: "Threads", icon: "🧵", color: "#D946EF" };
   }
   if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
     return { id: "youtube", label: "YouTube", icon: "▶️", color: "#ef4444" };
@@ -182,224 +130,15 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
       id: "username",
       label: `@${cleanHandle || "username"}`,
       icon: "👤",
-      color: "#f59e0b",
+      color: "#22E4FF",
       isUsername: true,
     };
   }
 
-  return { id: "url", label: "Web Link", icon: "🔗", color: "#8b5cf6" };
+  return { id: "url", label: "Web Link", icon: "🔗", color: "#7C3AED" };
 }
 
-function buildDownloadProxyUrl(mediaUrl: string, filename = "instagram-media"): string {
-  if (!mediaUrl) return "#";
-  return `/api/download?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(filename)}`;
-}
-
-function normalizeApiResponse(rawPayload: unknown, inputVal: string): ExtractedResult {
-  const root = isRecord(rawPayload) ? rawPayload : {};
-  const data = isRecord(root.data)
-    ? root.data
-    : isRecord(root.result)
-    ? root.result
-    : root;
-
-  const mediaList: MediaItem[] = [];
-
-  if (Array.isArray(data.media)) {
-    for (const item of data.media) {
-      if (typeof item === "string") {
-        mediaList.push({
-          url: item,
-          type: item.includes(".mp4") ? "video" : "image",
-        });
-      } else if (isRecord(item)) {
-        const itemUrl =
-          getStr(item.url) ||
-          getStr(item.videoUrl) ||
-          getStr(item.imageUrl) ||
-          getStr(item.src);
-        if (itemUrl) {
-          const isVid =
-            item.type === "video" ||
-            getBool(item.isVideo) ||
-            Boolean(getStr(item.videoUrl));
-          mediaList.push({
-            url: itemUrl,
-            type: isVid ? "video" : item.type === "audio" ? "audio" : "image",
-            thumbnail:
-              getStr(item.thumbnail) ||
-              getStr(item.poster) ||
-              getStr(item.preview),
-            quality: getStr(item.quality) || "HD",
-          });
-        }
-      }
-    }
-  } else if (Array.isArray(data.items)) {
-    for (const item of data.items) {
-      if (isRecord(item)) {
-        const u =
-          getStr(item.url) ||
-          getStr(item.video_url) ||
-          getStr(item.display_url) ||
-          getStr(item.src);
-        if (u) {
-          const isVid =
-            item.type === "video" ||
-            getBool(item.is_video) ||
-            Boolean(getStr(item.video_url));
-          mediaList.push({
-            url: u,
-            type: isVid ? "video" : "image",
-            thumbnail: getStr(item.thumbnail) || getStr(item.display_url),
-            quality: getStr(item.quality) || "HD",
-          });
-        }
-      }
-    }
-  }
-
-  const singleVideo =
-    getStr(data.videoUrl) ||
-    getStr(data.video_url) ||
-    getStr(data.video) ||
-    (data.type === "video" ? getStr(data.url) : undefined);
-
-  const singleImage =
-    getStr(data.imageUrl) ||
-    getStr(data.display_url) ||
-    getStr(data.profilePicHd) ||
-    getStr(data.profile_pic_url_hd) ||
-    getStr(data.avatar) ||
-    getStr(data.thumbnail) ||
-    (data.type === "image" ? getStr(data.url) : undefined);
-
-  const singleAudio =
-    getStr(data.audioUrl) || getStr(data.audio_url) || getStr(data.musicUrl);
-
-  if (mediaList.length === 0) {
-    if (singleVideo) {
-      mediaList.push({
-        url: singleVideo,
-        type: "video",
-        thumbnail: singleImage || getStr(data.thumbnail),
-        quality: "Full HD",
-      });
-    } else if (singleImage) {
-      mediaList.push({
-        url: singleImage,
-        type: "image",
-        thumbnail: singleImage,
-        quality: "Original HD",
-      });
-    } else {
-      const directUrl = getStr(data.url);
-      if (directUrl) {
-        mediaList.push({
-          url: directUrl,
-          type: directUrl.includes(".mp4") ? "video" : "image",
-          thumbnail: getStr(data.thumbnail),
-          quality: "HD",
-        });
-      }
-    }
-  }
-
-  if (Array.isArray(data.posts) && mediaList.length <= 1) {
-    for (const post of data.posts) {
-      if (isRecord(post)) {
-        const postUrl =
-          getStr(post.videoUrl) ||
-          getStr(post.video_url) ||
-          getStr(post.displayUrl) ||
-          getStr(post.display_url) ||
-          getStr(post.url);
-        if (postUrl) {
-          const isVid =
-            getBool(post.isVideo) ||
-            getBool(post.is_video) ||
-            Boolean(getStr(post.videoUrl));
-          mediaList.push({
-            url: postUrl,
-            type: isVid ? "video" : "image",
-            thumbnail:
-              getStr(post.thumbnail) ||
-              getStr(post.displayUrl) ||
-              getStr(post.display_url),
-            quality: "Feed Post",
-          });
-        }
-      }
-    }
-  }
-
-  const authorRec = isRecord(data.author) ? data.author : {};
-  const ownerRec = isRecord(data.owner) ? data.owner : {};
-  const followedByRec = isRecord(data.edge_followed_by) ? data.edge_followed_by : {};
-  const followRec = isRecord(data.edge_follow) ? data.edge_follow : {};
-  const timelineRec = isRecord(data.edge_owner_to_timeline_media)
-    ? data.edge_owner_to_timeline_media
-    : {};
-
-  const username =
-    getStr(authorRec.username) ||
-    getStr(data.username) ||
-    getStr(ownerRec.username) ||
-    (inputVal.startsWith("@") ? inputVal.slice(1) : undefined);
-
-  const captionText =
-    getStr(data.caption) || getStr(data.description) || getStr(data.bio) || "";
-
-  const authorAvatar =
-    getStr(authorRec.avatar) ||
-    getStr(data.profilePicHd) ||
-    getStr(data.profile_pic_url_hd) ||
-    getStr(data.profilePic) ||
-    getStr(data.avatar);
-
-  return {
-    success: true,
-    platform: getStr(data.platform) || "instagram",
-    type: getStr(data.type) || (mediaList[0]?.type ?? "media"),
-    title:
-      getStr(data.title) ||
-      (captionText ? captionText.slice(0, 90) : undefined) ||
-      (username ? `@${username}` : "Instagram Media"),
-    caption: captionText,
-    author: {
-      username,
-      fullName:
-        getStr(authorRec.fullName) ||
-        getStr(data.fullName) ||
-        getStr(data.full_name) ||
-        getStr(ownerRec.full_name),
-      avatar: authorAvatar,
-      verified:
-        getBool(authorRec.verified) ||
-        getBool(data.isVerified) ||
-        getBool(data.is_verified),
-      followers: getNum(data.followers) ?? getNum(followedByRec.count),
-      following: getNum(data.following) ?? getNum(followRec.count),
-      postsCount: getNum(data.postsCount) ?? getNum(timelineRec.count),
-      bio: getStr(data.bio) || getStr(data.biography),
-    },
-    thumbnail:
-      getStr(data.thumbnail) ||
-      mediaList[0]?.thumbnail ||
-      singleImage ||
-      authorAvatar,
-    url: mediaList[0]?.url || singleVideo || singleImage,
-    videoUrl: singleVideo || mediaList.find((m) => m.type === "video")?.url,
-    imageUrl: singleImage || mediaList.find((m) => m.type === "image")?.url,
-    audioUrl: singleAudio,
-    media: mediaList,
-    likes: getNum(data.likes) ?? getNum(data.like_count),
-    comments: getNum(data.comments) ?? getNum(data.comment_count),
-    views: getNum(data.views) ?? getNum(data.view_count),
-  };
-}
-
-const GOLDEN_BAR_STYLES = `
+export const GOLDEN_BAR_STYLES = `
   .gb-wrapper {
     width: 100%;
     max-width: 820px;
@@ -423,21 +162,21 @@ const GOLDEN_BAR_STYLES = `
     border-radius: 999px;
     font-size: 0.8rem;
     font-weight: 600;
-    border: 1px solid rgba(245, 158, 11, 0.25);
+    border: 1px solid rgb(var(--c-cyan-rgb) / 0.30);
     background: rgba(15, 23, 42, 0.04);
     color: inherit;
     cursor: pointer;
     transition: all 0.18s ease;
   }
   .gb-mode-pill:hover {
-    border-color: rgba(245, 158, 11, 0.6);
+    border-color: rgb(var(--c-cyan-rgb) / 0.65);
     transform: translateY(-1px);
   }
   .gb-mode-active {
-    background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6);
-    color: #ffffff;
+    background: var(--gradient-button);
+    color: var(--on-accent);
     border-color: transparent;
-    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+    box-shadow: 0 4px 14px rgb(var(--c-violet-2-rgb) / 0.32);
   }
   .gb-form {
     width: 100%;
@@ -445,13 +184,13 @@ const GOLDEN_BAR_STYLES = `
   .gb-bar-outer {
     padding: 3px;
     border-radius: 20px;
-    background: linear-gradient(120deg, #f59e0b 0%, #ec4899 50%, #8b5cf6 100%);
-    box-shadow: 0 14px 35px -10px rgba(236, 72, 153, 0.32), 0 0 0 1px rgba(245, 158, 11, 0.2);
+    background: var(--gradient-brand);
+    box-shadow: 0 14px 35px -10px rgb(var(--c-violet-2-rgb) / 0.34), 0 0 0 1px rgb(var(--c-cyan-rgb) / 0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .gb-bar-outer:focus-within {
     transform: translateY(-1px);
-    box-shadow: 0 18px 42px -10px rgba(236, 72, 153, 0.45), 0 0 0 3px rgba(245, 158, 11, 0.28);
+    box-shadow: 0 18px 42px -10px rgb(var(--c-violet-2-rgb) / 0.48), 0 0 0 3px rgb(var(--c-cyan-rgb) / 0.35);
   }
   .gb-bar-inner {
     display: flex;
@@ -459,8 +198,8 @@ const GOLDEN_BAR_STYLES = `
     gap: 0.5rem;
     padding: 0.45rem 0.5rem 0.45rem 0.75rem;
     border-radius: 17px;
-    background: var(--background, #0f172a);
-    color: var(--foreground, #f8fafc);
+    background: var(--surface);
+    color: var(--ink);
   }
   .gb-platform-chip {
     display: inline-flex;
@@ -531,13 +270,13 @@ const GOLDEN_BAR_STYLES = `
     padding: 0.78rem 1.35rem;
     border-radius: 13px;
     border: none;
-    background: linear-gradient(135deg, #f59e0b 0%, #ec4899 60%, #8b5cf6 100%);
-    color: #ffffff;
+    background: var(--gradient-button);
+    color: var(--on-accent);
     font-size: 0.92rem;
     font-weight: 800;
     cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
+    box-shadow: 0 6px 18px rgb(var(--c-violet-2-rgb) / 0.40);
     transition: transform 0.15s ease, opacity 0.15s ease;
   }
   .gb-submit-btn:hover:not(:disabled) {
@@ -555,8 +294,8 @@ const GOLDEN_BAR_STYLES = `
   .gb-spinner {
     width: 15px;
     height: 15px;
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    border-top-color: #ffffff;
+    border: 2px solid rgb(5 11 36 / 0.30);
+    border-top-color: var(--on-accent);
     border-radius: 50%;
     animation: gbSpin 0.7s linear infinite;
   }
@@ -616,8 +355,8 @@ const GOLDEN_BAR_STYLES = `
     cursor: pointer;
   }
   .gb-history-chip:hover {
-    border-color: #ec4899;
-    color: #ec4899;
+    border-color: var(--gold-ink);
+    color: var(--gold-ink);
   }
   .gb-history-right {
     display: flex;
@@ -625,7 +364,7 @@ const GOLDEN_BAR_STYLES = `
     gap: 0.65rem;
   }
   .gb-history-link {
-    color: #ec4899;
+    color: var(--gold-ink);
     text-decoration: none;
     font-weight: 600;
   }
@@ -675,7 +414,7 @@ const GOLDEN_BAR_STYLES = `
     opacity: 0.85;
   }
   .gb-error-link {
-    color: #f472b6;
+    color: var(--gold-ink);
     font-weight: 700;
     text-decoration: underline;
   }
@@ -683,7 +422,7 @@ const GOLDEN_BAR_STYLES = `
     margin-top: 1.4rem;
     padding: 1.25rem;
     border-radius: 20px;
-    border: 1px solid rgba(236, 72, 153, 0.28);
+    border: 1px solid rgb(var(--c-violet-2-rgb) / 0.30);
     background: rgba(15, 23, 42, 0.04);
     text-align: left;
   }
@@ -707,7 +446,7 @@ const GOLDEN_BAR_STYLES = `
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ec4899;
+    border: 2px solid var(--c-violet-2);
   }
   .gb-author-name-row {
     display: flex;
@@ -725,7 +464,7 @@ const GOLDEN_BAR_STYLES = `
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #3b82f6;
+    background: var(--c-violet-2);
     color: #fff;
     font-size: 0.65rem;
     font-weight: 800;
@@ -747,9 +486,9 @@ const GOLDEN_BAR_STYLES = `
   .gb-dp-btn {
     padding: 0.5rem 0.9rem;
     border-radius: 10px;
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #fbbf24;
+    background: rgb(var(--c-cyan-rgb) / 0.14);
+    border: 1px solid rgb(var(--c-cyan-rgb) / 0.40);
+    color: var(--gold-ink);
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 700;
@@ -805,8 +544,8 @@ const GOLDEN_BAR_STYLES = `
     justify-content: center;
     padding: 0.7rem 1rem;
     border-radius: 10px;
-    background: linear-gradient(135deg, #ec4899, #8b5cf6);
-    color: #ffffff;
+    background: var(--gradient-brand);
+    color: var(--on-accent);
     text-decoration: none;
     font-weight: 700;
     font-size: 0.86rem;
@@ -845,9 +584,9 @@ const GOLDEN_BAR_STYLES = `
   .gb-copy-btn {
     padding: 0.28rem 0.65rem;
     border-radius: 8px;
-    border: 1px solid rgba(236, 72, 153, 0.35);
-    background: rgba(236, 72, 153, 0.1);
-    color: #f472b6;
+    border: 1px solid rgb(var(--c-violet-2-rgb) / 0.40);
+    background: rgb(var(--c-violet-2-rgb) / 0.10);
+    color: var(--gold-ink);
     font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
@@ -881,78 +620,88 @@ const GOLDEN_BAR_STYLES = `
 
   /* ── NEON: photo jaisa look (globals.css ke BAAD inject hota hai, isliye yahan override chalta hai) ── */
 
-  /* Link icon: gol badge (✕ button ke saath mirror) */
-  .gb-neon .gbn-field { padding: 0 8px; }
+  /* Link icon: gol badge (✕ button ke saath mirror) — fluid 32 → 40px */
   .gb-neon .gbn-field__icon {
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: clamp(32px, 26px + 1.6vw, 40px);
+    height: clamp(32px, 26px + 1.6vw, 40px);
     border-radius: 50%;
     border: 1px solid var(--gbn-edge);
     background: var(--surface-3);
+  }
+  .gb-neon .gbn-field__icon > svg {
+    width: clamp(16px, 13px + .8vw, 20px);
+    height: clamp(16px, 13px + .8vw, 20px);
   }
 
   /* Paste Link + Grab Media: poori pill shape */
   .gb-neon .gbn-btn { border-radius: 999px; }
 
-  /* Trust row: card ke ANDAR, buttons aur Tools sub-card ke beech */
+  /* Trust row: card ke ANDAR, buttons aur Tools sub-card ke beech.
+     Phones: ONE compact row, 3 equal columns (icon above a ≤2-line label) with the
+     vertical dividers kept. ≥561px: icon beside text. ≥768px: single-line items. */
   .gb-neon .gbn-trust {
-    display: flex;
-    flex-direction: column;
-    margin: 12px 0 0;
-    padding: 4px 12px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    margin: var(--gbn-gap) 0 0;
+    padding: 4px;
     list-style: none;
-    border-radius: 20px;
+    border-radius: clamp(16px, 12px + 1vw, 20px);
     border: 1px solid var(--gbn-edge);
     background: var(--gbn-sub);
   }
   .gb-neon .gbn-trust__item {
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 8px;
+    gap: 2px;
+    min-height: 52px;
+    padding: 3px 4px;
     color: var(--ink);
-    font-size: 0.82rem;
+    font-size: clamp(0.6875rem, 0.62rem + 0.3vw, 0.88rem);
     font-weight: 600;
     line-height: 1.2;
     text-align: center;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
-  .gb-neon .gbn-trust__item + .gbn-trust__item {
-    border-top: 1px solid var(--gbn-edge);
+  .gb-neon .gbn-trust__item > span:last-child { min-width: 0; }
+  .gb-neon .gbn-trust__item + .gbn-trust__item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 60%;
+    max-height: 28px;
+    transform: translateY(-50%);
+    border-left: 1px solid var(--gbn-edge);
   }
   .gb-neon .gbn-trust__icon {
     flex: 0 0 auto;
     display: inline-flex;
     color: var(--gold-ink);
   }
-  @media (min-width: 768px) {
-    .gb-neon .gbn-trust {
+  .gb-neon .gbn-trust__icon > svg {
+    width: clamp(15px, 13px + .5vw, 20px);
+    height: clamp(15px, 13px + .5vw, 20px);
+  }
+  @media (min-width: 561px) {
+    .gb-neon .gbn-trust__item {
       flex-direction: row;
-      align-items: center;
+      gap: 8px;
+      min-height: 52px;
       padding: 0 8px;
     }
+  }
+  @media (min-width: 768px) {
+    .gb-neon .gbn-trust { padding: 0 8px; }
     .gb-neon .gbn-trust__item {
-      flex: 1 1 auto;
       min-height: 52px;
-      font-size: 0.88rem;
       white-space: nowrap;
-    }
-    .gb-neon .gbn-trust__item + .gbn-trust__item {
-      border-top: 0;
-    }
-    /* Items ke beech vertical divider (photo wali "|" line) */
-    .gb-neon .gbn-trust__item + .gbn-trust__item::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 50%;
-      height: 24px;
-      transform: translateY(-50%);
-      border-left: 1px solid var(--gbn-edge);
     }
   }
 `;

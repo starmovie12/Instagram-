@@ -462,7 +462,7 @@ const CSS = `
   transition:transform .15s ease}
 .pf-tile[data-interactive="true"]{cursor:pointer}
 .pf-tile__label{font-size:.75rem;line-height:1.2;font-weight:600;opacity:.85;white-space:nowrap}
-.pf-tile:focus-visible{outline:3px solid var(--pf-focus,#3B6BFF);outline-offset:3px}
+.pf-tile:focus-visible{outline:3px solid var(--pf-focus,var(--c-cyan,#22E4FF));outline-offset:3px}
 .pf-tile[data-interactive="true"]:active{transform:scale(.94)}
 @media (hover:hover) and (pointer:fine){
   .pf-tile[data-interactive="true"]:hover{transform:translateY(-3px)}
@@ -485,7 +485,7 @@ const CSS = `
     -webkit-mask-image:none;mask-image:none}
   .pf-strip .pf-tile{min-width:72px}
 }
-.pf-strip:focus-visible{outline:2px solid var(--pf-focus,#3B6BFF);outline-offset:-2px;border-radius:14px}
+.pf-strip:focus-visible{outline:2px solid var(--pf-focus,var(--c-cyan,#22E4FF));outline-offset:-2px;border-radius:14px}
 @media (forced-colors:active){
   .pf-tile:focus-visible{outline:3px solid Highlight}
   .pf-strip:focus-visible{outline:2px solid Highlight}

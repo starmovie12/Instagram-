@@ -17,7 +17,7 @@ function celebrate(e: React.MouseEvent) {
     const p = document.createElement("span");
     const angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.6;
     const dist = 26 + Math.random() * 22;
-    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:5px;height:5px;border-radius:99px;pointer-events:none;z-index:99;background:linear-gradient(135deg,#EBD6A4,#A67C35);transition:transform 600ms cubic-bezier(.16,1,.3,1),opacity 600ms;`;
+    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:5px;height:5px;border-radius:99px;pointer-events:none;z-index:99;background:linear-gradient(135deg,var(--c-cyan),var(--c-magenta));transition:transform 600ms cubic-bezier(.16,1,.3,1),opacity 600ms;`;
     document.body.appendChild(p);
     requestAnimationFrame(() => {
       p.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`;

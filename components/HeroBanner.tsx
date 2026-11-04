@@ -317,8 +317,8 @@ export default function HeroBanner() {
         /* Outer wrapper locks maximum width so desktop & mobile match 1:1 */
         .hb-shell {
           width: 100%;
-          max-width: 680px;
-          margin: 12px auto 0 auto;
+          max-width: 800px;
+          margin: clamp(8px, 4px + 1vw, 12px) auto 0 auto;
           container-type: inline-size;
         }
 
@@ -333,16 +333,16 @@ export default function HeroBanner() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          border: 1.5px solid rgba(34, 228, 255, 0.55);
+          border: 1.5px solid rgb(var(--c-cyan-rgb) / 0.55);
           background:
-            radial-gradient(55% 85% at 80% 54%, rgba(124, 58, 237, 0.48), transparent 70%),
-            radial-gradient(35% 45% at 60% 98%, rgba(217, 70, 239, 0.3), transparent 70%),
-            radial-gradient(45% 60% at 8% 12%, rgba(34, 228, 255, 0.12), transparent 70%),
+            radial-gradient(55% 85% at 80% 54%, rgb(var(--c-violet-rgb) / 0.48), transparent 70%),
+            radial-gradient(35% 45% at 60% 98%, rgb(var(--c-magenta-rgb) / 0.3), transparent 70%),
+            radial-gradient(45% 60% at 8% 12%, rgb(var(--c-cyan-rgb) / 0.12), transparent 70%),
             linear-gradient(135deg, #050B24 0%, #080E2E 52%, #120B38 100%);
           box-shadow:
-            0 0 0 1px rgba(124, 58, 237, 0.22),
+            0 0 0 1px rgb(var(--c-violet-rgb) / 0.22),
             0 10px 36px -10px rgba(0, 0, 0, 0.78),
-            0 0 34px -12px rgba(34, 228, 255, 0.5);
+            0 0 34px -12px rgb(var(--c-cyan-rgb) / 0.5);
           box-sizing: border-box;
         }
 
@@ -352,7 +352,7 @@ export default function HeroBanner() {
           left: 46%;
           width: 34%;
           height: 20%;
-          background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.55), transparent 70%);
+          background: radial-gradient(ellipse at center, rgb(var(--c-pink-rgb) / 0.55), transparent 70%);
           filter: blur(10px);
           pointer-events: none;
           z-index: 1;
@@ -384,7 +384,7 @@ export default function HeroBanner() {
         .hb-spark {
           width: 100%;
           height: 100%;
-          filter: drop-shadow(0 0 8px rgba(34, 228, 255, 0.95));
+          filter: drop-shadow(0 0 8px rgb(var(--c-cyan-rgb) / 0.95));
         }
 
         .hb-dot {
@@ -508,7 +508,7 @@ export default function HeroBanner() {
           border-radius: 24%;
           filter:
             drop-shadow(0 6px 12px rgba(2, 4, 18, 0.78))
-            drop-shadow(0 0 10px rgba(56, 189, 248, 0.42));
+            drop-shadow(0 0 10px rgb(var(--c-sky-rgb) / 0.42));
           animation: hb-float 5.5s ease-in-out infinite;
         }
 

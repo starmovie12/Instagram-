@@ -57,9 +57,9 @@ function StreakBadge() {
       style={{
         fontSize: 12,
         fontWeight: 700,
-        color: "#FF3D8B",
-        background: "rgba(255, 61, 139, 0.1)",
-        border: "1px solid rgba(255, 61, 139, 0.3)",
+        color: "var(--gold-ink)",
+        background: "color-mix(in srgb, var(--gold-ink) 10%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--gold-ink) 30%, transparent)",
         borderRadius: 999,
         padding: "5px 10px",
         whiteSpace: "nowrap",
@@ -80,19 +80,21 @@ function InstaGrabLogo() {
       fill="none"
       aria-hidden="true"
       style={{
-        borderRadius: 13,
-        boxShadow: "0 4px 18px rgba(255, 61, 139, 0.35)",
+        width: "clamp(34px, 20px + 3vw, 44px)",
+        height: "clamp(34px, 20px + 3vw, 44px)",
+        borderRadius: "clamp(10px, 6px + 1vw, 13px)",
+        boxShadow: "0 4px 18px rgb(var(--c-violet-2-rgb) / 0.45)",
         flexShrink: 0,
       }}
     >
       <defs>
         <linearGradient id="ig_logo_stroke" x1="0" y1="44" x2="44" y2="0" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FF7A3D" />
-          <stop offset="0.5" stopColor="#FF3D8B" />
-          <stop offset="1" stopColor="#8B3DFF" />
+          <stop stopColor="#22E4FF" />
+          <stop offset="0.5" stopColor="#6366F1" />
+          <stop offset="1" stopColor="#D946EF" />
         </linearGradient>
       </defs>
-      <rect x="1" y="1" width="42" height="42" rx="12" fill="#0B0816" stroke="url(#ig_logo_stroke)" strokeWidth="2" />
+      <rect x="1" y="1" width="42" height="42" rx="12" fill="#050B24" stroke="url(#ig_logo_stroke)" strokeWidth="2" />
       {/* Viewfinder corners */}
       <path
         d="M12 17V14.5C12 13.12 13.12 12 14.5 12H17M27 12H29.5C30.88 12 32 13.12 32 14.5V17M32 27V29.5C32 30.88 30.88 32 29.5 32H27M17 32H14.5C13.12 32 12 30.88 12 29.5V27"
@@ -274,11 +276,11 @@ export default function Nav() {
           position: "sticky",
           top: 0,
           zIndex: 80,
-          height: 68,
-          background: "rgba(8, 6, 20, 0.88)",
+          height: "clamp(52px, 36px + 4.2vw, 68px)",
+          background: "color-mix(in srgb, var(--bg) 86%, transparent)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          borderBottom: "1px solid var(--line)",
           transform: headerHidden ? "translateY(-100%)" : "translateY(0)",
           transition: "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)",
           willChange: "transform",
@@ -301,7 +303,7 @@ export default function Nav() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
+              gap: "clamp(8px, 4px + 1vw, 12px)",
               textDecoration: "none",
               color: "inherit",
             }}
@@ -310,16 +312,16 @@ export default function Nav() {
             <span
               style={{
                 fontWeight: 800,
-                fontSize: 26,
+                fontSize: "clamp(20px, 12px + 1.8vw, 26px)",
                 lineHeight: 1,
                 letterSpacing: "-0.03em",
-                color: "#FFFFFF",
+                color: "var(--ink)",
               }}
             >
               Insta
               <span
                 style={{
-                  background: "linear-gradient(135deg, #FF3D8B 0%, #E11D9A 60%, #C026D3 100%)",
+                  background: "var(--gradient-brand)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -348,7 +350,7 @@ export default function Nav() {
                     whiteSpace: "nowrap",
                     fontSize: 13.5,
                     fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#FF3D8B" : "#CBD5E1",
+                    color: isActive ? "var(--gold-ink)" : "var(--ink-2)",
                     padding: "6px 8px",
                     borderRadius: 8,
                     transition: "color 150ms ease, background 150ms ease",
@@ -379,12 +381,12 @@ export default function Nav() {
               title="Recent Grabs"
               style={{
                 position: "relative",
-                width: 46,
-                height: 46,
-                borderRadius: 14,
-                background: "rgba(245, 184, 61, 0.10)",
-                border: "1px solid rgba(245, 184, 61, 0.18)",
-                color: "#F5B83D",
+                width: "clamp(40px, 28px + 2.4vw, 46px)",
+                height: "clamp(40px, 28px + 2.4vw, 46px)",
+                borderRadius: "clamp(11px, 8px + .6vw, 14px)",
+                background: "color-mix(in srgb, var(--gold-ink) 10%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--gold-ink) 26%, transparent)",
+                color: "var(--gold-ink)",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -398,8 +400,8 @@ export default function Nav() {
                     position: "absolute",
                     top: -4,
                     right: -4,
-                    background: "linear-gradient(135deg, #FF3D8B, #C026D3)",
-                    color: "#FFFFFF",
+                    background: "var(--gradient-brand)",
+                    color: "var(--on-accent)",
                     fontSize: 10,
                     fontWeight: 800,
                     borderRadius: 999,
@@ -421,12 +423,12 @@ export default function Nav() {
               aria-label="Settings"
               title="Settings"
               style={{
-                width: 46,
-                height: 46,
-                borderRadius: 14,
+                width: "clamp(40px, 28px + 2.4vw, 46px)",
+                height: "clamp(40px, 28px + 2.4vw, 46px)",
+                borderRadius: "clamp(11px, 8px + .6vw, 14px)",
                 background: "transparent",
                 border: "none",
-                color: "#A5A3B8",
+                color: "var(--ink-2)",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -465,7 +467,7 @@ export default function Nav() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(3, 5, 12, 0.78)",
+            background: "rgba(5, 11, 36, 0.72)",
             backdropFilter: "blur(10px)",
             zIndex: 130,
             display: "flex",
@@ -477,15 +479,15 @@ export default function Nav() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "#101426",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
+              background: "var(--surface)",
+              border: "1px solid var(--border-color)",
               borderRadius: 20,
               width: "100%",
               maxWidth: 480,
               maxHeight: "88vh",
               overflowY: "auto",
               padding: 24,
-              color: "#F8FAFC",
+              color: "var(--ink)",
               boxShadow: "0 20px 60px rgba(0, 0, 0, 0.65)",
             }}
           >
@@ -507,7 +509,7 @@ export default function Nav() {
                   margin: 0,
                 }}
               >
-                <Settings size={20} color="#FF3D8B" />
+                <Settings size={20} color="var(--gold-ink)" />
                 <span>InstaGrab Settings</span>
               </h3>
               <button
@@ -517,7 +519,7 @@ export default function Nav() {
                 style={{
                   background: "transparent",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   cursor: "pointer",
                   padding: 6,
                 }}
@@ -535,7 +537,7 @@ export default function Nav() {
                   fontWeight: 800,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   marginBottom: 10,
                 }}
               >
@@ -553,9 +555,9 @@ export default function Nav() {
                       borderRadius: 999,
                       fontSize: 13.5,
                       fontWeight: 700,
-                      color: path === l.href ? "#FF3D8B" : "#E2E8F0",
-                      background: "rgba(255, 255, 255, 0.05)",
-                      border: path === l.href ? "1px solid rgba(255, 61, 139, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+                      color: path === l.href ? "var(--gold-ink)" : "var(--ink)",
+                      background: "var(--surface-2)",
+                      border: path === l.href ? "1px solid color-mix(in srgb, var(--gold-ink) 55%, transparent)" : "1px solid var(--line)",
                     }}
                   >
                     {l.label}
@@ -566,7 +568,7 @@ export default function Nav() {
                 <LanguagePicker />
                 <ThemeToggle />
               </div>
-              <div style={{ height: 1, background: "rgba(255, 255, 255, 0.08)", marginTop: 16 }} />
+              <div style={{ height: 1, background: "var(--line)", marginTop: 16 }} />
             </div>
 
             <div style={{ marginBottom: 16 }}>
@@ -576,7 +578,7 @@ export default function Nav() {
                   fontSize: 13.5,
                   fontWeight: 700,
                   marginBottom: 6,
-                  color: "#E2E8F0",
+                  color: "var(--ink)",
                 }}
               >
                 Instagram Session ID (Optional)
@@ -589,11 +591,11 @@ export default function Nav() {
                 style={{
                   width: "100%",
                   height: 46,
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.14)",
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--border-color)",
                   borderRadius: 10,
                   padding: "0 14px",
-                  color: "#F8FAFC",
+                  color: "var(--ink)",
                   fontSize: 14,
                   outline: "none",
                 }}
@@ -601,14 +603,14 @@ export default function Nav() {
               <p
                 style={{
                   fontSize: 12,
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   marginTop: 6,
                   lineHeight: 1.45,
                 }}
               >
                 <ShieldCheck
                   size={13}
-                  color="#FF3D8B"
+                  color="var(--gold-ink)"
                   style={{ display: "inline", marginRight: 4, verticalAlign: "middle" }}
                 />
                 Saved strictly in your browser. Lets you grab stories/posts from accounts you follow and bypasses public rate-limits.
@@ -622,7 +624,7 @@ export default function Nav() {
                   fontSize: 13.5,
                   fontWeight: 700,
                   marginBottom: 6,
-                  color: "#E2E8F0",
+                  color: "var(--ink)",
                 }}
               >
                 Custom Cobalt Instance URL (Optional)
@@ -635,11 +637,11 @@ export default function Nav() {
                 style={{
                   width: "100%",
                   height: 46,
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.14)",
+                  background: "var(--surface-2)",
+                  border: "1px solid var(--border-color)",
                   borderRadius: 10,
                   padding: "0 14px",
-                  color: "#F8FAFC",
+                  color: "var(--ink)",
                   fontSize: 14,
                   outline: "none",
                 }}
@@ -647,7 +649,7 @@ export default function Nav() {
               <p
                 style={{
                   fontSize: 12,
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   marginTop: 6,
                   lineHeight: 1.45,
                 }}
@@ -664,8 +666,8 @@ export default function Nav() {
                 height: 48,
                 borderRadius: 12,
                 border: "none",
-                background: "linear-gradient(135deg, #FF7A59 0%, #FF3D8B 50%, #C026D3 100%)",
-                color: "#FFFFFF",
+                background: "var(--gradient-button)",
+                color: "var(--on-accent)",
                 fontWeight: 800,
                 fontSize: 15,
                 cursor: "pointer",
@@ -689,7 +691,7 @@ export default function Nav() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(3, 5, 12, 0.78)",
+            background: "rgba(5, 11, 36, 0.72)",
             backdropFilter: "blur(10px)",
             zIndex: 130,
             display: "flex",
@@ -701,14 +703,14 @@ export default function Nav() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "#101426",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
+              background: "var(--surface)",
+              border: "1px solid var(--border-color)",
               borderRadius: 20,
               width: "100%",
               maxWidth: 520,
               maxHeight: "86vh",
               padding: 22,
-              color: "#F8FAFC",
+              color: "var(--ink)",
               display: "flex",
               flexDirection: "column",
               gap: 14,
@@ -722,7 +724,7 @@ export default function Nav() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingBottom: 10,
-                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                borderBottom: "1px solid var(--line)",
               }}
             >
               <h3
@@ -735,7 +737,7 @@ export default function Nav() {
                   margin: 0,
                 }}
               >
-                <History size={20} color="#FF3D8B" />
+                <History size={20} color="var(--gold-ink)" />
                 <span>Recent Grabs ({history.length})</span>
               </h3>
               <button
@@ -745,7 +747,7 @@ export default function Nav() {
                 style={{
                   background: "transparent",
                   border: "none",
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   cursor: "pointer",
                   padding: 6,
                 }}
@@ -763,8 +765,8 @@ export default function Nav() {
                   justifyContent: "space-between",
                   padding: "10px 14px",
                   borderRadius: 12,
-                  background: "rgba(192, 38, 211, 0.18)",
-                  border: "1px solid rgba(192, 38, 211, 0.45)",
+                  background: "color-mix(in srgb, var(--c-magenta) 18%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--c-magenta) 45%, transparent)",
                   fontSize: 13,
                 }}
               >
@@ -773,8 +775,8 @@ export default function Nav() {
                   type="button"
                   onClick={handleUndoDelete}
                   style={{
-                    background: "#FF3D8B",
-                    color: "#040711",
+                    background: "var(--c-cyan)",
+                    color: "var(--on-accent)",
                     border: "none",
                     borderRadius: 8,
                     padding: "5px 10px",
@@ -795,7 +797,7 @@ export default function Nav() {
             {history.length === 0 ? (
               <p
                 style={{
-                  color: "#94A3B8",
+                  color: "var(--ink-2)",
                   textAlign: "center",
                   padding: "28px 12px",
                   fontSize: 14,
@@ -811,8 +813,8 @@ export default function Nav() {
                       key={`${item.id}-${item.timestamp}-${idx}`}
                       onClick={() => handleSelectHistoryItem(item)}
                       style={{
-                        background: "rgba(255, 255, 255, 0.04)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--line)",
                         borderRadius: 14,
                         padding: "10px 12px",
                         display: "flex",
@@ -840,7 +842,7 @@ export default function Nav() {
                               height: 44,
                               borderRadius: 9,
                               objectFit: "cover",
-                              background: "#181E36",
+                              background: "var(--surface-2)",
                               flexShrink: 0,
                             }}
                           />
@@ -850,13 +852,13 @@ export default function Nav() {
                               width: 44,
                               height: 44,
                               borderRadius: 9,
-                              background: "linear-gradient(135deg, #C026D3, #FF3D8B)",
+                              background: "var(--gradient-brand)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontWeight: 800,
                               fontSize: 12,
-                              color: "#050811",
+                              color: "var(--on-accent)",
                               flexShrink: 0,
                             }}
                           >
@@ -868,7 +870,7 @@ export default function Nav() {
                             style={{
                               fontSize: 13.5,
                               fontWeight: 700,
-                              color: "#F8FAFC",
+                              color: "var(--ink)",
                               whiteSpace: "nowrap",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
@@ -876,7 +878,7 @@ export default function Nav() {
                           >
                             @{item.author || "media_post"}
                           </div>
-                          <div style={{ fontSize: 11.5, color: "#94A3B8" }}>
+                          <div style={{ fontSize: 11.5, color: "var(--ink-2)" }}>
                             {(item.platform || "instagram").toUpperCase()} •{" "}
                             {item.type || "media"} •{" "}
                             {new Date(item.timestamp).toLocaleDateString()}
@@ -892,9 +894,9 @@ export default function Nav() {
                             width: 38,
                             height: 38,
                             borderRadius: 9,
-                            background: "rgba(255, 61, 139, 0.12)",
-                            border: "1px solid rgba(255, 61, 139, 0.3)",
-                            color: "#FF3D8B",
+                            background: "color-mix(in srgb, var(--gold-ink) 12%, transparent)",
+                            border: "1px solid color-mix(in srgb, var(--gold-ink) 30%, transparent)",
+                            color: "var(--gold-ink)",
                             display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -933,14 +935,14 @@ export default function Nav() {
                   style={{
                     marginTop: 8,
                     paddingTop: 12,
-                    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderTop: "1px solid var(--line)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 11.5, color: "#64748B" }}>
+                  <span style={{ fontSize: 11.5, color: "var(--ink-3)" }}>
                     Stored locally on your device
                   </span>
                   <button

@@ -4,7 +4,7 @@ import { Upload, Download, RefreshCw } from "lucide-react";
 
 const RINGS: { name: string; stops: string[] }[] = [
   { name: "Story", stops: ["#feda75", "#fa7e1e", "#d62976", "#962fbf", "#4f5bd5"] },
-  { name: "Gold", stops: ["#EBD6A4", "#D2AC64", "#A67C35", "#EBD6A4"] },
+  { name: "Brand", stops: ["#22E4FF", "#6366F1", "#D946EF", "#22E4FF"] },
   { name: "Sunset", stops: ["#ff9a9e", "#fad0c4", "#fbc2eb", "#a18cd1"] },
   { name: "Ocean", stops: ["#43e97b", "#38f9d7", "#38a1f9", "#5b6bf9"] },
 ];

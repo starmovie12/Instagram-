@@ -36,13 +36,13 @@ function draw(canvas: HTMLCanvasElement, k: Kit) {
   canvas.width = W; canvas.height = H;
 
   // Ivory paper + gold frame (the InstaGrab editorial look)
-  ctx.fillStyle = "#FBFAF7"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#F4F6FF"; ctx.fillRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "#EBD6A4"); g.addColorStop(0.5, "#D2AC64"); g.addColorStop(1, "#A67C35");
+  g.addColorStop(0, "#22E4FF"); g.addColorStop(0.5, "#6366F1"); g.addColorStop(1, "#D946EF");
   ctx.strokeStyle = g; ctx.lineWidth = 6; ctx.strokeRect(28, 28, W - 56, H - 56);
   ctx.lineWidth = 1.5; ctx.strokeRect(44, 44, W - 88, H - 88);
 
-  const gold = "#A67C35", ink = "#1C1913", ink2 = "#5C554A";
+  const gold = "#4F46E5", ink = "#0B1030", ink2 = "#414C78";
   ctx.textBaseline = "alphabetic";
 
   // Label

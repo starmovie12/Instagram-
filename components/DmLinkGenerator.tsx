@@ -23,7 +23,7 @@ export default function DmLinkGenerator() {
         const QRCode = (await import("qrcode")).default;
         const url = await QRCode.toDataURL(link, {
           width: 480, margin: 2,
-          color: { dark: "#5C4A22", light: "#FBFAF7" },
+          color: { dark: "#1E1B4B", light: "#F4F6FF" },
         });
         if (!cancelled) setQr(url);
       } catch { if (!cancelled) setQr(null); }

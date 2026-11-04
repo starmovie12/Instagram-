@@ -37,7 +37,9 @@ export function getRecentTools(): string[] {
   return read(RECENT_KEY);
 }
 
-/* ── Download history (H1) — private, on-device only ── */
+/* ── Download history (H1) — DEPRECATED ──
+   Naya History `lib/storage.ts` (ig.history.v2) me hai. Ye purane exports sirf isliye bache hain taaki purani files
+   (HistoryList, ResultCard) agar repo me reh jayein to build na toote. Un files ko delete karne ke baad ye section hata sakte ho. */
 
 export type HistoryItem = {
   shortcode: string;

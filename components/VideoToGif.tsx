@@ -89,11 +89,11 @@ export default function VideoToGif() {
             <span className="label">Start at: {start.toFixed(1)}s</span>
             <input type="range" min={0} max={Math.max(0, duration - 0.5)} step={0.1} value={start}
               onChange={(e) => setStart(Number(e.target.value))} aria-label="GIF start time"
-              style={{ width: "100%", accentColor: "#A67C35" }} />
+              style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
             <span className="label">Length: {len}s (max {MAX_GIF_SECONDS}s)</span>
             <input type="range" min={1} max={MAX_GIF_SECONDS} step={1} value={len}
               onChange={(e) => setLen(Number(e.target.value))} aria-label="GIF length"
-              style={{ width: "100%", accentColor: "#A67C35" }} />
+              style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
             <button className="btn btn-molten" onClick={make} disabled={working} style={{ height: 50, justifyContent: "center" }}>
               <Film size={16} strokeWidth={1.5} />
               {working ? `Encoding… ${progress}%` : "Make GIF"}

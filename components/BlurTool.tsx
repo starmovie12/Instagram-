@@ -100,7 +100,7 @@ export default function BlurTool() {
             <label className="mono" style={{ fontSize: 12, color: "var(--ink-3)", display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 160 }}>
               Brush {brush}px
               <input type="range" min={16} max={80} value={brush} onChange={(e) => setBrush(Number(e.target.value))}
-                aria-label="Brush size" style={{ flex: 1, accentColor: "#A67C35" }} />
+                aria-label="Brush size" style={{ flex: 1, accentColor: "var(--gold-ink)" }} />
             </label>
             <button className="btn btn-ghost" onClick={reset} style={{ fontSize: 13 }}>
               <Eraser size={13} strokeWidth={1.5} /> Reset

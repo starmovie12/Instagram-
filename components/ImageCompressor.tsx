@@ -87,7 +87,7 @@ export default function ImageCompressor() {
             </div>
             <input type="range" min={30} max={95} step={5} value={quality * 100}
               onChange={(e) => setQuality(Number(e.target.value) / 100)}
-              aria-label="Compression quality" style={{ width: "100%", accentColor: "var(--gold-ink, #A67C35)" }} />
+              aria-label="Compression quality" style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12, marginTop: 16 }}>
               {([
                 ["Original", fmtBytes(origSize), undefined],

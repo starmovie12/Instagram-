@@ -10,10 +10,10 @@ export type Tool = {
 };
 
 const BADGE_STYLE: Record<Badge, React.CSSProperties> = {
-  Signature: { color: "var(--gold-ink)", background: "rgba(245,233,207,.35)", borderColor: "var(--line)" },
+  Signature: { color: "var(--gold-ink)", background: "color-mix(in srgb, var(--gold-ink) 12%, transparent)", borderColor: "var(--line)" },
   New: { color: "var(--gold-ink)", background: "color-mix(in srgb, var(--gold-300) 22%, transparent)", borderColor: "var(--gold-300)" },
-  Hot: { color: "#fff", background: "var(--molten)", borderColor: "transparent" },
-  "World-first": { color: "#1a1205", background: "linear-gradient(100deg, var(--gold-300), #f5e9cf)", borderColor: "transparent" },
+  Hot: { color: "var(--on-accent)", background: "var(--molten)", borderColor: "transparent" },
+  "World-first": { color: "var(--on-accent)", background: "linear-gradient(100deg, var(--c-sky), var(--c-magenta))", borderColor: "transparent" },
 };
 
 export function ToolBadge({ badge }: { badge: Badge }) {

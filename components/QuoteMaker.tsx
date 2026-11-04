@@ -4,8 +4,8 @@ import { Download, Quote } from "lucide-react";
 
 type Theme = { id: string; label: string; bg: [string, string]; ink: string; accent: string };
 const THEMES: Theme[] = [
-  { id: "ivory", label: "Ivory & gold", bg: ["#FBFAF7", "#F1EBDD"], ink: "#1C1913", accent: "#A67C35" },
-  { id: "noir", label: "Noir & gold", bg: ["#12100B", "#1E1A12"], ink: "#F5E9CF", accent: "#D2AC64" },
+  { id: "ivory", label: "Ivory & indigo", bg: ["#F4F6FF", "#E1E6FB"], ink: "#0B1030", accent: "#4F46E5" },
+  { id: "noir", label: "Noir & cyan", bg: ["#050B24", "#101842"], ink: "#F1F5FF", accent: "#22E4FF" },
   { id: "blush", label: "Blush", bg: ["#FCEEF0", "#F8D8DD"], ink: "#4A2B33", accent: "#B0566B" },
   { id: "sage", label: "Sage", bg: ["#EEF3EA", "#D7E3D0"], ink: "#2C3B28", accent: "#5E7A52" },
   { id: "ocean", label: "Midnight", bg: ["#0E1B2C", "#16283E"], ink: "#E8EEF5", accent: "#7FA8D0" },

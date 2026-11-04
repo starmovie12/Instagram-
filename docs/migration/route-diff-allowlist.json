@@ -1,0 +1,18 @@
+[
+  {
+    "match": "JSON-LD DROPPED /: 2 → 1",
+    "reason": "PRD A12/§17.1: Home no longer renders the FAQ, so FAQPage JSON-LD moved to /how-to-download where the FAQ is visible (Google requires structured data to match visible content). WebApplication JSON-LD stays on /."
+  },
+  {
+    "match": "JSON-LD TYPES LOST /: FAQPage",
+    "reason": "Same move as above — FAQPage now on /how-to-download (and on every platform page)."
+  },
+  {
+    "match": "JSON-LD DROPPED /history: 1 → 0",
+    "reason": "/history was and is robots noindex; PRD §12 makes it a tab screen without FAQ. Structured data on a noindex page has no search value."
+  },
+  {
+    "match": "JSON-LD TYPES LOST /history: FAQPage",
+    "reason": "Same as above (noindex page)."
+  }
+]

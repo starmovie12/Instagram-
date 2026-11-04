@@ -118,10 +118,10 @@ export default function VideoTrimmer() {
               </div>
               <input type="range" min={0} max={duration} step={0.1} value={start}
                 onChange={(e) => setStart(Math.min(Number(e.target.value), end - 0.5))}
-                aria-label="Clip start" style={{ width: "100%", accentColor: "#A67C35" }} />
+                aria-label="Clip start" style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
               <input type="range" min={0} max={duration} step={0.1} value={end}
                 onChange={(e) => setEnd(Math.max(Number(e.target.value), start + 0.5))}
-                aria-label="Clip end" style={{ width: "100%", accentColor: "#A67C35" }} />
+                aria-label="Clip end" style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
               <button className="btn btn-molten" onClick={trim} disabled={recording} style={{ height: 50, justifyContent: "center" }}>
                 <Scissors size={16} strokeWidth={1.5} />
                 {recording ? `Recording clip… ${progress}%` : "Trim this range"}

@@ -2,8 +2,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, CornerDownLeft, History } from "lucide-react";
-import { TOOLS } from "@/lib/copy";
+import { visibleTools } from "@/lib/registry";
+import { CATEGORY_ICON } from "@/components/ToolIcon";
 import { recordToolVisit, getRecentTools } from "@/lib/retention";
+
+/** Registry se (PRD A17) — copy.ts ki 12-tool list nahi. */
+const TOOLS = visibleTools.map((t) => ({ title: t.name, desc: t.description, href: t.href, Icon: CATEGORY_ICON[t.category] }));
 
 /**
  * Global Cmd+K / Ctrl+K palette: jump to any tool in a second. Also the
@@ -87,30 +91,17 @@ export default function CommandPalette() {
   }, [active]);
 
   if (!open) {
-    return (
-      <button
-        onClick={openPalette}
-        aria-label="Search tools (Ctrl+K)"
-        title="Search tools — Ctrl+K"
-        style={{
-          position: "fixed", right: 20, bottom: 20, zIndex: 70,
-          width: 46, height: 46, borderRadius: 999, cursor: "pointer",
-          background: "var(--surface)", border: "1px solid var(--gold-300)",
-          color: "var(--gold-ink)", display: "inline-flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 20px rgba(10,9,6,.18)",
-        }}>
-        <Search size={19} strokeWidth={1.5} />
-      </button>
-    );
+    // Floating button hata diya — Tools tab ka search + Ctrl/⌘+K hi kaafi hai (bottom nav ke saath overlap nahi)
+    return null;
   }
 
   return (
     <div
       onClick={() => setOpen(false)}
       role="dialog" aria-modal="true" aria-label="Tool search"
-      style={{ position: "fixed", inset: 0, zIndex: 80, background: "rgba(10,9,6,.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
+      style={{ position: "fixed", inset: 0, zIndex: 130, background: "rgba(5,11,36,.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
       <div onClick={(e) => e.stopPropagation()} className="card intro-rise"
-        style={{ width: "100%", maxWidth: 560, padding: 0, overflow: "hidden", boxShadow: "0 20px 60px rgba(10,9,6,.35)" }}>
+        style={{ width: "100%", maxWidth: 560, padding: 0, overflow: "hidden", boxShadow: "0 20px 60px rgba(5,11,36,.45)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
           <Search size={17} strokeWidth={1.5} style={{ color: "var(--gold-ink)", flexShrink: 0 }} />
           <input

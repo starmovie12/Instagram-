@@ -14,31 +14,31 @@ function draw(canvas: HTMLCanvasElement, winner: string, prize: string, host: st
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d")!;
 
-  ctx.fillStyle = "#FBFAF7"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#F4F6FF"; ctx.fillRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "#EBD6A4"); g.addColorStop(0.5, "#D2AC64"); g.addColorStop(1, "#A67C35");
+  g.addColorStop(0, "#22E4FF"); g.addColorStop(0.5, "#6366F1"); g.addColorStop(1, "#D946EF");
   ctx.strokeStyle = g; ctx.lineWidth = 8; ctx.strokeRect(32, 32, W - 64, H - 64);
   ctx.lineWidth = 1.5; ctx.strokeRect(52, 52, W - 104, H - 104);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#A67C35";
+  ctx.fillStyle = "#4F46E5";
   ctx.font = "600 26px Georgia, serif";
   ctx.fillText("O F F I C I A L   G I V E A W A Y   R E S U L T", W / 2, 150);
 
   ctx.font = "700 110px Georgia, serif";
   ctx.fillText("🏆", W / 2, 300);
 
-  ctx.fillStyle = "#5C554A";
+  ctx.fillStyle = "#414C78";
   ctx.font = "400 30px Georgia, serif";
   ctx.fillText("The winner is", W / 2, 390);
 
-  ctx.fillStyle = "#1C1913";
+  ctx.fillStyle = "#0B1030";
   ctx.font = "700 72px Georgia, serif";
   const name = "@" + (winner || "winner").replace(/^@/, "");
   ctx.fillText(name.length > 24 ? name.slice(0, 23) + "…" : name, W / 2, 480);
 
   if (prize.trim()) {
-    ctx.fillStyle = "#A67C35";
+    ctx.fillStyle = "#4F46E5";
     ctx.font = "600 34px Georgia, serif";
     ctx.fillText(prize.trim().slice(0, 50), W / 2, 560);
   }
@@ -46,15 +46,15 @@ function draw(canvas: HTMLCanvasElement, winner: string, prize: string, host: st
   ctx.strokeStyle = g; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(240, 640); ctx.lineTo(W - 240, 640); ctx.stroke();
 
-  ctx.fillStyle = "#5C554A"; ctx.font = "400 26px Georgia, serif";
+  ctx.fillStyle = "#414C78"; ctx.font = "400 26px Georgia, serif";
   ctx.fillText(`Drawn randomly ${host.trim() ? "by @" + host.trim().replace(/^@/, "") : ""} on ${new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}`, W / 2, 700);
 
   ctx.fillStyle = "#8C8478"; ctx.font = "500 22px monospace";
   ctx.fillText(`Certificate ID: ${id}`, W / 2, 760);
 
-  ctx.fillStyle = "#5C554A"; ctx.font = "400 22px Georgia, serif";
+  ctx.fillStyle = "#414C78"; ctx.font = "400 22px Georgia, serif";
   ctx.fillText("Picked with a cryptographically random draw — every entry had an equal chance.", W / 2, 880);
-  ctx.fillStyle = "#A67C35"; ctx.font = "600 24px Georgia, serif";
+  ctx.fillStyle = "#4F46E5"; ctx.font = "600 24px Georgia, serif";
   ctx.fillText("Verified draw · InstaGrab giveaway tools", W / 2, 950);
 }
 

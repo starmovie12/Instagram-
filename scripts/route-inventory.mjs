@@ -206,9 +206,21 @@ function diff(beforeFile, afterFile) {
   for (const s of a.sitemap) if (!bSitemap.has(s)) problems.push(`SITEMAP LOST: ${s}`);
   for (const s of b.sitemap) if (!new Set(a.sitemap).has(s)) lines.push(`sitemap added: ${s}`);
 
+  // Explicit, reviewed exceptions (docs/migration/route-diff-allowlist.json): [{ match, reason }].
+  const allowFile = resolve("docs/migration/route-diff-allowlist.json");
+  const allow = existsSync(allowFile) ? readJson(allowFile) : [];
+  const allowed = [];
+  for (let i = problems.length - 1; i >= 0; i--) {
+    const rule = allow.find((r) => problems[i] === r.match);
+    if (rule) allowed.unshift(`${problems.splice(i, 1)[0]}  — ALLOWED: ${rule.reason}`);
+  }
   console.log(`before: ${a.routes.length} routes / ${Object.keys(a.pages).length} pages / ${a.sitemap.length} sitemap urls`);
   console.log(`after:  ${b.routes.length} routes / ${Object.keys(b.pages).length} pages / ${b.sitemap.length} sitemap urls`);
   for (const l of lines) console.log("  " + l);
+  if (allowed.length) {
+    console.log(`\n${allowed.length} reviewed exception(s):`);
+    for (const l of allowed) console.log("  ~ " + l);
+  }
   if (problems.length) {
     console.log(`\n${problems.length} PROBLEM(S):`);
     for (const p of problems) console.log("  ✗ " + p);

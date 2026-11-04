@@ -51,21 +51,21 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        margin: "16px 0 0",
-        padding: "14px 14px",
-        borderRadius: 20,
-        border: "1px solid rgba(255, 61, 139, 0.38)",
+        gap: "clamp(8px, 4px + 1vw, 12px)",
+        margin: "clamp(10px, 6px + 1.2vw, 16px) 0 0",
+        padding: "clamp(9px, 5px + 1vw, 14px)",
+        borderRadius: "clamp(16px, 11px + 1.2vw, 20px)",
+        border: "1px solid rgb(var(--c-violet-2-rgb) / 0.42)",
         background:
-          "linear-gradient(135deg, rgba(255, 61, 139, 0.10) 0%, rgba(124, 58, 237, 0.10) 55%, rgba(10, 8, 24, 0.92) 100%)",
-        boxShadow: "0 0 34px -14px rgba(255, 61, 139, 0.55)",
+          "linear-gradient(135deg, rgb(var(--c-cyan-rgb) / 0.10) 0%, rgb(var(--c-violet-rgb) / 0.14) 55%, rgb(var(--c-magenta-rgb) / 0.10) 100%), var(--surface)",
+        boxShadow: "0 0 34px -14px rgb(var(--c-violet-2-rgb) / 0.55)",
       }}
     >
-      <svg width="34" height="40" viewBox="6 0 28 40" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <svg width="34" height="40" viewBox="6 0 28 40" fill="none" aria-hidden="true" style={{ flexShrink: 0, width: "clamp(24px, 14px + 2.4vw, 34px)", height: "auto", aspectRatio: "34 / 40" }}>
         <defs>
           <linearGradient id="iab_phone" x1="6" y1="36" x2="34" y2="4" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#8B3DFF" />
-            <stop offset="1" stopColor="#FF3D8B" />
+            <stop stopColor="#22E4FF" />
+            <stop offset="1" stopColor="#D946EF" />
           </linearGradient>
         </defs>
         <rect x="9" y="3" width="22" height="34" rx="5" stroke="url(#iab_phone)" strokeWidth="2.4" />
@@ -76,9 +76,9 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
         <div
           style={{
             fontWeight: 800,
-            fontSize: 18,
+            fontSize: "clamp(15px, 11px + 1vw, 18px)",
             lineHeight: 1.2,
-            background: "linear-gradient(90deg, #FF7A59 0%, #FF3D8B 100%)",
+            background: "linear-gradient(90deg, var(--gold-400) 0%, var(--c-violet-2) 60%, var(--c-magenta) 100%)",
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -86,27 +86,30 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
         >
           Install App
         </div>
-        <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 3, lineHeight: 1.35 }}>
+        <div style={{ fontSize: "clamp(11px, 9px + .5vw, 12px)", color: "var(--ink-2)", marginTop: 2, lineHeight: 1.3 }}>
           Get faster downloads &amp; easy access
         </div>
       </div>
 
       <button
         type="button"
+        className="iab-card-btn"
         onClick={install}
         aria-label="Install the InstaGrab app"
         style={{
+          position: "relative",
           flexShrink: 0,
-          height: 44,
-          padding: "0 20px",
-          borderRadius: 14,
+          height: "clamp(36px, 28px + 2vw, 44px)",
+          minWidth: 64,
+          padding: "0 clamp(14px, 8px + 1.6vw, 20px)",
+          borderRadius: "clamp(11px, 8px + .8vw, 14px)",
           border: "none",
           cursor: "pointer",
-          color: "#FFFFFF",
+          color: "var(--on-accent)",
           fontWeight: 800,
-          fontSize: 15,
-          background: "linear-gradient(135deg, #FF4D8D 0%, #E0267F 55%, #C026D3 100%)",
-          boxShadow: "0 8px 22px -8px rgba(255, 61, 139, 0.75)",
+          fontSize: "clamp(13px, 11px + .5vw, 15px)",
+          background: "var(--gradient-button)",
+          boxShadow: "0 8px 22px -8px rgb(var(--c-cyan-rgb) / 0.55)",
         }}
       >
         Install
@@ -127,7 +130,7 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
 
       {showHelp && (
         <div onClick={() => setShowHelp(false)} role="dialog" aria-modal="true" aria-label="How to install"
-          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(10,9,6,.55)", backdropFilter: "blur(8px)" }}>
+          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(5,11,36,.62)", backdropFilter: "blur(8px)" }}>
           <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 380, width: "100%", padding: 26, position: "relative" }}>
             <button onClick={() => setShowHelp(false)} aria-label="Close" className="btn-icon" style={{ position: "absolute", top: 12, right: 12 }}>
               <X size={18} strokeWidth={1.5} />
@@ -169,6 +172,11 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
       )}
 
       <style jsx>{`
+        .iab-card-btn::after {
+          content: "";
+          position: absolute;
+          inset: -2px; /* keeps a 40px touch target around the 36px visual button */
+        }
         @media (max-width: 479px) {
           .iab .iab-label { display: none; }
           .iab { padding: 0 11px !important; }

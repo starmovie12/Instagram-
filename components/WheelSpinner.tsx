@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RotateCw, Trash2, Trophy } from "lucide-react";
 
-const COLORS = ["#D2AC64", "#8C6A2F", "#EBD6A4", "#A67C35", "#C89B52", "#75592B"];
+const COLORS = ["#22E4FF", "#7C3AED", "#38BDF8", "#4F46E5", "#D946EF", "#6366F1"];
 
 function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
   const ctx = canvas.getContext("2d")!;
@@ -28,7 +28,7 @@ function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
     ctx.translate(c, c);
     ctx.rotate(start + seg / 2);
     ctx.textAlign = "right";
-    ctx.fillStyle = i % COLORS.length === 2 ? "#5C4A22" : "#FFF8EA";
+    ctx.fillStyle = i % COLORS.length === 0 || i % COLORS.length === 2 ? "#050B24" : "#FFFFFF";
     ctx.font = `600 ${Math.max(11, Math.min(18, 320 / names.length))}px system-ui, sans-serif`;
     const label = name.length > 16 ? name.slice(0, 15) + "…" : name;
     ctx.fillText(label, r - 14, 5);
@@ -38,9 +38,9 @@ function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
   // Hub
   ctx.beginPath();
   ctx.arc(c, c, 26, 0, Math.PI * 2);
-  ctx.fillStyle = "#FBFAF7";
+  ctx.fillStyle = "#F4F6FF";
   ctx.fill();
-  ctx.strokeStyle = "#A67C35";
+  ctx.strokeStyle = "#4F46E5";
   ctx.lineWidth = 3;
   ctx.stroke();
 }

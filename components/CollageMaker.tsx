@@ -19,7 +19,7 @@ function drawCollage(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], layout
   const ctx = canvas.getContext("2d")!;
   if (gold) {
     const g = ctx.createLinearGradient(0, 0, SIZE, SIZE);
-    g.addColorStop(0, "#EBD6A4"); g.addColorStop(0.5, "#D2AC64"); g.addColorStop(1, "#A67C35");
+    g.addColorStop(0, "#22E4FF"); g.addColorStop(0.5, "#6366F1"); g.addColorStop(1, "#D946EF");
     ctx.fillStyle = g;
   } else {
     ctx.fillStyle = "#FFFFFF";
@@ -100,10 +100,10 @@ export default function CollageMaker() {
         <div>
           <span className="label" style={{ display: "block", marginBottom: 8 }}>Border thickness: {gap}px</span>
           <input type="range" min={0} max={24} step={2} value={gap} onChange={(e) => setGap(Number(e.target.value))}
-            aria-label="Border thickness" style={{ width: "100%", accentColor: "#A67C35" }} />
+            aria-label="Border thickness" style={{ width: "100%", accentColor: "var(--gold-ink)" }} />
         </div>
         <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--ink-2)", cursor: "pointer" }}>
-          <input type="checkbox" checked={gold} onChange={(e) => setGold(e.target.checked)} style={{ accentColor: "#A67C35", width: 16, height: 16 }} />
+          <input type="checkbox" checked={gold} onChange={(e) => setGold(e.target.checked)} style={{ accentColor: "var(--gold-ink)", width: 16, height: 16 }} />
           Gold gradient borders ✨
         </label>
         <button className="btn btn-molten" onClick={download} disabled={!imgs.length} style={{ height: 50, justifyContent: "center" }}>
