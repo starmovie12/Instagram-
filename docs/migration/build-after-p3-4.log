@@ -1,0 +1,170 @@
+
+> instagrab@1.0.0 build
+> next build
+
+   ▲ Next.js 15.5.20
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.4s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/142) ...
+   Generating static pages (35/142) 
+   Generating static pages (70/142) 
+   Generating static pages (106/142) 
+ ✓ Generating static pages (142/142)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                  Size  First Load JS
+┌ ○ /                                                     7.76 kB         153 kB
+├ ○ /_not-found                                             198 B         102 kB
+├ ○ /about                                                  180 B         106 kB
+├ ○ /account-health                                       5.27 kB         131 kB
+├ ƒ /admin                                                4.38 kB         107 kB
+├ ○ /ai-alt-text                                          4.12 kB         110 kB
+├ ● /ai/[tool]                                            4.15 kB         110 kB
+├   ├ /ai/caption-generator
+├   ├ /ai/hashtag-generator
+├   ├ /ai/bio-generator
+├   └ [+10 more paths]
+├ ƒ /api/admin/config                                       198 B         102 kB
+├ ƒ /api/admin/login                                        198 B         102 kB
+├ ƒ /api/ai                                                 198 B         102 kB
+├ ƒ /api/alt-text                                           198 B         102 kB
+├ ƒ /api/diag                                               198 B         102 kB
+├ ƒ /api/download                                           198 B         102 kB
+├ ƒ /api/extract                                            198 B         102 kB
+├ ƒ /api/ig-status                                          198 B         102 kB
+├ ƒ /api/invent/crystal                                     198 B         102 kB
+├ ƒ /api/invent/kundli                                      198 B         102 kB
+├ ƒ /api/invent/voice                                       198 B         102 kB
+├ ƒ /api/invent/wrapped                                     198 B         102 kB
+├ ƒ /api/og-extract                                         198 B         102 kB
+├ ƒ /api/profile                                            198 B         102 kB
+├ ƒ /api/shorten                                            198 B         102 kB
+├ ƒ /api/telegram                                           198 B         102 kB
+├ ƒ /api/transcribe                                         198 B         102 kB
+├ ƒ /api/twitter                                            198 B         102 kB
+├ ○ /apple-icon.png                                           0 B            0 B
+├ ○ /audio-downloader                                       146 B         170 kB
+├ ○ /batch-downloader                                     3.62 kB         125 kB
+├ ○ /best-time-to-post                                    3.89 kB         110 kB
+├ ○ /blog                                                   507 B         106 kB
+├ ● /blog/[slug]                                            836 B         107 kB
+├   ├ /blog/how-to-download-instagram-reels-with-caption
+├   ├ /blog/best-time-to-post-reels
+├   ├ /blog/find-trending-hashtags-instagram
+├   └ [+12 more paths]
+├ ○ /blur-tool                                            3.91 kB         110 kB
+├ ○ /bulk-downloader                                        135 B         134 kB
+├ ○ /caption-extractor                                     1.8 kB         134 kB
+├ ○ /caption-fixer                                        3.18 kB         109 kB
+├ ○ /carousel-downloader                                    148 B         170 kB
+├ ○ /case-converter                                       3.26 kB         109 kB
+├ ○ /character-counter                                    3.73 kB         109 kB
+├ ○ /collage-maker                                        4.11 kB         110 kB
+├ ○ /color-palette                                        3.91 kB         110 kB
+├ ● /coming-soon/[id]                                       181 B         113 kB
+├   ├ /coming-soon/snapchat
+├   ├ /coming-soon/reddit
+├   ├ /coming-soon/linkedin
+├   └ [+3 more paths]
+├ ○ /comments-exporter                                    3.95 kB         113 kB
+├ ○ /contact                                                180 B         106 kB
+├ ○ /crystal-ball                                         3.94 kB         110 kB
+├ ○ /dm-link-generator                                    4.07 kB         110 kB
+├ ○ /dmca                                                   180 B         106 kB
+├ ○ /dp-ring-maker                                         3.5 kB         109 kB
+├ ○ /emv-calculator                                       3.29 kB         109 kB
+├ ○ /engagement-calculator                                  134 B         131 kB
+├ ○ /facebook-downloader                                    148 B         170 kB
+├ ○ /fake-follower-checker                                5.09 kB         131 kB
+├ ○ /fastdl-alternative                                   1.61 kB         117 kB
+├ ○ /follower-ratio-checker                               3.65 kB         109 kB
+├ ○ /follower-tracker                                     5.11 kB         111 kB
+├ ○ /font-generator                                       3.15 kB         112 kB
+├ ○ /ghost-feed                                           4.53 kB         110 kB
+├ ○ /giveaway-picker                                      4.59 kB         114 kB
+├ ○ /grid-architect                                       4.96 kB         111 kB
+├ ○ /grid-planner                                         3.54 kB         109 kB
+├ ○ /grid-splitter                                        3.35 kB         112 kB
+├ ○ /hashtag-checker                                      4.07 kB         110 kB
+├ ○ /hashtag-counter                                      4.45 kB         110 kB
+├ ○ /hashtag-extractor                                     1.8 kB         134 kB
+├ ○ /highlights-downloader                                  148 B         170 kB
+├ ○ /history                                               4.5 kB         129 kB
+├ ○ /how-to-download                                       2.4 kB         115 kB
+├ ○ /icon.svg                                                 0 B            0 B
+├ ○ /image-compressor                                     3.72 kB         109 kB
+├ ○ /insta-guess                                          5.39 kB         111 kB
+├ ○ /insta-kundli                                         4.37 kB         113 kB
+├ ○ /insta-wrapped                                        4.78 kB         114 kB
+├ ○ /instagram-downloader                                   148 B         170 kB
+├ ○ /invisible-character                                  3.28 kB         109 kB
+├ ○ /is-instagram-down                                    3.19 kB         112 kB
+├ ○ /link-shortener                                       3.63 kB         109 kB
+├ ○ /manifest.webmanifest                                   198 B         102 kB
+├ ○ /media-kit-generator                                  4.34 kB         110 kB
+├ ○ /money-calculator                                     3.77 kB         109 kB
+├ ○ /offline                                                170 B         106 kB
+├ ○ /opengraph-image                                        198 B         102 kB
+├ ○ /photo-downloader                                       148 B         170 kB
+├ ○ /photo-downloader-hindi                               1.61 kB         117 kB
+├ ○ /photo-filters                                        3.69 kB         109 kB
+├ ○ /photo-resizer                                        3.82 kB         110 kB
+├ ○ /pinterest-downloader                                   148 B         170 kB
+├ ○ /privacy-policy                                         180 B         106 kB
+├ ○ /profile-audit                                          134 B         131 kB
+├ ○ /profile-battle                                       4.98 kB         111 kB
+├ ○ /profile-pic-zoom                                       135 B         134 kB
+├ ○ /profile-picture-downloader                             148 B         170 kB
+├ ○ /profile-roaster                                      4.34 kB         113 kB
+├ ○ /profile-viewer                                         135 B         134 kB
+├ ○ /quick-action                                         2.32 kB         121 kB
+├ ○ /quote-maker                                          3.93 kB         110 kB
+├ ○ /reel-frame-grabber                                   3.86 kB         113 kB
+├ ○ /reel-remix                                             131 B         113 kB
+├ ○ /reel-repurposer                                      3.74 kB         113 kB
+├ ○ /reel-to-mp3                                          4.19 kB         113 kB
+├ ○ /reel-transcript                                        131 B         113 kB
+├ ○ /reels-downloader                                       148 B         170 kB
+├ ○ /reels-downloader-hindi                               1.61 kB         117 kB
+├ ○ /robots.txt                                             198 B         102 kB
+├ ƒ /s/[code]                                               198 B         102 kB
+├ ○ /settings                                             7.18 kB         145 kB
+├ ○ /shadowban-lab                                        5.74 kB         115 kB
+├ ○ /sitemap.xml                                            198 B         102 kB
+├ ○ /snapinsta-alternative                                1.61 kB         117 kB
+├ ○ /story-downloader                                       148 B         170 kB
+├ ○ /story-downloader-hindi                                 135 B         134 kB
+├ ○ /story-feed                                           4.64 kB         110 kB
+├ ○ /story-viewer                                           135 B         134 kB
+├ ○ /terms                                                  180 B         106 kB
+├ ○ /threads-downloader                                     148 B         170 kB
+├ ○ /thumbnail-downloader                                   148 B         170 kB
+├ ○ /tiktok-downloader                                      148 B         170 kB
+├ ○ /time-capsule                                         5.18 kB         111 kB
+├ ○ /tools                                                5.36 kB         164 kB
+├ ○ /trending-india                                       4.41 kB         110 kB
+├ ○ /twitter-downloader                                     148 B         170 kB
+├ ○ /username-checker                                     4.38 kB         130 kB
+├ ○ /utm-builder                                          3.45 kB         109 kB
+├ ○ /video-downloader                                       148 B         170 kB
+├ ○ /video-to-gif                                         4.01 kB         110 kB
+├ ○ /video-trimmer                                        4.25 kB         110 kB
+├ ○ /virality-score                                       3.87 kB         110 kB
+├ ○ /voice-cloner                                         4.01 kB         110 kB
+├ ○ /wheel-spinner                                        4.29 kB         110 kB
+├ ○ /winner-certificate                                      4 kB         110 kB
+└ ○ /youtube-thumbnail-downloader                           148 B         170 kB
++ First Load JS shared by all                              102 kB
+  ├ chunks/1255-ab54a41c275880be.js                         46 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js                   54.2 kB
+  └ other shared chunks (total)                           2.08 kB
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

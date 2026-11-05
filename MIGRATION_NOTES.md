@@ -277,3 +277,21 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
 |---|---|---|
 | 3.3.a | `en` strings are English, `hi` strings Devanagari Hindi (PRD writes defaults in Hinglish) | There is no Hinglish locale among the 21; English stays the site default. |
 | 3.3.b | `⌘/Ctrl+K` opens the Command Palette everywhere (PRD §7.1 also lists it as "focus the box") | §14.3/D28 give it to the palette; on Home a page-level paste already targets the box. |
+
+### 3.4 Tools hub (PRD §9, §26.3, Blueprint 3, AC-9/10)
+
+- Title + live registry count (94), 52 px search (150 ms debounce +
+  `useDeferredValue`, ✕ / Esc clear, `/` and `⌘/Ctrl+K` focus — the Command
+  Palette yields on `/tools`), `?cat=&q=` share/restore.
+- **Category pills, max 5 on phones:** Popular · All · Downloaders · AI & Creator ·
+  "+4 More" → bottom sheet (Analytics, Visual Studio, Utilities, Fun); a pick from
+  the sheet swaps into the 4th slot. Pills wrap (never hidden behind a horizontal
+  scroll) and keep 48 px hit areas; all 8 with counts on desktop. The row is sticky
+  and slides up with the header on Quick Return.
+- Recently used (space reserved before paint only when recent tools exist → no
+  layout shift), Tool of the day (now from the registry's featured tools, not the
+  old 12-item `lib/copy.ts` list; height reserved), the 7 apps, then every tool as a
+  real `<a href>` card (3 / 4 / 5 / 6 columns, 1-line description on desktop,
+  `content-visibility: auto` for below-fold sections, M6 hover lift).
+- Empty search: icon + "Nothing found" + one action "Request a tool" → /contact.
+- Verified in Chromium at 360/390/1280 px.

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import ToolsScreen from "@/components/ToolsScreen";
 import { TOOL_COUNT } from "@/lib/registry";
+import "./tools.css";
 
 export const metadata: Metadata = {
   title: "All Tools — Instagram, Facebook, TikTok Downloaders & Creator Tools",
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Suspense fallback={null}><ToolsScreen /></Suspense>;
+  return <Suspense fallback={<main className="ts" aria-busy="true"><div className="ts__grid ts__grid--skel" /></main>}><ToolsScreen /></Suspense>;
 }

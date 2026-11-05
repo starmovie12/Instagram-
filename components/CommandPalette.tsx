@@ -38,6 +38,8 @@ export default function CommandPalette() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // On /tools the page's own search owns ⌘K and "/" (PRD §9.1).
+      if (window.location.pathname === "/tools") return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOpen((o) => { if (!o) { setRecent(getRecentTools()); setQuery(""); setActive(0); } return !o; });

@@ -1,0 +1,103 @@
+/* ==========================================================================
+   TOOLS HUB (PRD §9, §14.3, Blueprint 3) — loaded only on /tools. Tokens only.
+   ========================================================================== */
+.ts { width: 100%; max-width: 1120px; margin: 0 auto; padding: var(--sp-4) var(--sp-4) 0; }
+@media (min-width: 600px) { .ts { padding-inline: var(--sp-6); } }
+@media (min-width: 1024px) { .ts { padding-inline: 0; } }
+.ts__title { display: flex; align-items: center; gap: var(--sp-3); margin: 0 0 var(--sp-3); font: 700 var(--fs-page-title)/var(--lh-page-title) var(--font-stack); letter-spacing: -0.01em; color: var(--text-primary); }
+@media (min-width: 1024px) { .ts__title { font-size: 32px; line-height: 38px; } }
+.ts__count { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: var(--radius-full); background: var(--color-primary-subtle); color: var(--text-brand); font: 600 14px/20px var(--font-stack); font-variant-numeric: tabular-nums; }
+.ts__search {
+  display: flex; align-items: center; gap: var(--sp-2); min-height: 52px; padding-inline: var(--sp-4) var(--sp-1);
+  border-radius: var(--radius-base); background: var(--bg-surface-sunken); border: 1px solid var(--border-default); color: var(--text-secondary);
+}
+.ts__search:focus-within { border-color: var(--border-strong); }
+.ts__search input { flex: 1; min-width: 0; height: 50px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--text-primary); font: 400 16px/24px var(--font-stack); }
+.ts__search input::placeholder { color: var(--text-secondary); opacity: 1; }
+.ts__search input::-webkit-search-cancel-button { display: none; }
+
+.ts__pills {
+  position: sticky; top: calc(var(--hdr-h) + var(--sat)); z-index: var(--z-raised);
+  margin-inline: calc(-1 * var(--sp-4)); padding: var(--sp-3) var(--sp-4); background: var(--bg-base);
+  transition: transform var(--motion-base) var(--ease-decelerate);
+}
+:root[data-chrome="hidden"] .ts__pills { transform: translateY(calc(-1 * (var(--hdr-h) + var(--sat)))); }
+@media (min-width: 600px) { .ts__pills { margin-inline: calc(-1 * var(--sp-6)); padding-inline: var(--sp-6); } }
+@media (min-width: 1024px) { .ts__pills { margin-inline: 0; padding-inline: 0; } }
+/* ≤ 5 pills, all visible — they wrap instead of hiding behind a horizontal scroll (NIYAM 3(b)) */
+.ts__pills-mobile { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.ts__pills-mobile .tp { padding-inline: 14px; }
+.ts__pills-mobile .tp__n { display: none; }
+.ts__pills-desktop { display: none; flex-wrap: wrap; gap: var(--sp-2); }
+@media (min-width: 1024px) { .ts__pills-mobile { display: none; } .ts__pills-desktop { display: flex; } }
+.tp {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 var(--sp-4);
+  border-radius: var(--radius-full); border: 1px solid var(--border-default); background: var(--bg-surface);
+  color: var(--text-secondary); font: 600 14px/20px var(--font-stack); white-space: nowrap; scroll-snap-align: start;
+  transition: transform 80ms var(--ease-accelerate), background-color 150ms var(--ease-standard);
+}
+.tp[aria-pressed="true"] { color: var(--text-brand); background: var(--color-primary-subtle); border-color: var(--text-brand); }
+.tp:active { transform: scale(0.96); }
+.tp--more { color: var(--text-primary); }
+.tp__n { font-weight: 500; font-variant-numeric: tabular-nums; }
+@media (hover: hover) and (pointer: fine) { .tp:not([aria-pressed="true"]):hover { background: var(--bg-surface-2); color: var(--text-primary); } }
+.ts__sheet { display: grid; gap: var(--sp-1); }
+
+.ts__sec { margin-top: var(--sp-6); }
+.ts__sec--cv { content-visibility: auto; contain-intrinsic-size: auto 640px; }
+.ts__h { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-3); font: 700 var(--fs-section)/var(--lh-section) var(--font-stack); letter-spacing: -0.01em; color: var(--text-primary); }
+.ts__h svg { color: var(--text-secondary); }
+/* Reserve the recently-used row only when the pre-paint script saw recent tools (CLS 0). */
+.ts__grid--skel { min-height: 120px; border-radius: var(--radius-card); background: var(--overlay-shimmer-base); }
+:root:not([data-recent="1"]) .ts__recent:has(.ts__grid--skel) { display: none; }
+.ts__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+@media (min-width: 600px) { .ts__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 840px) { .ts__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .ts__grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 339px) { .ts__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Tool tile card (Blueprint 3, M6) */
+.tt {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); height: 100%; min-height: 88px;
+  padding: var(--sp-3) 6px; border-radius: var(--radius-card); background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  color: var(--text-primary); text-align: center; text-decoration: none;
+  transition: transform var(--motion-base) var(--ease-standard);
+}
+.tt__name { font: 600 var(--fs-tile)/var(--lh-tile) var(--font-stack); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.tt__desc { display: none; }
+@media (min-width: 1024px) {
+  .tt__desc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; font: 400 12px/16px var(--font-stack); color: var(--text-secondary); }
+}
+.tt__badge { position: absolute; top: 6px; inset-inline-end: 6px; padding: 1px 6px; border-radius: var(--radius-full); background: var(--color-primary-subtle); color: var(--text-brand); font: 600 10px/14px var(--font-stack); }
+.tt:active { transform: scale(0.96); transition-duration: 80ms; transition-timing-function: var(--ease-accelerate); }
+@media (hover: hover) and (pointer: fine) { .tt:hover { transform: translateY(-4px) scale(1.02); border-color: var(--border-default); } }
+
+.ts__apps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+@media (min-width: 600px) { .ts__apps { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.ts__app { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 88px; padding-top: var(--sp-1); color: var(--text-primary); font: 600 var(--fs-tile)/var(--lh-tile) var(--font-stack); text-decoration: none; border-radius: var(--radius-tile); transition: transform var(--motion-base) var(--ease-standard); }
+.ts__app:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) { .ts__app:hover { transform: translateY(-4px); } }
+
+.ts__empty { display: grid; justify-items: center; gap: var(--sp-2); padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--text-secondary); }
+.ts__empty p { margin: 0; }
+.ts__empty-title { font: 700 var(--fs-section)/var(--lh-section) var(--font-stack); color: var(--text-primary); }
+.ts__empty-cta { margin-top: var(--sp-2); min-height: 48px; display: inline-flex; align-items: center; padding: 0 var(--sp-5); border-radius: var(--radius-base); border: 1px solid var(--border-strong); color: var(--text-primary); font: 700 16px/24px var(--font-stack); text-decoration: none; }
+
+/* Tool of the day */
+.tod {
+  display: flex; align-items: center; gap: var(--sp-3); min-height: 76px; max-width: 720px; padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-card); background: var(--bg-surface); border: 1px solid var(--border-default); box-shadow: var(--shadow-card);
+  color: var(--text-primary); text-decoration: none;
+}
+.tod--skel { border-style: dashed; box-shadow: none; }
+.tod__body { flex: 1; min-width: 0; }
+.tod__label { display: flex; align-items: center; gap: 6px; font: 600 12px/16px var(--font-stack); color: var(--text-brand); }
+.tod__name { display: block; font: 700 16px/24px var(--font-stack); }
+.tod__desc { display: block; font: 400 14px/20px var(--font-stack); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tod__arrow { color: var(--text-brand); flex: 0 0 auto; }
+[dir="rtl"] .tod__arrow { transform: scaleX(-1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ts__pills, .tp, .tt, .ts__app { transition: none !important; }
+  .tt:hover, .ts__app:hover { transform: none; }
+}

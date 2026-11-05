@@ -65,6 +65,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const kind = shellKindFor(path);
   const quick = useQuickReturn(kind === "tab" && QUICK_RETURN.includes(path));
   const keyboard = useKeyboardOpen();
+  // Sticky sub-bars (e.g. Tools pills) slide up with the header on Quick Return.
+  useEffect(() => { document.documentElement.dataset.chrome = quick ? "hidden" : "shown"; }, [quick]);
 
   if (kind === "free") return <>{children}<Toaster /></>;
   const main = (

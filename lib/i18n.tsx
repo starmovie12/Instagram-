@@ -30,7 +30,8 @@ type Keys =
   | "boundary.title" | "boundary.body" | "boundary.retry" | "boundary.home" | "boundary.code" | "loading"
   | "nav.primary" | "nav.home" | "nav.tools" | "nav.history" | "nav.settings" | "nav.back" | "theme.toggle" | "theme.dark" | "theme.light" | "offline.pill" | "offline.back" | "sheet.close" | "toast.dismiss" | "shortcuts.title" | "shortcuts.search" | "shortcuts.goto"
   | "skip.content"
-  | "router.chip.detected" | "router.chip.cancel" | "router.err.empty" | "router.err.notlink" | "router.err.unsupported" | "router.err.request" | "router.err.self" | "router.err.scheme" | "router.err.incomplete" | "router.err.fbStory" | "router.hint.longpress" | "router.notice.extra" | "router.notice.first" | "router.notice.capped" | "router.soon.title" | "router.soon.body" | "router.soon.cta" | "router.batch" | "app.banner.youtube" | "app.err.private" | "home.placeholder" | "home.inputLabel" | "home.paste" | "home.grab" | "home.clear" | "home.howto" | "home.tools" | "home.viewAll" | "home.allTools" | "home.allToolsSub" | "home.drop" | "home.howtoCopy" | "home.howtoStep1" | "home.howtoStep2" | "home.howtoStep3" | "platform.tag.instagram" | "platform.tag.facebook" | "platform.tag.youtube" | "platform.tag.tiktok" | "platform.tag.pinterest" | "platform.tag.x" | "platform.tag.threads";
+  | "router.chip.detected" | "router.chip.cancel" | "router.err.empty" | "router.err.notlink" | "router.err.unsupported" | "router.err.request" | "router.err.self" | "router.err.scheme" | "router.err.incomplete" | "router.err.fbStory" | "router.hint.longpress" | "router.notice.extra" | "router.notice.first" | "router.notice.capped" | "router.soon.title" | "router.soon.body" | "router.soon.cta" | "router.batch" | "app.banner.youtube" | "app.err.private" | "home.placeholder" | "home.inputLabel" | "home.paste" | "home.grab" | "home.clear" | "home.howto" | "home.tools" | "home.viewAll" | "home.allTools" | "home.allToolsSub" | "home.drop" | "home.howtoCopy" | "home.howtoStep1" | "home.howtoStep2" | "home.howtoStep3" | "platform.tag.instagram" | "platform.tag.facebook" | "platform.tag.youtube" | "platform.tag.tiktok" | "platform.tag.pinterest" | "platform.tag.x" | "platform.tag.threads"
+  | "tools.title" | "tools.count" | "tools.search" | "tools.searchLabel" | "tools.clear" | "tools.cats" | "tools.more" | "tools.moreTitle" | "tools.recent" | "tools.apps" | "tools.tod" | "tools.empty" | "tools.emptyBody" | "tools.request" | "tools.results" | "cat.popular" | "cat.all" | "cat.downloaders" | "cat.ai" | "cat.analytics" | "cat.visual" | "cat.utilities" | "cat.fun";
 
 type Dict = Partial<Record<Keys, string>>;
 
@@ -120,6 +121,29 @@ const EN: Record<Keys, string> = {
   "platform.tag.pinterest": "Images · Videos",
   "platform.tag.x": "Videos · Photos",
   "platform.tag.threads": "Posts · Media",
+  "tools.title": "All Tools",
+  "tools.count": "{n} tools",
+  "tools.search": "Search {n} tools…",
+  "tools.searchLabel": "Search tools",
+  "tools.clear": "Clear search",
+  "tools.cats": "Categories",
+  "tools.more": "+{n} More",
+  "tools.moreTitle": "More categories",
+  "tools.recent": "Recently used",
+  "tools.apps": "Apps",
+  "tools.tod": "Tool of the day",
+  "tools.empty": "Nothing found",
+  "tools.emptyBody": "No tool matches “{q}”.",
+  "tools.request": "Request a tool",
+  "tools.results": "{n} results",
+  "cat.popular": "Popular",
+  "cat.all": "All",
+  "cat.downloaders": "Downloaders",
+  "cat.ai": "AI & Creator",
+  "cat.analytics": "Analytics",
+  "cat.visual": "Visual Studio",
+  "cat.utilities": "Utilities",
+  "cat.fun": "Fun",
 };
 
 const STRINGS: Record<Locale, Dict> = {
@@ -210,6 +234,29 @@ const STRINGS: Record<Locale, Dict> = {
     "platform.tag.pinterest": "इमेज · वीडियो",
     "platform.tag.x": "वीडियो · फ़ोटो",
     "platform.tag.threads": "पोस्ट · मीडिया",
+    "tools.title": "सभी टूल्स",
+    "tools.count": "{n} टूल्स",
+    "tools.search": "{n} टूल्स में खोजें…",
+    "tools.searchLabel": "टूल्स खोजें",
+    "tools.clear": "खोज साफ़ करें",
+    "tools.cats": "कैटेगरी",
+    "tools.more": "+{n} और",
+    "tools.moreTitle": "और कैटेगरी",
+    "tools.recent": "हाल में इस्तेमाल",
+    "tools.apps": "ऐप्स",
+    "tools.tod": "आज का टूल",
+    "tools.empty": "कुछ नहीं मिला",
+    "tools.emptyBody": "“{q}” से कोई टूल नहीं मिला।",
+    "tools.request": "टूल की रिक्वेस्ट करें",
+    "tools.results": "{n} नतीजे",
+    "cat.popular": "लोकप्रिय",
+    "cat.all": "सभी",
+    "cat.downloaders": "डाउनलोडर",
+    "cat.ai": "AI और क्रिएटर",
+    "cat.analytics": "एनालिटिक्स",
+    "cat.visual": "विज़ुअल स्टूडियो",
+    "cat.utilities": "यूटिलिटीज़",
+    "cat.fun": "मज़ेदार",
   },
   es: {
     linkPlaceholder: "Pega un enlace de Instagram — reel, post, historia…",
