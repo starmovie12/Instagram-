@@ -12,6 +12,7 @@ export type Route =
   | { type: "batch"; urls: string[]; truncated?: boolean }
   | { type: "soon"; platform: SoonId }
   | { type: "unsupported"; platform: PlatformId; url: string }
+  | { type: "incomplete"; platform: PlatformId }
   | { type: "rejected"; reason: "self" | "scheme" }
   | { type: "unknown" | "empty" | "notlink" };
 
@@ -66,6 +67,7 @@ export function resolveRoute(raw: string, opts: ResolveOptions = {}): Route {
     if (d.type === "soon") { hits.push({ route: { type: "soon", platform: d.platform }, igLink: false, url: href }); continue; }
     if (d.type === "unknown") { hits.push({ route: { type: "unknown" }, igLink: false, url: href }); continue; }
     if (d.unsupported) { hits.push({ route: { type: "unsupported", platform: d.platform, url: href }, igLink: false, url: href }); continue; }
+    if (d.incomplete) { hits.push({ route: { type: "incomplete", platform: d.platform }, igLink: false, url: href }); continue; }
     hits.push({ route: appRoute(d.platform, d.kind, d.isUsername && d.kind === "profile" ? "@" + n.url.pathname.split("/").filter(Boolean)[0] : href), igLink: d.platform === "instagram", url: href });
   }
 
@@ -83,7 +85,7 @@ export function resolveRoute(raw: string, opts: ResolveOptions = {}): Route {
   }
 
   // pehla useful link. Supported/soon ko unknown par tarjeeh (share-text me tracker links ho sakte hain)
-  const first = hits.find((h) => h.route.type === "app" || h.route.type === "soon" || h.route.type === "unsupported") ?? hits[0];
+  const first = hits.find((h) => h.route.type === "app" || h.route.type === "soon" || h.route.type === "unsupported") ?? hits.find((h) => h.route.type === "incomplete") ?? hits[0];
   const route = first.route;
   if (route.type === "app") {
     const others = hits.filter((h) => h !== first && (h.route.type === "app" || h.route.type === "soon")).length;

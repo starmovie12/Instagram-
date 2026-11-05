@@ -240,3 +240,40 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
 | 3.2.a | Aurora = one animation for three glows (PRD lists three drifts) | Keeps the ≤ 3 infinite-animations budget (AC-69) with Story-Ring + shimmer. |
 | 3.2.b | Route transition is the CSS fallback, not the View Transitions API | Next 15 stable has no router hook for it; PRD M4/K24 allow the 200 ms fade. |
 | 3.2.c | Island/Rail indicator is solid `--color-primary` (PRD: spectrum) | Brief rule: gradient only on CTA + logo. |
+
+### 3.3 Home + Smart Link Router (PRD §7, §7.6, §7.7, AC-5…8, AC-30…43)
+
+- **Home** is exactly 5 elements: Header → HeroBanner → Smart Link Box → How to
+  Download → Tools & Platforms (AC-5). The old trust row ("100% Anonymous…",
+  "No Watermark" — not true for every platform, K7) and the hard-coded
+  "N Tools Auto-Supported" strip are gone; the only footer is the trust line.
+  Widths: phone full −16 px, tablet 560/640 px, desktop 720/960 px with input +
+  Paste Link + Grab Media on one row. Home-only CSS lives in `app/home.css`.
+- **Smart Link Box** (rewritten, no fetch ever): Paste Link (immediate),
+  Grab/Enter, paste event and link drop (600 ms chip with Cancel, 300 ms under
+  reduced motion; `autoRoute` setting), page-level `Ctrl/⌘+V` and window drop on
+  desktop; read-once sessionStorage handoff (link never in the URL; `?url=` only
+  if storage is blocked); `router.prefetch`; `home_route` analytics with platform /
+  kind / trigger / outcome only. 1 px Story-Ring that spins on focus (4 s),
+  faster while detecting (1.2 s) and turns red on error; detected chip pops and a
+  3 px progress bar fills over 600 ms (M2, M3). Errors use the PRD copy keys with
+  one fix each: supported-app chips, "Request this app" → /contact, and a "How to
+  copy a link?" bottom sheet for incomplete links (E-3).
+- **Router:** new `incomplete` route (bare platform home, `/p/` without a code),
+  input capped at 10,000 chars / 21 links (linear regexes). New table-driven
+  suite `lib/router.cases.test.ts`: 64 routing cases + cap + adversarial-perf
+  tests (PRD asks for ≥ 45).
+- **M1 entrance:** stagger only on the first Home view of a session, fade
+  afterwards; hidden start state only under `html.js-motion` (set before paint).
+- **i18n:** all PRD §7.6.12 keys (+ home labels and platform taglines) in English
+  and Hindi.
+- **Verified in a real browser (Playwright, 390 px):** Grab → `/instagram-downloader?src=home&kind=reel`
+  with the link absent from the URL; Back → empty box; empty → "Enter a link or
+  @username"; dropbox.com → unsupported + chips; paste of `fb.watch/…` → chip →
+  `/facebook-downloader?src=home&kind=video`; **zero** non-asset network requests.
+- `npm test` → 120 / 120.
+
+| # | Decision | Why |
+|---|---|---|
+| 3.3.a | `en` strings are English, `hi` strings Devanagari Hindi (PRD writes defaults in Hinglish) | There is no Hinglish locale among the 21; English stays the site default. |
+| 3.3.b | `⌘/Ctrl+K` opens the Command Palette everywhere (PRD §7.1 also lists it as "focus the box") | §14.3/D28 give it to the palette; on Home a page-level paste already targets the box. |

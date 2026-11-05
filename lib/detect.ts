@@ -17,19 +17,27 @@ export type Kind =
   | "reel" | "story" | "highlights" | "post" | "video" | "photo" | "profile" | "thumbnail" | "image";
 
 export type Detected =
-  | { type: "live"; platform: PlatformId; kind?: Kind; unsupported?: boolean; isUsername?: boolean }
+  | { type: "live"; platform: PlatformId; kind?: Kind; unsupported?: boolean; isUsername?: boolean; incomplete?: boolean }
   | { type: "soon"; platform: SoonId }
   | { type: "unknown" };
 
-/** Text me se link-jaise tokens nikalo (scheme ho ya na ho). Order preserved, dedupe. */
+/** PRD §7.6.13 #7 — DoS guard: input cap + link cap (20 + 1 to detect overflow). */
+export const MAX_INPUT_CHARS = 10_000;
+export const MAX_LINKS = 21;
+
+/**
+ * Text me se link-jaise tokens nikalo (scheme ho ya na ho). Order preserved, dedupe.
+ * Linear-time regexes; input capped at {@link MAX_INPUT_CHARS}, output at {@link MAX_LINKS}.
+ */
 export function extractLinks(raw: string): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
   const push = (s: string) => {
+    if (out.length >= MAX_LINKS) return;
     const c = cleanTrailing(s);
     if (c && !seen.has(c)) { seen.add(c); out.push(c); }
   };
-  const text = raw.replace(/[\u200B-\u200D\uFEFF]/g, "");
+  const text = (raw ?? "").slice(0, MAX_INPUT_CHARS).replace(/[\u200B-\u200D\uFEFF]/g, "");
   const withScheme = /https?:\/\/[^\s<>"']+/gi;
   let rest = text;
   for (const m of text.match(withScheme) ?? []) push(m);
@@ -37,7 +45,7 @@ export function extractLinks(raw: string): string[] {
   // scheme-less: host.tld/path  (sirf jab "/" ho ya host kisi known platform ka ho)
   const bare = /(?:^|[\s(<\["'])((?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<>"']*)?)/gi;
   let m: RegExpExecArray | null;
-  while ((m = bare.exec(rest))) {
+  while ((m = bare.exec(rest)) && out.length < MAX_LINKS) {
     const tok = cleanTrailing(m[1]);
     const host = tok.split("/")[0].toLowerCase();
     const hasPath = tok.includes("/");
@@ -96,20 +104,25 @@ export function detectUrl(u: URL): Detected {
     const soon = soonOfHost(host);
     return soon ? { type: "soon", platform: soon.id } : { type: "unknown" };
   }
-  const segs = u.pathname.split("/").filter(Boolean).map((s) => decodeURIComponent(s).toLowerCase());
+  const segs = u.pathname.split("/").filter(Boolean).map((s) => { try { return decodeURIComponent(s).toLowerCase(); } catch { return s.toLowerCase(); } });
   const path = "/" + segs.join("/");
+  // A bare platform home page ("https://instagram.com", "tiktok.com/") has nothing to download (PRD E-3).
+  const shortHost = /^(fb\.watch|vm\.tiktok\.com|vt\.tiktok\.com|pin\.it|youtu\.be|fb\.me)$/.test(host);
+  if (segs.length === 0 && !shortHost && !u.searchParams.get("v")) return { type: "live", platform: live.id, incomplete: true };
 
   switch (live.id) {
     case "instagram": {
       if (segs[0] === "stories" && segs[1] === "highlights") return { type: "live", platform: "instagram", kind: "highlights" }; // pehle
       if (segs[0] === "stories" && segs[1]) return { type: "live", platform: "instagram", kind: "story" };
-      const hit = (name: string) => segs[0] === name || (segs.length >= 3 && segs[1] === name);
-      if (hit("reel") || hit("reels")) return { type: "live", platform: "instagram", kind: "reel" };
-      if (hit("p")) return { type: "live", platform: "instagram", kind: "post" };
-      if (hit("tv")) return { type: "live", platform: "instagram", kind: "video" };
+      const at = (name: string) => (segs[0] === name ? 0 : segs.length >= 2 && segs[1] === name ? 1 : -1);
+      const withId = (name: string) => { const i = at(name); return i >= 0 && Boolean(segs[i + 1]); };
+      if (at("reel") >= 0 || at("reels") >= 0) return withId("reel") || withId("reels") ? { type: "live", platform: "instagram", kind: "reel" } : { type: "live", platform: "instagram", incomplete: true };
+      if (at("p") >= 0) return withId("p") ? { type: "live", platform: "instagram", kind: "post" } : { type: "live", platform: "instagram", incomplete: true };
+      if (at("tv") >= 0) return withId("tv") ? { type: "live", platform: "instagram", kind: "video" } : { type: "live", platform: "instagram", incomplete: true };
+      if (segs[0] === "stories" && !segs[1]) return { type: "live", platform: "instagram", incomplete: true };
       if (segs.length >= 1 && !IG_RESERVED.has(segs[0]) && /^[a-z0-9._]{1,30}$/.test(segs[0]))
         return { type: "live", platform: "instagram", kind: "profile", isUsername: true };
-      return { type: "live", platform: "instagram" };
+      return { type: "live", platform: "instagram", incomplete: segs.length === 0 || IG_RESERVED.has(segs[0] ?? "") };
     }
     case "facebook": {
       if (host === "fb.watch" || host.endsWith(".fb.watch")) return { type: "live", platform: "facebook", kind: "video" };
