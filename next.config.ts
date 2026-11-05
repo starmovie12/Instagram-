@@ -118,7 +118,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/:path*", headers: SECURITY_HEADERS }, ...NOINDEX_PATHS.map((source) => ({
+    return [
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      // Service worker updates must not wait for the HTTP cache.
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }, { key: "Service-Worker-Allowed", value: "/" }] },
+      ...NOINDEX_PATHS.map((source) => ({
       source,
       headers: [
         {

@@ -1,0 +1,12 @@
+/* /offline — tokens only */
+.off { width: 100%; max-width: calc(560px + 2 * var(--sp-4)); margin: 0 auto; padding: var(--sp-10) var(--sp-4) var(--sp-8); display: grid; justify-items: center; gap: var(--sp-3); text-align: center; }
+.off__icon { width: 72px; height: 72px; display: grid; place-items: center; border-radius: var(--radius-card); background: var(--color-info-subtle); color: var(--color-info); margin-bottom: var(--sp-2); }
+.off__h1 { margin: 0; font: 700 var(--fs-page-title)/var(--lh-page-title) var(--font-stack); letter-spacing: -0.01em; color: var(--text-primary); }
+.off__body { margin: 0; max-width: 40ch; color: var(--text-secondary); font: 400 16px/24px var(--font-stack); }
+.off__retry {
+  margin-top: var(--sp-3); display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 52px; padding: 0 var(--sp-6);
+  border: 0; border-radius: var(--radius-base); background: var(--cta-gradient); color: var(--text-on-primary);
+  box-shadow: var(--shadow-button-primary); font: 700 16px/24px var(--font-stack); cursor: pointer;
+}
+.off__link { display: inline-flex; align-items: center; min-height: 48px; color: var(--text-link); font: 600 15px/20px var(--font-stack); }
+.off__tip { margin: var(--sp-4) 0 0; max-width: 46ch; color: var(--text-secondary); font: 400 14px/20px var(--font-stack); }

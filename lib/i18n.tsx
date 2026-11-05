@@ -36,7 +36,8 @@ type Keys =
   | "ws.ph.story" | "ws.ph.profile" | "ws.ph.highlights" | "ws.ph.audio" | "ws.features" | "ws.result" | "ws.loading" | "res.tooBig" | "res.verified" | "res.itemAlt" | "res.dpAlt" | "res.followers" | "res.following" | "res.posts" | "res.saved" | "pe.stories" | "pe.highlights" | "pe.noHighlights" | "pe.nothing" | "pe.highlight" | "pe.storyAlt" | "pe.label"
   | "err.retryIn" | "err.offline.t"
   | "hs.title" | "hs.saved" | "hs.filter" | "hs.all" | "hs.moreApps" | "hs.regrab" | "hs.delete" | "hs.removed" | "hs.item" | "hs.clearAll" | "hs.clearAllHistory" | "hs.confirm" | "hs.cleared" | "hs.local" | "hs.emptyT" | "hs.emptyB" | "hs.emptyCta" | "hs.media" | "st.title" | "st.appearance" | "st.language" | "st.dark" | "st.solid" | "st.solidD" | "st.ambient" | "st.ambientD" | "st.downloads" | "st.autoFetch" | "st.autoFetchD" | "st.autoRoute" | "st.autoRouteD" | "st.autoSave" | "st.autoSaveD" | "st.quality" | "st.qualityHd" | "st.qualitySaver" | "st.clipboard" | "st.clipboardD" | "st.sound" | "st.haptics" | "st.hapticsD" | "st.hapticsIos" | "st.advanced" | "st.sessionLabel" | "st.sessionHelp" | "st.sessionWarn" | "st.sessionShow" | "st.sessionHide" | "st.remember" | "st.rememberD" | "st.sessionRemove" | "st.sessionRemoved" | "st.cobaltLabel" | "st.cobaltHelp" | "st.cobaltErr" | "st.save" | "st.saved" | "st.storage" | "st.clearHistory" | "st.clearHistoryD" | "st.clear" | "st.reset" | "st.resetD" | "st.resetBtn" | "st.resetDone" | "st.links" | "st.support" | "st.version"
-  | "tour.label" | "tour.s1t" | "tour.s1b" | "tour.s2t" | "tour.s2b" | "tour.s3t" | "tour.s3b" | "tour.step" | "tour.skip" | "tour.next" | "tour.done" | "install.title" | "install.body" | "install.cta" | "install.later";
+  | "tour.label" | "tour.s1t" | "tour.s1b" | "tour.s2t" | "tour.s2b" | "tour.s3t" | "tour.s3b" | "tour.step" | "tour.skip" | "tour.next" | "tour.done" | "install.title" | "install.body" | "install.cta" | "install.later"
+  | "offline.title" | "offline.body" | "offline.retry" | "offline.history" | "offline.tip";
 
 export type Dict = Partial<Record<Keys, string>>;
 
@@ -333,6 +334,11 @@ const EN: Record<Keys, string> = {
   "install.body": "Share a reel from Instagram straight to InstaGrab — it opens with the download ready.",
   "install.cta": "Install",
   "install.later": "Not now",
+  "offline.title": "You're offline",
+  "offline.body": "Downloads need the internet — but everything already saved on this device is still here.",
+  "offline.retry": "Try again",
+  "offline.history": "Open Recent Grabs",
+  "offline.tip": "On-device tools (resizer, compressor, filters, collage) work offline once you have opened them before.",
 };
 
 

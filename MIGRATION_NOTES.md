@@ -507,3 +507,31 @@ requests from this sandbox (a datacenter IP, like Vercel), A/B against a build o
 | 3.8.c | CSP stays Report-Only | PRD D20; ad network scripts would break under an enforced CSP. |
 | 3.8.d | `microphone=()` instead of `(self)` | Verified no page uses getUserMedia (Voice Cloner writes text). |
 | 3.8.e | `browsing-topics=()` instead of `interest-cohort=()` | `interest-cohort` is unrecognised by current browsers and logs a console error. |
+
+### 3.9 PWA / service worker (PRD §14.2, §22.2, AC-58, AC-72)
+
+- **`public/sw.js` rewritten** (cache `instagrab-v4-*`; the old `instagrab-v3` cache is
+  deleted on activate):
+  - never touches `/api/*`, `/s/*`, `/_vercel/*`, other origins, non-GET or App Router RSC
+    requests;
+  - hashed build assets / icons / fonts → cache-first (capped at 250 entries);
+  - navigations → network-first with a 3.5 s timeout, then the cached page, then a
+    redirect to `/offline`; pages are cached **by path only**, so a pasted `?url=` link
+    never lands in Cache Storage (capped at 40 pages);
+  - shell precache `/`, `/tools`, `/settings`, `/how-to-download`, `/history`, `/offline`,
+    `/quick-action` ≈ 346 KB of HTML (budget 500 KB).
+- `/sw.js` is served `no-cache` + `Service-Worker-Allowed: /`; registration uses
+  `updateViaCache: "none"` so a deploy reaches clients on the next load.
+- `/offline` rebuilt (translated, tokens, one action "Try again", Recent Grabs as a link).
+- Verified in Chromium: page controlled by the SW; after visiting
+  `/instagram-downloader?url=…SECRETLINK…` no cache key contains a query, the link or
+  `/api`; offline `/tools` opens from cache; offline `/about` (never visited) lands on
+  `/offline` with its content; offline `fetch('/api/health')` fails instead of serving a
+  cached reply. iOS metas (`apple-mobile-web-app-capable`, black-translucent status bar,
+  180 px apple-touch-icon) and the 3 s "Back online" pill were already in place.
+
+| # | Decision | Why |
+|---|---|---|
+| 3.9.a | Navigations network-first, not stale-while-revalidate | Stale HTML after a deploy references chunk hashes the new deployment may not serve (no skew protection on Hobby) — hydration would break. |
+| 3.9.b | Cache renamed `instagrab-v4` (PRD names v3) | v3 is what the old worker used; a new name purges entries it stored with full query strings. |
+| 3.9.c | Offline fallback is a redirect, not `/offline` HTML under the requested URL | Serving another page's HTML left the App Router showing a skeleton forever. |
