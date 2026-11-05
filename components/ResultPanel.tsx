@@ -1,222 +1,351 @@
 "use client";
 /**
- * ResultPanel (PRD §10.7, A20) — GoldenBar ka inline result + ResultCard/CreatorPack ke features, ek jagah:
- * preview, author, type badge, Copy Caption, hashtag chips + Copy Hashtags, mentions, Download, Audio,
- * Save Thumbnail, Download All (ZIP). Markup/CSS GoldenBar ke `.gb-result-*` classes (look same).
+ * ResultPanel (PRD §10.7, §25.3 E-8/E-9, A20). One card for every platform:
+ * header (@author, verified, type badge, resolution · views · likes) → preview → ONE primary action
+ * (Download HD / Download All ZIP / Download HD DP / Download Audio) → "More" row (thumbnail, audio,
+ * quality, Save to Photos) → caption (3-line clamp + Read more, Copy Caption) → hashtag chips (each
+ * copyable) + Copy Hashtags → mentions → profile extras → "Download another".
+ * Styles: components/downloader.css (no inline <style>).
  */
-import React, { useMemo, useState } from "react";
-import { Check, Copy, Download, ImageDown, Music, Package, RotateCcw } from "lucide-react";
-import { GOLDEN_BAR_STYLES } from "@/components/GoldenBar";
-import { buildDownloadProxyUrl, type ExtractedResult } from "@/lib/normalize";
-import { celebrate } from "@/lib/feedback";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { BadgeCheck, Check, ChevronDown, Copy, Download, ImageDown, Music, Package, RotateCcw, Share2, SlidersHorizontal } from "lucide-react";
+import BottomSheet from "@/components/ui/BottomSheet";
+import { buildDownloadProxyUrl, type ExtractedResult, type MediaItem } from "@/lib/normalize";
+import { celebrate, haptic } from "@/lib/feedback";
 import { fmt } from "@/lib/media";
+import { getPrefs } from "@/lib/storage";
+import { useI18n } from "@/lib/i18n";
+import { toast } from "@/lib/toast";
+import type { PlatformDef } from "@/lib/platforms";
+import { triggerDownload } from "@/lib/download";
 
 const HASHTAG_RE = /#[\p{L}\p{N}_]+/gu;
-const MENTION_RE = /@[A-Za-z0-9_.]+/g;
+const MENTION_RE = /(?:^|[^\w.])@([A-Za-z0-9_.]{1,30})/g;
+/** E-8: above this the browser should stream the file itself instead of us buffering it. */
+export const MAX_BUFFER_BYTES = 150 * 1024 * 1024;
 
-function unique(a: string[]) { return Array.from(new Set(a)); }
+const unique = (a: string[]) => Array.from(new Set(a));
+const extOf = (m: MediaItem) => (m.type === "video" ? "mp4" : m.type === "audio" ? "m4a" : "jpg");
+const safeName = (s: string) => s.replace(/[^\w.-]/g, "").slice(0, 60) || "media";
+
+function badgeOf(r: ExtractedResult, count: number): string {
+  if (r.type === "profile") return "PROFILE";
+  if (r.type === "thumbnail") return "THUMBNAIL";
+  if (count > 1) return `CAROUSEL · ${count}`;
+  const t = (r.type || r.media?.[0]?.type || "media").toUpperCase();
+  return t === "IMAGE" ? "PHOTO" : t;
+}
+
+function useCanShareFiles(): boolean {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    try {
+      const coarse = matchMedia("(pointer: coarse)").matches;
+      const probe = new File([new Blob(["x"], { type: "image/jpeg" })], "probe.jpg", { type: "image/jpeg" });
+      setOk(coarse && typeof navigator.canShare === "function" && navigator.canShare({ files: [probe] }));
+    } catch { setOk(false); }
+  }, []);
+  return ok;
+}
 
 export default function ResultPanel({
-  result, platformName, pulseSave, onAnother, children,
+  result, platform, focus, pulseSave, onAnother, children,
 }: {
   result: ExtractedResult;
-  platformName: string;
-  /** iOS Safari: auto-save skip hua — Save button pulse kare + hint (R8) */
+  platform: PlatformDef;
+  /** Pill the user chose — "audio" / "thumbnail" make that the primary action. */
+  focus?: string;
+  /** R8 iOS: auto-save skipped → pulse the primary button + hint. */
   pulseSave?: boolean;
   onAnother: () => void;
-  /** Profile extras (stories / highlights) */
+  /** Profile extras (Stories / Highlights). */
   children?: React.ReactNode;
 }) {
-  const [copied, setCopied] = useState<"caption" | "tags" | "">("");
-  const [zip, setZip] = useState<"idle" | "packing" | "done" | "error">("idle");
+  const { t } = useI18n();
+  const canShare = useCanShareFiles();
+  const [copied, setCopied] = useState<string>("");
+  const [zip, setZip] = useState<{ state: "idle" | "packing" | "done" | "error" | "toobig"; p: number }>({ state: "idle", p: 0 });
+  const [qualityOpen, setQualityOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  const captionRef = useRef<HTMLParagraphElement>(null);
+
   const caption = result.caption ?? "";
   const hashtags = useMemo(() => unique(caption.match(HASHTAG_RE) ?? []), [caption]);
-  const mentions = useMemo(() => unique(caption.match(MENTION_RE) ?? []), [caption]);
-  const media = result.media ?? [];
-  const base = (result.author?.username || platformName || "media").replace(/[^\w.-]/g, "") || "media";
-  const audio = media.find((m) => m.audioUrl)?.audioUrl || result.audioUrl;
+  const mentions = useMemo(() => unique(Array.from(caption.matchAll(MENTION_RE), (m) => "@" + m[1])), [caption]);
+  const media = useMemo(() => result.media ?? [], [result.media]);
   const isProfile = result.type === "profile";
-  const multi = media.length > 1 && !isProfile && result.type !== "thumbnail";
+  const isThumb = result.type === "thumbnail";
+  const variants = isThumb && media.length > 1 ? media : null;
+  const [vIdx, setVIdx] = useState(() => (variants && getPrefs().quality === "saver" ? variants.length - 1 : 0));
+  const items = isThumb ? (media.length ? [media[Math.min(vIdx, media.length - 1)]] : []) : media;
+  const multi = !isProfile && items.length > 1;
+  const first = items[0];
+  const user = result.author?.username;
+  const base = safeName(user || platform.id);
+  const audio = media.find((m) => m.audioUrl)?.audioUrl || result.audioUrl;
+  const thumb = first?.type === "video" ? first.thumbnail || result.thumbnail : undefined;
+  const nameFor = (m: MediaItem, i: number) => m.filename || `${base}-${i + 1}.${extOf(m)}`;
 
-  async function copy(text: string, kind: "caption" | "tags") {
-    try { await navigator.clipboard.writeText(text); setCopied(kind); setTimeout(() => setCopied(""), 1800); } catch { /* ignore */ }
+  useLayoutEffect(() => {
+    const el = captionRef.current;
+    if (!el) return;
+    setClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [caption]);
+
+  async function copy(text: string, id: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(id);
+      haptic("Light");
+      setTimeout(() => setCopied((c) => (c === id ? "" : c)), 1600);
+    } catch { toast({ message: t("router.hint.longpress"), tone: "info" }); }
   }
 
   async function downloadZip(e: React.MouseEvent) {
+    if (zip.state === "packing") return;
     celebrate(e.clientX, e.clientY);
-    if (zip === "packing") return;
-    setZip("packing");
+    setZip({ state: "packing", p: 0 });
     try {
       const { default: JSZip } = await import("jszip");
       const z = new JSZip();
-      const add = async (name: string, url: string) => {
-        const r = await fetch(buildDownloadProxyUrl(url, name));
+      let bytes = 0;
+      const jobs = items.map((m, i) => ({ name: nameFor(m, i), url: m.url }));
+      if (audio) jobs.push({ name: `${base}-audio.m4a`, url: audio });
+      for (let i = 0; i < jobs.length; i++) {
+        const r = await fetch(buildDownloadProxyUrl(jobs[i].url, jobs[i].name));
         if (!r.ok) throw new Error("fetch failed");
-        z.file(name, await r.blob());
-      };
-      for (let i = 0; i < media.length; i++) await add(`${base}-${i + 1}.${media[i].type === "video" ? "mp4" : media[i].type === "audio" ? "m4a" : "jpg"}`, media[i].url);
-      if (audio) await add(`${base}-audio.m4a`, audio);
+        const blob = await r.blob();
+        bytes += blob.size;
+        if (bytes > MAX_BUFFER_BYTES) { setZip({ state: "toobig", p: 0 }); return; }
+        z.file(jobs[i].name, blob);
+        setZip({ state: "packing", p: Math.round(((i + 1) / jobs.length) * 90) });
+      }
       if (caption) z.file("caption.txt", caption);
       if (hashtags.length) z.file("hashtags.txt", hashtags.join(" "));
-      z.file("info.txt", `Source: ${result.platform ?? platformName}\nAuthor: ${result.author?.username ? "@" + result.author.username : "-"}\nPacked by InstaGrab — download only content you own or have permission to use.`);
-      const blob = await z.generateAsync({ type: "blob" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${base}-pack.zip`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
-      setZip("done"); setTimeout(() => setZip("idle"), 2500);
-    } catch { setZip("error"); setTimeout(() => setZip("idle"), 3000); }
+      z.file("info.txt", `Source: ${platform.name}\nAuthor: ${user ? "@" + user : "-"}\nSaved with InstaGrab — download only content you own or have permission to use.`);
+      const blob = await z.generateAsync({ type: "blob" }, (m) => setZip({ state: "packing", p: 90 + Math.round(m.percent / 10) }));
+      const href = URL.createObjectURL(blob);
+      triggerDownload(href, `${base}-pack.zip`);
+      setTimeout(() => URL.revokeObjectURL(href), 30_000);
+      setZip({ state: "done", p: 100 });
+      setTimeout(() => setZip({ state: "idle", p: 0 }), 2500);
+    } catch {
+      haptic("Error");
+      setZip({ state: "error", p: 0 });
+    }
   }
 
-  const badge = (result.type || "media").toUpperCase();
+  async function shareToPhotos() {
+    if (!first) return;
+    try {
+      const name = nameFor(first, 0);
+      const r = await fetch(buildDownloadProxyUrl(first.url, name));
+      const blob = await r.blob();
+      if (blob.size > MAX_BUFFER_BYTES) { toast({ message: t("res.tooBig"), tone: "info" }); return; }
+      const file = new File([blob], name, { type: blob.type || (first.type === "video" ? "video/mp4" : "image/jpeg") });
+      await navigator.share({ files: [file] });
+      haptic("Success");
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return; // user closed the share sheet
+      toast({ message: t("res.zipFailed"), tone: "error" });
+    }
+  }
+
+  const onSaved = (e: React.MouseEvent) => celebrate(e.clientX, e.clientY);
+  const pulse = pulseSave ? " is-pulsing" : "";
+  const meta: string[] = [];
+  if (first?.width && first?.height) meta.push(`${first.width}×${first.height}`);
+  if (typeof result.views === "number") meta.push(t("res.views", { n: fmt(result.views) }));
+  if (typeof result.likes === "number") meta.push(t("res.likes", { n: fmt(result.likes) }));
+
+  /* ── primary action (exactly one) ── */
+  let primary: React.ReactNode = null;
+  if (isProfile && result.author?.avatar) {
+    primary = (
+      <a id="rp-primary" className={`rp__primary${pulse}`} href={buildDownloadProxyUrl(result.author.avatar, `${base}-dp.jpg`)} download={`${base}-dp.jpg`} onClick={onSaved}>
+        <Download size={20} strokeWidth={2.2} aria-hidden="true" /> {t("res.dp")}
+      </a>
+    );
+  } else if (multi) {
+    primary = (
+      <button id="rp-primary" type="button" className={`rp__primary${pulse}`} onClick={downloadZip} disabled={zip.state === "packing"} aria-busy={zip.state === "packing"}>
+        <Package size={20} strokeWidth={2.2} aria-hidden="true" />
+        {zip.state === "packing" ? t("res.packing", { p: zip.p }) : zip.state === "done" ? t("res.saved") : t("res.downloadAll", { n: items.length + (audio ? 1 : 0) })}
+      </button>
+    );
+  } else if (focus === "audio" && audio) {
+    primary = (
+      <a id="rp-primary" className={`rp__primary${pulse}`} href={buildDownloadProxyUrl(audio, `${base}-audio.m4a`)} download={`${base}-audio.m4a`} onClick={onSaved}>
+        <Music size={20} strokeWidth={2.2} aria-hidden="true" /> {t("res.audio")}
+      </a>
+    );
+  } else if (first) {
+    const name = nameFor(first, 0);
+    primary = (
+      <a id="rp-primary" className={`rp__primary${pulse}`} href={buildDownloadProxyUrl(first.url, name)} download={name} onClick={onSaved}>
+        <Download size={20} strokeWidth={2.2} aria-hidden="true" /> {t("res.downloadHd")}
+      </a>
+    );
+  }
+
+  const more: React.ReactNode[] = [];
+  if (variants) more.push(
+    <button key="q" type="button" className="rp__more-btn" aria-haspopup="dialog" onClick={() => setQualityOpen(true)}>
+      <SlidersHorizontal size={18} strokeWidth={2} aria-hidden="true" /> {t("res.quality", { q: variants[vIdx]?.quality ?? "HD" })}
+    </button>,
+  );
+  if (thumb && !multi) more.push(
+    <a key="t" className="rp__more-btn" href={buildDownloadProxyUrl(thumb, `${base}-thumb.jpg`)} download={`${base}-thumb.jpg`} onClick={onSaved}>
+      <ImageDown size={18} strokeWidth={2} aria-hidden="true" /> {t("res.thumb")}
+    </a>,
+  );
+  if (audio && !multi && focus !== "audio") more.push(
+    <a key="a" className="rp__more-btn" href={buildDownloadProxyUrl(audio, `${base}-audio.m4a`)} download={`${base}-audio.m4a`} onClick={onSaved}>
+      <Music size={18} strokeWidth={2} aria-hidden="true" /> {t("res.audio")}
+    </a>,
+  );
+  if (focus === "audio" && audio && first && !multi) more.push(
+    <a key="v" className="rp__more-btn" href={buildDownloadProxyUrl(first.url, nameFor(first, 0))} download={nameFor(first, 0)} onClick={onSaved}>
+      <Download size={18} strokeWidth={2} aria-hidden="true" /> {t("res.downloadHd")}
+    </a>,
+  );
+  if (canShare && first && !multi && !isProfile) more.push(
+    <button key="s" type="button" className="rp__more-btn" onClick={() => { void shareToPhotos(); }}>
+      <Share2 size={18} strokeWidth={2} aria-hidden="true" /> {t("res.share")}
+    </button>,
+  );
 
   return (
-    <div className="gb-wrapper rp">
-      <style dangerouslySetInnerHTML={{ __html: GOLDEN_BAR_STYLES + RP_STYLES }} />
-      <div className="gb-result-card" aria-live="polite">
-        <div className="rp-meta">
-          <span className="rp-badge">{badge}</span>
-          {typeof result.views === "number" && <span>{fmt(result.views)} views</span>}
-          {typeof result.likes === "number" && <span>{fmt(result.likes)} likes</span>}
-          {typeof result.comments === "number" && <span>{fmt(result.comments)} comments</span>}
+    <article className="rp" aria-labelledby="rp-title">
+      <header className="rp__head">
+        {result.author?.avatar && !isProfile && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="rp__avatar" src={buildDownloadProxyUrl(result.author.avatar, "avatar.jpg")} alt="" width={40} height={40} />
+        )}
+        <div className="rp__who">
+          <h2 id="rp-title" className="rp__name">
+            <span className="rp__name-text">{user ? `@${user}` : result.title || t("res.ready")}</span>
+            {result.author?.verified && <BadgeCheck className="rp__verified" size={18} strokeWidth={2.2} aria-label={t("res.verified")} />}
+          </h2>
+          <p className="rp__meta">
+            <span className="rp__badge">{badgeOf(result, items.length)}</span>
+            {meta.map((m) => <span key={m}>{m}</span>)}
+          </p>
         </div>
+      </header>
 
-        {(result.author?.username || result.author?.avatar || (result.title && !isProfile)) && (
-          <div className="gb-result-header">
-            <div className="gb-author-box">
-              {result.author?.avatar && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={buildDownloadProxyUrl(result.author.avatar, "avatar")} alt={result.author.username || "Creator"} className="gb-author-avatar" />
-              )}
-              <div>
-                <div className="gb-author-name-row">
-                  <span className="gb-author-name">
-                    {result.author?.fullName || (result.author?.username ? `@${result.author.username}` : result.title)}
-                  </span>
-                  {result.author?.verified && <span className="gb-verified" title="Verified">✓</span>}
+      {isProfile && result.author?.avatar && (
+        <div className="rp__dp">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={buildDownloadProxyUrl(result.author.avatar, `${base}-dp.jpg`)} alt={t("res.dpAlt", { user: user ?? "" })} width={160} height={160} />
+          {result.author.fullName && <p className="rp__fullname">{result.author.fullName}</p>}
+          {typeof result.author.followers === "number" && (
+            <dl className="rp__stats">
+              <div><dt>{t("res.followers")}</dt><dd>{fmt(result.author.followers)}</dd></div>
+              {typeof result.author.following === "number" && <div><dt>{t("res.following")}</dt><dd>{fmt(result.author.following)}</dd></div>}
+              {typeof result.author.postsCount === "number" && <div><dt>{t("res.posts")}</dt><dd>{fmt(result.author.postsCount)}</dd></div>}
+            </dl>
+          )}
+        </div>
+      )}
+
+      {!isProfile && items.length === 1 && first && (
+        <div className="rp__preview" style={first.width && first.height ? { aspectRatio: `${first.width} / ${first.height}` } : undefined}>
+          {first.type === "video" ? (
+            <video src={buildDownloadProxyUrl(first.url, nameFor(first, 0))} poster={first.thumbnail ? buildDownloadProxyUrl(first.thumbnail, "poster.jpg") : undefined} controls playsInline preload="metadata" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={buildDownloadProxyUrl(first.url, nameFor(first, 0))} alt={t("res.itemAlt", { app: platform.name, n: 1 })} width={first.width} height={first.height} />
+          )}
+          {first.quality && <span className="rp__q">{first.quality}</span>}
+        </div>
+      )}
+
+      {multi && (
+        <ul className="rp__grid">
+          {items.map((m, i) => {
+            const name = nameFor(m, i);
+            const href = buildDownloadProxyUrl(m.url, name);
+            return (
+              <li key={`${m.url}-${i}`} className="rp__cell">
+                <div className="rp__cell-media">
+                  {m.type === "video"
+                    ? <video src={href} poster={m.thumbnail ? buildDownloadProxyUrl(m.thumbnail, "poster.jpg") : undefined} controls playsInline preload="none" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    : <img src={href} alt={t("res.itemAlt", { app: platform.name, n: i + 1 })} loading="lazy" />}
                 </div>
-                {result.author?.username && <span className="gb-author-handle">@{result.author.username}</span>}
-              </div>
-            </div>
-            {typeof result.author?.followers === "number" && (
-              <div className="gb-profile-stats">
-                <div className="gb-stat"><strong>{result.author.followers.toLocaleString()}</strong><span>Followers</span></div>
-                {typeof result.author.following === "number" && <div className="gb-stat"><strong>{result.author.following.toLocaleString()}</strong><span>Following</span></div>}
-                {typeof result.author.postsCount === "number" && <div className="gb-stat"><strong>{result.author.postsCount.toLocaleString()}</strong><span>Posts</span></div>}
-              </div>
-            )}
-            {isProfile && result.author?.avatar && (
-              <a
-                href={buildDownloadProxyUrl(result.author.avatar, `${result.author.username || "profile"}-dp.jpg`)}
-                download onClick={(e) => celebrate(e.clientX, e.clientY)}
-                className={`gb-dp-btn ${pulseSave ? "rp-pulse" : ""}`}
-              >
-                <Download size={16} strokeWidth={2.2} aria-hidden="true" /> Download HD DP
-              </a>
-            )}
-          </div>
-        )}
+                <a className="rp__cell-btn" href={href} download={name} onClick={onSaved}>
+                  <Download size={18} strokeWidth={2.2} aria-hidden="true" /> {t("res.downloadItem", { n: i + 1 })}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-        {!isProfile && media.length > 0 && (
-          <div className="gb-media-grid">
-            {media.map((item, idx) => {
-              const ext = item.type === "video" ? "mp4" : item.type === "audio" ? "m4a" : "jpg";
-              const fname = item.filename || `${base}-${idx + 1}.${ext}`;
-              const href = buildDownloadProxyUrl(item.url, fname);
-              return (
-                <div key={`${item.url}-${idx}`} className="gb-media-item">
-                  <div className="gb-media-preview">
-                    {item.type === "video" ? (
-                      <video src={buildDownloadProxyUrl(item.url, fname)} poster={item.thumbnail ? buildDownloadProxyUrl(item.thumbnail, "poster") : undefined} controls playsInline preload="metadata" className="gb-video" />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={buildDownloadProxyUrl(item.url, fname)} alt={`${platformName} media ${idx + 1}`} loading="lazy" className="gb-image" />
-                    )}
-                    <span className="gb-quality-tag">{item.quality || (item.type === "video" ? "HD MP4" : "HD JPG")}</span>
-                  </div>
-                  <div className="gb-media-footer">
-                    <a href={href} download={fname} onClick={(e) => celebrate(e.clientX, e.clientY)} className={`gb-download-primary ${pulseSave && idx === 0 ? "rp-pulse" : ""}`}>
-                      <span><Download size={16} strokeWidth={2.2} aria-hidden="true" style={{ verticalAlign: "-3px" }} /> Download {item.type === "video" ? "Video (MP4)" : "Photo (HD)"}</span>
-                    </a>
-                    {item.thumbnail && item.type === "video" && (
-                      <a href={buildDownloadProxyUrl(item.thumbnail, `${base}-thumb.jpg`)} download className="gb-download-secondary">
-                        <ImageDown size={15} strokeWidth={2} aria-hidden="true" style={{ verticalAlign: "-3px" }} /> Save Thumbnail
-                      </a>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {pulseSave && <p className="rp-hint">iPhone/iPad par download ke liye Save button ko ek baar tap karein.</p>}
-
-        {(audio || multi || (zip !== "idle")) && !isProfile && (
-          <div className="rp-actions">
-            {audio && (
-              <a href={buildDownloadProxyUrl(audio, `${base}-audio.m4a`)} download onClick={(e) => celebrate(e.clientX, e.clientY)} className="gb-download-secondary">
-                <Music size={15} strokeWidth={2} aria-hidden="true" style={{ verticalAlign: "-3px" }} /> Download Audio
-              </a>
-            )}
-            {multi && (
-              <button type="button" onClick={downloadZip} className="gb-download-secondary" disabled={zip === "packing"}>
-                <Package size={15} strokeWidth={2} aria-hidden="true" style={{ verticalAlign: "-3px" }} />{" "}
-                {zip === "packing" ? "Packing…" : zip === "done" ? "Saved ✓" : zip === "error" ? "Failed — retry" : `Download All (ZIP · ${media.length})`}
-              </button>
-            )}
-          </div>
-        )}
-
-        {caption && !isProfile && (
-          <div className="gb-caption-box">
-            <div className="gb-caption-top">
-              <span className="gb-caption-label">Caption{hashtags.length ? " & Hashtags" : ""}</span>
-              <button type="button" onClick={() => copy(caption, "caption")} className="gb-copy-btn">
-                {copied === "caption" ? <><Check size={14} strokeWidth={2.6} aria-hidden="true" /> Copied!</> : <><Copy size={14} strokeWidth={2} aria-hidden="true" /> Copy Caption</>}
-              </button>
-            </div>
-            <p className="gb-caption-text">{caption}</p>
-            {hashtags.length > 0 && (
-              <div className="rp-tags">
-                <div className="rp-tags__row">
-                  {hashtags.map((h) => (
-                    <button key={h} type="button" className="rp-tag" onClick={() => copy(h, "tags")} title="Copy">{h}</button>
-                  ))}
-                </div>
-                <button type="button" onClick={() => copy(hashtags.join(" "), "tags")} className="gb-copy-btn">
-                  {copied === "tags" ? <><Check size={14} strokeWidth={2.6} aria-hidden="true" /> Copied!</> : <><Copy size={14} strokeWidth={2} aria-hidden="true" /> Copy Hashtags</>}
-                </button>
-              </div>
-            )}
-            {mentions.length > 0 && <p className="rp-mentions">Mentions: {mentions.join(" · ")}</p>}
-          </div>
-        )}
-
-        {children}
-
-        <button type="button" className="rp-another" onClick={onAnother}>
-          <RotateCcw size={16} strokeWidth={2.2} aria-hidden="true" /> Download another
-        </button>
+      <div className="rp__actions">
+        {primary}
+        {zip.state === "packing" && <progress className="rp__progress" max={100} value={zip.p} aria-label={t("res.packing", { p: zip.p })} />}
+        {zip.state === "error" && <p className="rp__note" role="status">{t("res.zipFailed")}</p>}
+        {zip.state === "toobig" && <p className="rp__note" role="status">{t("res.tooBig")}</p>}
+        {pulseSave && <p className="rp__note rp__note--hint">{t("res.iosHint")}</p>}
+        {more.length > 0 && <div className="rp__more" role="group" aria-label={t("res.more")}>{more}</div>}
       </div>
-    </div>
+
+      {caption && !isProfile && (
+        <section className="rp__caption" aria-label={t("res.caption")}>
+          <div className="rp__caption-top">
+            <h3 className="rp__h">{t("res.caption")}</h3>
+            <button type="button" className="rp__copy" onClick={() => { void copy(caption, "caption"); }}>
+              {copied === "caption" ? <Check size={16} strokeWidth={2.6} aria-hidden="true" /> : <Copy size={16} strokeWidth={2} aria-hidden="true" />}
+              <span aria-live="polite">{copied === "caption" ? t("res.copied") : t("res.copyCaption")}</span>
+            </button>
+          </div>
+          <p ref={captionRef} className="rp__caption-text" data-expanded={expanded ? "true" : "false"}>{caption}</p>
+          {(clamped || expanded) && (
+            <button type="button" className="rp__readmore" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)}>
+              {expanded ? t("res.readLess") : t("res.readMore")} <ChevronDown size={16} strokeWidth={2} aria-hidden="true" />
+            </button>
+          )}
+          {hashtags.length > 0 && (
+            <div className="rp__tags">
+              <ul className="rp__chips">
+                {hashtags.map((h) => (
+                  <li key={h}>
+                    <button type="button" className="rp__chip" onClick={() => { void copy(h, h); }} aria-label={`${h} — ${copied === h ? t("res.copied") : t("res.copyTags")}`}>
+                      {copied === h ? t("res.copied") : h}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button type="button" className="rp__copy" onClick={() => { void copy(hashtags.join(" "), "tags"); }}>
+                {copied === "tags" ? <Check size={16} strokeWidth={2.6} aria-hidden="true" /> : <Copy size={16} strokeWidth={2} aria-hidden="true" />}
+                <span aria-live="polite">{copied === "tags" ? t("res.copied") : t("res.copyTags")}</span>
+              </button>
+            </div>
+          )}
+          {mentions.length > 0 && <p className="rp__mentions"><span>{t("res.mentions")}:</span> {mentions.join(" · ")}</p>}
+        </section>
+      )}
+
+      {children}
+
+      <button type="button" className="rp__another" onClick={onAnother}>
+        <RotateCcw size={18} strokeWidth={2} aria-hidden="true" /> {t("res.another")}
+      </button>
+
+      {variants && (
+        <BottomSheet open={qualityOpen} onClose={() => setQualityOpen(false)} title={t("res.qualityTitle")} id="rp-quality">
+          <div className="sheet-list">
+            {variants.map((v, i) => (
+              <button key={v.url} type="button" className="sheet-opt" aria-pressed={i === vIdx} onClick={() => { haptic("Selection"); setVIdx(i); setQualityOpen(false); }}>
+                <span>{v.quality ?? `#${i + 1}`}</span>
+              </button>
+            ))}
+          </div>
+        </BottomSheet>
+      )}
+    </article>
   );
 }
-
-const RP_STYLES = `
-  .rp .gb-result-card { margin-top: 0; }
-  .rp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; color: var(--ink-3); margin-bottom: 12px; }
-  .rp-badge { font-weight: 800; letter-spacing: .08em; font-size: 11px; padding: 4px 10px; border-radius: 999px; color: var(--gold-ink); border: 1px solid var(--line-strong); background: rgb(var(--c-cyan-rgb) / .08); }
-  .rp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-  .rp-actions .gb-download-secondary { cursor: pointer; }
-  .rp-tags { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-  .rp-tags__row { display: flex; flex-wrap: wrap; gap: 6px; }
-  .rp-tag { min-height: 32px; padding: 0 12px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--gold-ink); background: rgb(var(--c-cyan-rgb) / .08); border: 1px solid var(--line-strong); }
-  .rp-mentions { margin: 10px 0 0; font-size: 13px; color: var(--ink-3); overflow-wrap: anywhere; }
-  .rp-hint { margin: 10px 0 0; font-size: 13px; color: var(--warn); }
-  .rp-another { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; min-height: 44px; padding: 0 18px; border-radius: 999px; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--ink); background: var(--bg-surface); border: 1px solid var(--border-color); }
-  @keyframes rpPulse { 0%,100% { box-shadow: 0 0 0 0 rgb(var(--c-cyan-rgb) / .55); } 50% { box-shadow: 0 0 0 10px rgb(var(--c-cyan-rgb) / 0); } }
-  .rp-pulse { animation: rpPulse 1.4s ease-in-out infinite; }
-  @media (prefers-reduced-motion: reduce) { .rp-pulse { animation: none; outline: 2px solid var(--c-cyan); } }
-`;

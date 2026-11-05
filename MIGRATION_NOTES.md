@@ -295,3 +295,73 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
   `content-visibility: auto` for below-fold sections, M6 hover lift).
 - Empty search: icon + "Nothing found" + one action "Request a tool" → /contact.
 - Verified in Chromium at 360/390/1280 px.
+
+### 3.5 App-page workspace, result, errors (PRD §10, §0A MGF-1…4, §25.3)
+
+- **`components/PlatformDownloader.tsx` rewritten** (all 7 apps + every legacy SEO
+  URL): hero card (56 px icon, h1, one-line description, 3 capability chips) →
+  URL card with the Story-Ring (52 px input with `inputmode=url`, `autocapitalize`,
+  `autocorrect`, `spellcheck`, `enterkeyhint`, ✕ clear) → Paste + Download →
+  detection strip (height reserved) "Instagram Reel recognised — Change?" and
+  **Recent (n)** → type pills (**max 5 visible**: Auto · Reel · Story · slot 4 ·
+  "+4 More" sheet; a pick from the sheet or a `?kind=` preselect is promoted into
+  slot 4 with "Auto-selected") → banners → result pane.
+- **Rules R1–R15** in one place: paste anywhere on the page / Paste button / drop /
+  handoff / `?url=` / typing 500 ms; Home & History hand-offs always fetch, plain
+  `?url=` follows the Auto-fetch setting; R3 another app's link → one redirect with
+  a read-once handoff and toast (`r=1` loop guard), a manually chosen pill shows a
+  banner with "Open {app}" instead; R4/R5 kind mismatch → banner "Switch to … / Use
+  Auto" (fetch still runs); R6 `@username` → DP + Stories/Highlights (auto-opened
+  when the Story/Highlights pill is active); R7 auto-save for single media; R8 iOS →
+  pulse + hint instead; R9/E-9 same link within 10 s → "This media is ready below"
+  + focus on Download HD; R10 clear + refocus; R11 History; R12 abort + Cancel;
+  R14 silent pill correction after fetch; R15 query cleaned after boot.
+- **MGF-1** pill override counts `{fromKind>toKind}` only (never a URL).
+  **MGF-2** offline → link queued in `sessionStorage`, banner with "Try again now /
+  Cancel", fetched automatically on `online` (also after a reload).
+  **MGF-3** Recent (n) bottom sheet: this app's grabs, 72 px rows, re-grab, delete
+  with 6 s Undo. **MGF-4** see pills above.
+- **Errors (`ErrorCard`) — exactly one next action each:** PRIVATE / INVALID_URL /
+  NOT_FOUND → "Paste another link"; STORY_EXPIRED → "See @user's profile" when the
+  username is known; RATE_LIMITED → live "Try again in 12s" from `Retry-After`;
+  EXTRACTOR_DOWN / OFFLINE → "Try again"; new BANNED → "Contact us". PRIVATE never
+  suggests a Session ID (content policy §1.4).
+- **`ResultPanel` rewritten:** @author + verified, type badge, resolution · views ·
+  likes, preview with reserved aspect ratio, **one primary action** (Download HD /
+  Download All ZIP with progress / Download HD DP / Download Audio when the Audio
+  pill is active), "More" row (Save Thumbnail, Download Audio, Quality sheet —
+  default from Settings → Quality — and "Save to Photos" via Web Share on touch
+  devices), caption clamped to 3 lines + Read more, Copy Caption, every hashtag a
+  copyable chip ("Copied ✓" + haptic), Copy Hashtags, mentions, "Download another".
+  E-8: ZIP / share stop at 150 MB and say "save the files one by one".
+- **Desktop ≥ 1024 px:** 2-pane grid 440 px | result (sticky), gap 24, max 1120.
+- **Below the fold (`PlatformPage`):** Supported formats → "How to download from
+  {App}" (3 steps) → page prose → FAQ → Related tools → disclaimer. `FAQ` is now
+  native `<details>/<summary>` (no JS, answers in the HTML).
+- **GoldenBar removed** (1,468 lines with a 700-line inline `<style>`): the four
+  landing pages that still used it (Hindi reels/photo, SnapInsta/FastDL
+  alternatives) and `ToolLanding` (caption/hashtag extractors) embed
+  `<PlatformDownloader platform="instagram" embedded />`. No `dangerouslySetInnerHTML`
+  left in the downloader path; styles live in `components/downloader.css`.
+- **Bundle:** locale dictionaries split — English inline, Hindi and the other 19
+  languages are lazy chunks loaded when chosen (`loadLocale`); result/error UI is a
+  separate chunk prefetched on idle. First-load JS: `/` 156 → **142 kB** (PRD ≤ 150),
+  app pages 168 → **148 kB** (baseline 134–141 kB, within the +20 kB budget).
+- Tests: `lib/i18n.test.ts` (lazy locales), `lib/time.test.ts` (relative time,
+  `Retry-After` parsing) → `npm test` 127 / 127. Route diff: zero losses.
+- **Verified in Chromium (390 / 360 / 1280 px, light + dark, mocked API):** paste →
+  result (History record saved, "Download started ✓"), E-9, hashtag copy, "+4 More"
+  → Audio promoted to slot 4, Recent sheet, PRIVATE (one action, no Session ID
+  text), RATE_LIMITED countdown disabled, manual pill + Facebook link → banner,
+  Auto + Facebook link → `/facebook-downloader` with the link handed over and
+  fetched, carousel → "Download All (ZIP · 4)", no horizontal overflow at 360 px,
+  no console errors.
+
+| # | Decision | Why |
+|---|---|---|
+| 3.5.a | Recent (n) sits at the end of the detection strip, not after the pills | The strip's height is reserved, so the chip appearing after hydration causes no layout shift; it collapses to an icon + count under 480 px. |
+| 3.5.b | Pill labels and below-fold SEO prose stay English (data from `lib/platforms.ts` / page files) | Format names (Reel, Story, MP3) are used as-is in Hindi UIs; SEO copy is per-URL by design. All interface chrome is translated. |
+| 3.5.c | Platform pages read `?url=/src/kind` from `window.location` instead of `useSearchParams` | `useSearchParams` forces a client-only bailout to the nearest Suspense boundary, which removed the hero `<h1>` from the server HTML. |
+| 3.5.d | "@user on TikTok / X" (D13) links go to the official profile URLs in a new tab | Our TikTok/X pages download posts, they cannot search users. |
+| 3.5.e | Story-Ring also frames the app-page URL card; `glow-neon` stays Home-only | One spectrum surface per page (AC-77); PRD reserves the neon glow for Home. |
+| 3.5.f | Hindi landing pages keep the visitor's chosen language instead of forcing `lang=hi` | Forcing a locale per URL would override an explicit choice in Settings; their prose is already Hindi. |

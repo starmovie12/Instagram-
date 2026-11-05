@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SimpleToolLanding from "@/components/SimpleToolLanding";
-import GoldenBar from "@/components/GoldenBar";
+import PlatformDownloader from "@/components/PlatformDownloader";
 
 export const metadata: Metadata = {
   title: { absolute: "FastDL Alternative — InstaGrab (HD + Captions + AI Tools)" },
@@ -15,7 +15,7 @@ export default function Page() {
       eyebrow="FastDL / iGram alternative"
       h1={<>FastDL&apos;s downloads, plus the <em className="gilded">creator toolkit</em>.</>}
       lead="HD media with metadata, true MP3 audio (not renamed M4A), reel transcripts and 80+ tools — one paste bar. Try it:"
-      tool={<GoldenBar />}
+      tool={<PlatformDownloader platform="instagram" embedded />}
       faq={[
         { q: "Does InstaGrab show post metadata like FastDL?", a: "Yes — likes, comments, views and post date appear right on the result card when available, along with the full caption and hashtags FastDL doesn't give you." },
         { q: "FastDL advertises MP3 audio — what about InstaGrab?", a: "We do it more honestly and better: instant native M4A on the audio downloader, plus a true MP3 converter that actually re-encodes at 192 kbps in your browser — not a renamed file." },

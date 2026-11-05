@@ -264,6 +264,7 @@ dialog.sheet[data-state="closing"] { animation: sheet-out var(--motion-base) var
   font: 600 16px/24px var(--font-stack); text-align: start; text-decoration: none;
 }
 .sheet-opt[aria-pressed="true"], .sheet-opt[aria-current="true"] { color: var(--text-brand); background: var(--color-primary-subtle); }
+.sheet-list { display: grid; gap: var(--sp-1); }
 @media (hover: hover) and (pointer: fine) { .sheet-opt:hover { background: var(--bg-glass-island-active); } }
 @media (min-width: 600px) {
   dialog.sheet { inset: 0; margin: auto; max-width: 480px; max-height: min(85dvh, 640px); border-radius: var(--radius-card); border-bottom: 1px solid var(--border-default); padding-bottom: 0; }

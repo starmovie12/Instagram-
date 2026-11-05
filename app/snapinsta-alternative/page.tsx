@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SimpleToolLanding from "@/components/SimpleToolLanding";
-import GoldenBar from "@/components/GoldenBar";
+import PlatformDownloader from "@/components/PlatformDownloader";
 
 export const metadata: Metadata = {
   title: { absolute: "SnapInsta Alternative — InstaGrab (Free, No Ads Maze)" },
@@ -15,7 +15,7 @@ export default function Page() {
       eyebrow="SnapInsta alternative"
       h1={<>Everything SnapInsta does — <em className="gilded">plus 80 tools it doesn&apos;t</em>.</>}
       lead="Same one-paste downloads, none of the ad maze — and a full creator toolkit SnapInsta never built. Try it right here:"
-      tool={<GoldenBar />}
+      tool={<PlatformDownloader platform="instagram" embedded />}
       faq={[
         { q: "Is InstaGrab really a full SnapInsta replacement?", a: "Yes — reels, videos, photos, carousels, stories, highlights and profile pictures in HD, from one paste bar. Everything SnapInsta downloads, InstaGrab downloads." },
         { q: "What does InstaGrab have that SnapInsta doesn't?", a: "The whole creator workflow: caption + hashtag extraction with every download, Creator Pack ZIP, reel transcripts, AI caption/bio/script generators in Hinglish, engagement calculators, giveaway tools, an image studio — 80+ tools, all free." },

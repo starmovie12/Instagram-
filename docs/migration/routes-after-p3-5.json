@@ -1,0 +1,2489 @@
+{
+  "generatedAt": "2026-11-05T18:46:58.891Z",
+  "sharedFirstLoad": null,
+  "routes": [
+    {
+      "pattern": "/",
+      "type": "page"
+    },
+    {
+      "pattern": "/_not-found",
+      "type": "page"
+    },
+    {
+      "pattern": "/about",
+      "type": "page"
+    },
+    {
+      "pattern": "/account-health",
+      "type": "page"
+    },
+    {
+      "pattern": "/admin",
+      "type": "page"
+    },
+    {
+      "pattern": "/ai-alt-text",
+      "type": "page"
+    },
+    {
+      "pattern": "/ai/[tool]",
+      "type": "page"
+    },
+    {
+      "pattern": "/api/admin/config",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/admin/login",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/ai",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/alt-text",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/diag",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/download",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/extract",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/ig-status",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/invent/crystal",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/invent/kundli",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/invent/voice",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/invent/wrapped",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/og-extract",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/profile",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/shorten",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/telegram",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/transcribe",
+      "type": "route"
+    },
+    {
+      "pattern": "/api/twitter",
+      "type": "route"
+    },
+    {
+      "pattern": "/apple-icon.png",
+      "type": "route"
+    },
+    {
+      "pattern": "/audio-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/batch-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/best-time-to-post",
+      "type": "page"
+    },
+    {
+      "pattern": "/blog",
+      "type": "page"
+    },
+    {
+      "pattern": "/blog/[slug]",
+      "type": "page"
+    },
+    {
+      "pattern": "/blur-tool",
+      "type": "page"
+    },
+    {
+      "pattern": "/bulk-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/caption-extractor",
+      "type": "page"
+    },
+    {
+      "pattern": "/caption-fixer",
+      "type": "page"
+    },
+    {
+      "pattern": "/carousel-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/case-converter",
+      "type": "page"
+    },
+    {
+      "pattern": "/character-counter",
+      "type": "page"
+    },
+    {
+      "pattern": "/collage-maker",
+      "type": "page"
+    },
+    {
+      "pattern": "/color-palette",
+      "type": "page"
+    },
+    {
+      "pattern": "/coming-soon/[id]",
+      "type": "page"
+    },
+    {
+      "pattern": "/comments-exporter",
+      "type": "page"
+    },
+    {
+      "pattern": "/contact",
+      "type": "page"
+    },
+    {
+      "pattern": "/crystal-ball",
+      "type": "page"
+    },
+    {
+      "pattern": "/dm-link-generator",
+      "type": "page"
+    },
+    {
+      "pattern": "/dmca",
+      "type": "page"
+    },
+    {
+      "pattern": "/dp-ring-maker",
+      "type": "page"
+    },
+    {
+      "pattern": "/emv-calculator",
+      "type": "page"
+    },
+    {
+      "pattern": "/engagement-calculator",
+      "type": "page"
+    },
+    {
+      "pattern": "/facebook-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/fake-follower-checker",
+      "type": "page"
+    },
+    {
+      "pattern": "/fastdl-alternative",
+      "type": "page"
+    },
+    {
+      "pattern": "/follower-ratio-checker",
+      "type": "page"
+    },
+    {
+      "pattern": "/follower-tracker",
+      "type": "page"
+    },
+    {
+      "pattern": "/font-generator",
+      "type": "page"
+    },
+    {
+      "pattern": "/ghost-feed",
+      "type": "page"
+    },
+    {
+      "pattern": "/giveaway-picker",
+      "type": "page"
+    },
+    {
+      "pattern": "/grid-architect",
+      "type": "page"
+    },
+    {
+      "pattern": "/grid-planner",
+      "type": "page"
+    },
+    {
+      "pattern": "/grid-splitter",
+      "type": "page"
+    },
+    {
+      "pattern": "/hashtag-checker",
+      "type": "page"
+    },
+    {
+      "pattern": "/hashtag-counter",
+      "type": "page"
+    },
+    {
+      "pattern": "/hashtag-extractor",
+      "type": "page"
+    },
+    {
+      "pattern": "/highlights-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/history",
+      "type": "page"
+    },
+    {
+      "pattern": "/how-to-download",
+      "type": "page"
+    },
+    {
+      "pattern": "/icon.svg",
+      "type": "route"
+    },
+    {
+      "pattern": "/image-compressor",
+      "type": "page"
+    },
+    {
+      "pattern": "/insta-guess",
+      "type": "page"
+    },
+    {
+      "pattern": "/insta-kundli",
+      "type": "page"
+    },
+    {
+      "pattern": "/insta-wrapped",
+      "type": "page"
+    },
+    {
+      "pattern": "/instagram-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/invisible-character",
+      "type": "page"
+    },
+    {
+      "pattern": "/is-instagram-down",
+      "type": "page"
+    },
+    {
+      "pattern": "/link-shortener",
+      "type": "page"
+    },
+    {
+      "pattern": "/manifest.webmanifest",
+      "type": "route"
+    },
+    {
+      "pattern": "/media-kit-generator",
+      "type": "page"
+    },
+    {
+      "pattern": "/money-calculator",
+      "type": "page"
+    },
+    {
+      "pattern": "/offline",
+      "type": "page"
+    },
+    {
+      "pattern": "/opengraph-image",
+      "type": "route"
+    },
+    {
+      "pattern": "/photo-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/photo-downloader-hindi",
+      "type": "page"
+    },
+    {
+      "pattern": "/photo-filters",
+      "type": "page"
+    },
+    {
+      "pattern": "/photo-resizer",
+      "type": "page"
+    },
+    {
+      "pattern": "/pinterest-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/privacy-policy",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-audit",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-battle",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-pic-zoom",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-picture-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-roaster",
+      "type": "page"
+    },
+    {
+      "pattern": "/profile-viewer",
+      "type": "page"
+    },
+    {
+      "pattern": "/quick-action",
+      "type": "page"
+    },
+    {
+      "pattern": "/quote-maker",
+      "type": "page"
+    },
+    {
+      "pattern": "/reel-frame-grabber",
+      "type": "page"
+    },
+    {
+      "pattern": "/reel-remix",
+      "type": "page"
+    },
+    {
+      "pattern": "/reel-repurposer",
+      "type": "page"
+    },
+    {
+      "pattern": "/reel-to-mp3",
+      "type": "page"
+    },
+    {
+      "pattern": "/reel-transcript",
+      "type": "page"
+    },
+    {
+      "pattern": "/reels-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/reels-downloader-hindi",
+      "type": "page"
+    },
+    {
+      "pattern": "/robots.txt",
+      "type": "route"
+    },
+    {
+      "pattern": "/s/[code]",
+      "type": "route"
+    },
+    {
+      "pattern": "/settings",
+      "type": "page"
+    },
+    {
+      "pattern": "/shadowban-lab",
+      "type": "page"
+    },
+    {
+      "pattern": "/sitemap.xml",
+      "type": "route"
+    },
+    {
+      "pattern": "/snapinsta-alternative",
+      "type": "page"
+    },
+    {
+      "pattern": "/story-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/story-downloader-hindi",
+      "type": "page"
+    },
+    {
+      "pattern": "/story-feed",
+      "type": "page"
+    },
+    {
+      "pattern": "/story-viewer",
+      "type": "page"
+    },
+    {
+      "pattern": "/terms",
+      "type": "page"
+    },
+    {
+      "pattern": "/threads-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/thumbnail-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/tiktok-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/time-capsule",
+      "type": "page"
+    },
+    {
+      "pattern": "/tools",
+      "type": "page"
+    },
+    {
+      "pattern": "/trending-india",
+      "type": "page"
+    },
+    {
+      "pattern": "/twitter-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/username-checker",
+      "type": "page"
+    },
+    {
+      "pattern": "/utm-builder",
+      "type": "page"
+    },
+    {
+      "pattern": "/video-downloader",
+      "type": "page"
+    },
+    {
+      "pattern": "/video-to-gif",
+      "type": "page"
+    },
+    {
+      "pattern": "/video-trimmer",
+      "type": "page"
+    },
+    {
+      "pattern": "/virality-score",
+      "type": "page"
+    },
+    {
+      "pattern": "/voice-cloner",
+      "type": "page"
+    },
+    {
+      "pattern": "/wheel-spinner",
+      "type": "page"
+    },
+    {
+      "pattern": "/winner-certificate",
+      "type": "page"
+    },
+    {
+      "pattern": "/youtube-thumbnail-downloader",
+      "type": "page"
+    }
+  ],
+  "pages": {
+    "/": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "InstaGrab — Instagram Reels, Story, Caption & Hashtag Downloader",
+      "description": "Free Instagram downloader for reels, photos, stories and carousels in HD — plus the full caption and every hashtag. No login. Links never stored.",
+      "canonical": "https://tumhara-domain.com",
+      "ogTitle": "InstaGrab — Instagram Reels, Story, Caption & Hashtag Downloader",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "WebApplication"
+      ]
+    },
+    "/about": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "About · InstaGrab",
+      "description": "Who builds InstaGrab, what it does and how it keeps your downloads private — free, no login, public content only.",
+      "canonical": "https://tumhara-domain.com/about",
+      "ogTitle": "About · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/account-health": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Account Health Score — Free A+ to F Report Card · InstaGrab",
+      "description": "Get a complete Instagram health report card free: engagement, consistency, audience quality and profile craft scored out of 100 with an A+ to F grade. Shareable.",
+      "canonical": "https://tumhara-domain.com/account-health",
+      "ogTitle": "Instagram Account Health Score — Free A+ to F Report Card · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/admin": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Admin · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Admin · InstaGrab",
+      "robots": "noindex, nofollow, nocache",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/ai-alt-text": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Alt Text Generator for Instagram — Free Image Descriptions · InstaGrab",
+      "description": "Upload a photo and get 3 AI-written alt text options — concise, descriptive and keyword-rich — for Instagram accessibility and SEO reach. Free, image never stored.",
+      "canonical": "https://tumhara-domain.com/ai-alt-text",
+      "ogTitle": "AI Alt Text Generator for Instagram — Free Image Descriptions · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/bio-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Bio Generator — 10 Bios Under 150 Chars · InstaGrab",
+      "description": "Free AI bio generator for Instagram: describe yourself, pick a vibe and language (English/Hindi/Hinglish) — get 10 bios that fit the 150-character limit. No login.",
+      "canonical": "https://tumhara-domain.com/ai/bio-generator",
+      "ogTitle": "AI Instagram Bio Generator — 10 Bios Under 150 Chars · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/caption-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Caption Generator — English, Hindi & Hinglish · InstaGrab",
+      "description": "Free AI caption generator for Instagram. Pick a topic, tone and language — English, Hindi or Hinglish — and get 5 ready-to-post captions in seconds. No login.",
+      "canonical": "https://tumhara-domain.com/ai/caption-generator",
+      "ogTitle": "AI Instagram Caption Generator — English, Hindi & Hinglish · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/caption-translator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Caption Translator — 18 Languages, Hashtags Kept · InstaGrab",
+      "description": "Free AI caption translator for Instagram: natural, casual translation into 18 languages including Hindi and Hinglish — hashtags, emojis and mentions preserved exactly.",
+      "canonical": "https://tumhara-domain.com/ai/caption-translator",
+      "ogTitle": "AI Instagram Caption Translator — 18 Languages, Hashtags Kept · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/carousel-outline": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Carousel Outline Maker — 10 Slides Free · InstaGrab",
+      "description": "Free AI carousel generator: enter a topic and get a 10-slide outline — hook, one point per slide with visual suggestions, CTA, caption and hashtags. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/carousel-outline",
+      "ogTitle": "AI Instagram Carousel Outline Maker — 10 Slides Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/content-ideas": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Content Ideas — 30 Reel & Post Ideas Free · InstaGrab",
+      "description": "Free AI content idea generator: enter your niche and get 30 specific Instagram ideas — 15 reels, 10 posts, 5 stories — you could film today. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/content-ideas",
+      "ogTitle": "AI Instagram Content Ideas — 30 Reel & Post Ideas Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/giveaway-caption": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Giveaway Caption Generator for Instagram — Free · InstaGrab",
+      "description": "Free AI giveaway caption generator: enter the prize, rules and deadline — get a complete, premium giveaway announcement caption with hashtags. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/giveaway-caption",
+      "ogTitle": "AI Giveaway Caption Generator for Instagram — Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/growth-strategy": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Growth Strategy — Free 30-Day Plan · InstaGrab",
+      "description": "Free AI growth strategist: enter your followers, niche and goal — get a personalised 30-day Instagram plan with weekly actions and metrics to track. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/growth-strategy",
+      "ogTitle": "AI Instagram Growth Strategy — Free 30-Day Plan · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/hashtag-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Hashtag Generator — 30 Tags in 3 Reach Tiers · InstaGrab",
+      "description": "Free AI hashtag generator: enter your niche and get 30 relevant Instagram hashtags organised by reach tier (high / medium / niche) with one-click copy. No login.",
+      "canonical": "https://tumhara-domain.com/ai/hashtag-generator",
+      "ogTitle": "AI Instagram Hashtag Generator — 30 Tags in 3 Reach Tiers · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/hook-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Hook Generator for Reels — 10 Scroll-Stopping Openers · InstaGrab",
+      "description": "Free AI hook generator: get 10 scroll-stopping first lines for Instagram Reels using proven viral patterns. English, Hindi and Hinglish. No login.",
+      "canonical": "https://tumhara-domain.com/ai/hook-generator",
+      "ogTitle": "AI Hook Generator for Reels — 10 Scroll-Stopping Openers · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/reel-script-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Reel Script Generator — Hook, Beats, CTA (Hindi/Hinglish) · InstaGrab",
+      "description": "Free AI script generator for Instagram Reels: enter a topic and duration, get a complete script — hook, timed beats, on-screen text, CTA and B-roll ideas. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/reel-script-generator",
+      "ogTitle": "AI Reel Script Generator — Hook, Beats, CTA (Hindi/Hinglish) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/reply-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Comment Reply Generator — 5 Replies Free · InstaGrab",
+      "description": "Free AI reply generator for Instagram comments: paste a comment, pick a vibe (witty/professional/friendly) and get 5 human-sounding replies. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/reply-generator",
+      "ogTitle": "AI Instagram Comment Reply Generator — 5 Replies Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/story-poll-ideas": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Story Poll & Question Ideas — Free · InstaGrab",
+      "description": "Free AI generator for Instagram Story engagement: 15 poll, question-box and quiz ideas for your niche, ready to type into the sticker. Hinglish supported.",
+      "canonical": "https://tumhara-domain.com/ai/story-poll-ideas",
+      "ogTitle": "AI Instagram Story Poll & Question Ideas — Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ai/username-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Username Generator — 20 Handle Ideas · InstaGrab",
+      "description": "Free AI username generator for Instagram: enter your name and niche, get 20 clean handle ideas — then check availability instantly with our username checker.",
+      "canonical": "https://tumhara-domain.com/ai/username-generator",
+      "ogTitle": "AI Instagram Username Generator — 20 Handle Ideas · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/audio-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reel Audio Downloader — Save the Sound as MP3/M4A · InstaGrab",
+      "description": "Download the trending audio from any public Instagram reel on its own — the music/sound as an M4A file, no video. Free, no login, no watermark.",
+      "canonical": "https://tumhara-domain.com/audio-downloader",
+      "ogTitle": "Instagram Reel Audio Downloader — Save the Sound as MP3/M4A · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/batch-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Batch Downloader — Paste Many Links at Once · InstaGrab",
+      "description": "Paste up to 20 Instagram reel/post links and download them all in one go. Free, no login, no watermark — built for creators and social media managers.",
+      "canonical": "https://tumhara-domain.com/batch-downloader",
+      "ogTitle": "Instagram Batch Downloader — Paste Many Links at Once · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/best-time-to-post": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Best Time to Post on Instagram — India & Global (Free Tool) · InstaGrab",
+      "description": "Find the best time to post on Instagram for your niche and audience — India (IST), USA, Europe or global. Day-by-day golden windows, free, no login.",
+      "canonical": "https://tumhara-domain.com/best-time-to-post",
+      "ogTitle": "Best Time to Post on Instagram — India & Global (Free Tool) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/blog": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Blog — Instagram Growth, Reels & Hashtag Guides · InstaGrab",
+      "description": "Practical guides on Instagram reels, hashtags, captions, and content strategy for creators and social media managers.",
+      "canonical": "https://tumhara-domain.com/blog",
+      "ogTitle": "Blog — Instagram Growth, Reels & Hashtag Guides · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/best-time-to-post-reels": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Best Time to Post Instagram Reels in 2026 (What Actually Matters) · InstaGrab",
+      "description": "Generic 'best time' charts are mostly noise. Here's how timing really works on Reels and how to find YOUR best posting window.",
+      "canonical": "https://tumhara-domain.com/blog/best-time-to-post-reels",
+      "ogTitle": "Best Time to Post Instagram Reels in 2026 (What Actually Matters) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/copy-instagram-caption-full-text": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Copy an Instagram Caption — Full Text, One Click (2026) · InstaGrab",
+      "description": "Instagram blocks text selection on captions. Here are three ways to copy any caption word-for-word — and the one-click method that also grabs the hashtags.",
+      "canonical": "https://tumhara-domain.com/blog/copy-instagram-caption-full-text",
+      "ogTitle": "How to Copy an Instagram Caption — Full Text, One Click (2026) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/download-instagram-profile-picture-hd": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to See & Download Any Instagram Profile Picture in Full HD · InstaGrab",
+      "description": "Instagram locks profile photos to a tiny circle you can't zoom. Here's how to view and save the full-size HD original of any public account's DP.",
+      "canonical": "https://tumhara-domain.com/blog/download-instagram-profile-picture-hd",
+      "ogTitle": "How to See & Download Any Instagram Profile Picture in Full HD · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/download-instagram-stories-anonymously": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to View & Download Instagram Stories Anonymously (2026 Guide) · InstaGrab",
+      "description": "Watch and save public Instagram stories without the account owner ever knowing. Here's exactly how anonymous story viewing works — and its limits.",
+      "canonical": "https://tumhara-domain.com/blog/download-instagram-stories-anonymously",
+      "ogTitle": "How to View & Download Instagram Stories Anonymously (2026 Guide) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/find-trending-hashtags-instagram": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Find Trending Instagram Hashtags in Your Niche (Free Method) · InstaGrab",
+      "description": "No paid tools needed. A simple reverse-engineering workflow: extract hashtags from viral posts in your niche and build data-backed tag sets.",
+      "canonical": "https://tumhara-domain.com/blog/find-trending-hashtags-instagram",
+      "ogTitle": "How to Find Trending Instagram Hashtags in Your Niche (Free Method) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/get-brand-deals-small-creator-india": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How Small Creators in India Get Their First Brand Deal (Under 10K Followers) · InstaGrab",
+      "description": "You don't need 100K followers to earn from Instagram. Here's the realistic playbook Indian nano-creators use to land their first paid collab.",
+      "canonical": "https://tumhara-domain.com/blog/get-brand-deals-small-creator-india",
+      "ogTitle": "How Small Creators in India Get Their First Brand Deal (Under 10K Followers) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/how-to-download-instagram-reels-with-caption": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Download Instagram Reels WITH the Caption and Hashtags (2026) · InstaGrab",
+      "description": "Most downloaders only save the video. Here's how to get the reel, its full caption, and every hashtag in one step — free.",
+      "canonical": "https://tumhara-domain.com/blog/how-to-download-instagram-reels-with-caption",
+      "ogTitle": "How to Download Instagram Reels WITH the Caption and Hashtags (2026) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/instagram-giveaway-guide-india": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Run an Instagram Giveaway in India That Actually Grows Your Account · InstaGrab",
+      "description": "Most giveaways attract prize-hunters who unfollow in a week. The mechanics that attract your real audience — rules, prizes, picking winners fairly.",
+      "canonical": "https://tumhara-domain.com/blog/instagram-giveaway-guide-india",
+      "ogTitle": "How to Run an Instagram Giveaway in India That Actually Grows Your Account · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/instagram-hashtag-strategy-2026": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "The 2026 Instagram Hashtag Strategy That Still Works · InstaGrab",
+      "description": "Hashtags aren't dead — they're just misunderstood. A practical, data-backed hashtag system for reels and posts, built from extracting what already works.",
+      "canonical": "https://tumhara-domain.com/blog/instagram-hashtag-strategy-2026",
+      "ogTitle": "The 2026 Instagram Hashtag Strategy That Still Works · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/instagram-reels-hd-vs-4k-quality": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reel Quality Explained: What HD, 1080p and '4K' Really Mean · InstaGrab",
+      "description": "Downloaders promise '4K Ultra HD' — but Instagram doesn't store 4K reels. Here's the honest truth about reel resolution and how to get the best possible quality.",
+      "canonical": "https://tumhara-domain.com/blog/instagram-reels-hd-vs-4k-quality",
+      "ogTitle": "Instagram Reel Quality Explained: What HD, 1080p and '4K' Really Mean · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/instagram-seo-alt-text-keywords": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram SEO in 2026: Alt Text, Keywords, and How Search Actually Works · InstaGrab",
+      "description": "Instagram is a search engine now. How captions, alt text and keywords decide whether your posts surface — and the 10-minute SEO routine per post.",
+      "canonical": "https://tumhara-domain.com/blog/instagram-seo-alt-text-keywords",
+      "ogTitle": "Instagram SEO in 2026: Alt Text, Keywords, and How Search Actually Works · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/instagram-story-vs-reel-vs-post": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Story vs Reel vs Post: Where Should Your Content Go? · InstaGrab",
+      "description": "Each format has a different job. A quick decision framework for choosing where each piece of content performs best.",
+      "canonical": "https://tumhara-domain.com/blog/instagram-story-vs-reel-vs-post",
+      "ogTitle": "Story vs Reel vs Post: Where Should Your Content Go? · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/repurpose-instagram-content-legally": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Repurpose Instagram Content Legally (Creator's Guide) · InstaGrab",
+      "description": "Reposting isn't automatically fair use. What you can and can't do with downloaded Instagram content, and how to get permission the easy way.",
+      "canonical": "https://tumhara-domain.com/blog/repurpose-instagram-content-legally",
+      "ogTitle": "How to Repurpose Instagram Content Legally (Creator's Guide) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/spot-fake-followers-before-collab": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Spot Fake Followers Before a Collab (5 Checks in 2 Minutes) · InstaGrab",
+      "description": "Paying a creator with bot followers burns your budget. Five public-data checks that expose bought audiences before you sign anything.",
+      "canonical": "https://tumhara-domain.com/blog/spot-fake-followers-before-collab",
+      "ogTitle": "How to Spot Fake Followers Before a Collab (5 Checks in 2 Minutes) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blog/viral-reel-script-formula": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "The Viral Reel Script Formula: Hook, Beats, CTA (With Examples) · InstaGrab",
+      "description": "Viral reels aren't lucky — they're structured. Break down the 3-part script formula behind talking reels that travel, and how to write one in 10 minutes.",
+      "canonical": "https://tumhara-domain.com/blog/viral-reel-script-formula",
+      "ogTitle": "The Viral Reel Script Formula: Hook, Beats, CTA (With Examples) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/blur-tool": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Blur / Pixelate Tool — Hide Faces & Info in Screenshots · InstaGrab",
+      "description": "Blur or pixelate parts of any image free: rub over faces, names, numbers or chats to hide them before sharing. Runs entirely in your browser — nothing is uploaded.",
+      "canonical": "https://tumhara-domain.com/blur-tool",
+      "ogTitle": "Blur / Pixelate Tool — Hide Faces & Info in Screenshots · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/bulk-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Bulk Downloader — Save a Profile's Posts in One ZIP · InstaGrab",
+      "description": "Enter a public username and download its recent posts together in a single ZIP file. Fast, anonymous, no login. Great for content research and archiving.",
+      "canonical": "https://tumhara-domain.com/bulk-downloader",
+      "ogTitle": "Instagram Bulk Downloader — Save a Profile's Posts in One ZIP · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/caption-extractor": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Caption Extractor — Copy Any Caption Instantly · InstaGrab",
+      "description": "Extract and copy the full caption from any public Instagram post or reel — line breaks preserved, one click to copy. Free.",
+      "canonical": "https://tumhara-domain.com/caption-extractor",
+      "ogTitle": "Instagram Caption Extractor — Copy Any Caption Instantly · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/caption-fixer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Caption Line Break Generator — Fix Spacing · InstaGrab",
+      "description": "Add clean line breaks and spacing to your Instagram captions and bio. Instagram collapses blank lines — this locks them so your caption pastes perfectly. Free.",
+      "canonical": "https://tumhara-domain.com/caption-fixer",
+      "ogTitle": "Instagram Caption Line Break Generator — Fix Spacing · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/carousel-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Carousel Downloader — Save All Slides at Once · InstaGrab",
+      "description": "Download every slide of an Instagram carousel post — photos and videos — in HD. Each slide gets its own download. Free, no login, plus caption + hashtags.",
+      "canonical": "https://tumhara-domain.com/carousel-downloader",
+      "ogTitle": "Instagram Carousel Downloader — Save All Slides at Once · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/case-converter": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Case Converter — UPPERCASE, Title Case, Small Caps & More · InstaGrab",
+      "description": "Free text case converter for Instagram captions and bios: UPPERCASE, lowercase, Title Case, Sentence case, aLtErNaTiNg and Unicode small caps — with one-tap copy.",
+      "canonical": "https://tumhara-domain.com/case-converter",
+      "ogTitle": "Case Converter — UPPERCASE, Title Case, Small Caps & More · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/character-counter": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Character Counter — Caption, Bio & Hashtag Limits · InstaGrab",
+      "description": "Live character counter for Instagram: caption (2,200), bio (150), username (30) and the 30-hashtag limit — with a “… more” fold preview. Free, no login.",
+      "canonical": "https://tumhara-domain.com/character-counter",
+      "ogTitle": "Instagram Character Counter — Caption, Bio & Hashtag Limits · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/collage-maker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Photo Collage Maker — 2-9 Photos, Gold Borders, Free · InstaGrab",
+      "description": "Make a photo collage for Instagram free: 6 layouts for 2-9 photos, adjustable borders (gold gradient optional), live preview, 1080px download. 100% on-device.",
+      "canonical": "https://tumhara-domain.com/collage-maker",
+      "ogTitle": "Photo Collage Maker — 2-9 Photos, Gold Borders, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/color-palette": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Color Palette Extractor — 5 Hex Codes from Any Photo · InstaGrab",
+      "description": "Upload a photo and get its 5 signature colors as hex codes, free. Build a consistent Instagram aesthetic — palette extraction runs entirely in your browser.",
+      "canonical": "https://tumhara-domain.com/color-palette",
+      "ogTitle": "Color Palette Extractor — 5 Hex Codes from Any Photo · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/coming-soon/linkedin": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "LinkedIn support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "LinkedIn support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/coming-soon/reddit": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Reddit support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Reddit support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/coming-soon/snapchat": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Snapchat support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Snapchat support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/coming-soon/telegram": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Telegram support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Telegram support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/coming-soon/twitch": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Twitch support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Twitch support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/coming-soon/vimeo": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Vimeo support coming soon · InstaGrab",
+      "description": "Download Instagram reels, photos, stories and carousels in HD — plus the full caption and every hashtag, one click away. Free, no login, links never stored.",
+      "canonical": null,
+      "ogTitle": "Vimeo support coming soon · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/comments-exporter": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Comments Exporter — Download Comments as CSV · InstaGrab",
+      "description": "Export any public Instagram post's recent comments to CSV/Excel free — usernames, comment text and likes, one click. No login, honest limits.",
+      "canonical": "https://tumhara-domain.com/comments-exporter",
+      "ogTitle": "Instagram Comments Exporter — Download Comments as CSV · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/contact": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Contact · InstaGrab",
+      "description": "Reach the InstaGrab team for support, feature requests, takedown questions or partnership enquiries.",
+      "canonical": "https://tumhara-domain.com/contact",
+      "ogTitle": "Contact · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/crystal-ball": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Crystal Ball — Predict a Post's Virality BEFORE You Post (AI) · InstaGrab",
+      "description": "Upload your photo or reel frame before posting — AI gives a virality score, hook check, visual critique and a Post-it/Fix-it verdict. The pre-post checklist. Free.",
+      "canonical": "https://tumhara-domain.com/crystal-ball",
+      "ogTitle": "Crystal Ball — Predict a Post's Virality BEFORE You Post (AI) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/dm-link-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram DM Link Generator — ig.me Link + QR Code · InstaGrab",
+      "description": "Create your Instagram DM link (ig.me) with an optional pre-filled message, plus a scan-to-DM QR code you can download and print. Free, no login.",
+      "canonical": "https://tumhara-domain.com/dm-link-generator",
+      "ogTitle": "Instagram DM Link Generator — ig.me Link + QR Code · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/dmca": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "DMCA · InstaGrab",
+      "description": "How to report copyright infringement to InstaGrab and how takedown notices are handled.",
+      "canonical": "https://tumhara-domain.com/dmca",
+      "ogTitle": "DMCA · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/dp-ring-maker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Story Ring Maker — Add a Gradient Ring to Your DP · InstaGrab",
+      "description": "Add the colourful Instagram story-style gradient ring around your profile picture. Upload your DP, pick a ring, download the PNG. Free, in your browser.",
+      "canonical": "https://tumhara-domain.com/dp-ring-maker",
+      "ogTitle": "Instagram Story Ring Maker — Add a Gradient Ring to Your DP · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/emv-calculator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram EMV Calculator — Earned Media Value (₹ / $) · InstaGrab",
+      "description": "Calculate the earned media value (EMV) of your Instagram posts: impressions, likes, comments, shares and saves converted to ₹ or $ — the number brands understand. Free.",
+      "canonical": "https://tumhara-domain.com/emv-calculator",
+      "ogTitle": "Instagram EMV Calculator — Earned Media Value (₹ / $) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/engagement-calculator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Engagement Rate Calculator — Free, No Login · InstaGrab",
+      "description": "Calculate any public Instagram account's engagement rate — likes + comments ÷ followers — from its recent posts. Free, instant, no login. Great for sponsorships.",
+      "canonical": "https://tumhara-domain.com/engagement-calculator",
+      "ogTitle": "Instagram Engagement Rate Calculator — Free, No Login · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/facebook-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Facebook Video Downloader — Videos & Reels, Free · InstaGrab",
+      "description": "Download public Facebook videos and reels free: paste a facebook.com or fb.watch link and save the video. Best-effort, honest errors, no login.",
+      "canonical": "https://tumhara-domain.com/facebook-downloader",
+      "ogTitle": "Facebook Video Downloader — Videos & Reels, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/fake-follower-checker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Fake Follower Checker for Instagram — Free Audience Audit · InstaGrab",
+      "description": "Check any Instagram account for fake or bought followers, free. Enter a @username and get an audience quality grade (A+ to F) from public engagement signals. No login.",
+      "canonical": "https://tumhara-domain.com/fake-follower-checker",
+      "ogTitle": "Fake Follower Checker for Instagram — Free Audience Audit · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/fastdl-alternative": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "FastDL Alternative — InstaGrab (HD + Captions + AI Tools)",
+      "description": "Looking for a FastDL / iGram alternative? InstaGrab downloads Instagram media in HD with captions and hashtags included — plus true MP3, transcripts and 80+ free tools.",
+      "canonical": "https://tumhara-domain.com/fastdl-alternative",
+      "ogTitle": "FastDL Alternative — InstaGrab (HD + Captions + AI Tools)",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/follower-ratio-checker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Follower Ratio Checker — Is Your Instagram Ratio Healthy? · InstaGrab",
+      "description": "Check your Instagram follower-to-following ratio and likes-to-followers ratio against healthy benchmarks — with an honest verdict on what your ratio signals. Free.",
+      "canonical": "https://tumhara-domain.com/follower-ratio-checker",
+      "ogTitle": "Follower Ratio Checker — Is Your Instagram Ratio Healthy? · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/follower-tracker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Follower Tracker — Daily Growth Chart, Free · InstaGrab",
+      "description": "Track any Instagram account's follower growth daily with a beautiful chart, growth delta and milestone countdown. Private (stored only in your browser), free, no login.",
+      "canonical": "https://tumhara-domain.com/follower-tracker",
+      "ogTitle": "Instagram Follower Tracker — Daily Growth Chart, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/font-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Fonts Generator — Stylish Bio Fonts, Copy & Paste · InstaGrab",
+      "description": "Turn any text into 15+ stylish fonts for your Instagram bio, name or captions — bold, italic, script, cursive and more. Copy with one tap. Free.",
+      "canonical": "https://tumhara-domain.com/font-generator",
+      "ogTitle": "Instagram Fonts Generator — Stylish Bio Fonts, Copy & Paste · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/ghost-feed": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Ghost Feed — See Which Accounts Stopped Posting · InstaGrab",
+      "description": "Add public accounts you care about and see who's gone quiet. Ranks everyone by days since their last post — the ghosts rise to the top. Anonymous, on-device, free.",
+      "canonical": "https://tumhara-domain.com/ghost-feed",
+      "ogTitle": "Ghost Feed — See Which Accounts Stopped Posting · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/giveaway-picker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Giveaway Comment Picker — Random Winner, Free · InstaGrab",
+      "description": "Pick a random giveaway winner from your Instagram post's comments free: entry filters (tag requirements, keywords), multiple winners, backup winners and a certificate.",
+      "canonical": "https://tumhara-domain.com/giveaway-picker",
+      "ogTitle": "Instagram Giveaway Comment Picker — Random Winner, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/grid-architect": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Grid Architect — Design a Colour-Cohesive Instagram Feed · InstaGrab",
+      "description": "Upload your next posts and arrange a beautiful, colour-cohesive grid. Auto-sort by colour or brightness, drag to reorder, preview your 3×3 feed. On-device, free.",
+      "canonical": "https://tumhara-domain.com/grid-architect",
+      "ogTitle": "Grid Architect — Design a Colour-Cohesive Instagram Feed · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/grid-planner": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Grid Planner — Preview Your 3×3 Feed, Free · InstaGrab",
+      "description": "Plan your Instagram feed free: add up to 9 upcoming posts, swap them around, and preview your 3×3 grid exactly as profile visitors will see it. On-device, no login.",
+      "canonical": "https://tumhara-domain.com/grid-planner",
+      "ogTitle": "Instagram Grid Planner — Preview Your 3×3 Feed, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/grid-splitter": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram 9-Grid Photo Splitter — Giant Square Maker · InstaGrab",
+      "description": "Split one photo into a 3×3 grid for a giant Instagram profile layout. Upload, get 9 perfectly cut tiles in a ZIP, ready to post. Free, runs in your browser.",
+      "canonical": "https://tumhara-domain.com/grid-splitter",
+      "ogTitle": "Instagram 9-Grid Photo Splitter — Giant Square Maker · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/hashtag-checker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Banned Hashtag Checker — Spot Shadowbanned Tags · InstaGrab",
+      "description": "Paste your Instagram hashtags and instantly see which ones are banned, blocked or risky — before you post. Avoid shadowbans. Free, runs in your browser.",
+      "canonical": "https://tumhara-domain.com/hashtag-checker",
+      "ogTitle": "Banned Hashtag Checker — Spot Shadowbanned Tags · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/hashtag-counter": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Hashtag Counter & Cleaner — Dedupe + 30-Tag Limit · InstaGrab",
+      "description": "Count your Instagram hashtags, remove duplicates, drop banned tags and trim to the 30-tag limit in one click. Free hashtag cleaner, no login.",
+      "canonical": "https://tumhara-domain.com/hashtag-counter",
+      "ogTitle": "Instagram Hashtag Counter & Cleaner — Dedupe + 30-Tag Limit · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/hashtag-extractor": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Hashtag Extractor — Grab Every Tag From Any Post · InstaGrab",
+      "description": "Extract every hashtag from any public Instagram post as tappable chips. Copy one tag or all of them, space-separated. Free.",
+      "canonical": "https://tumhara-domain.com/hashtag-extractor",
+      "ogTitle": "Instagram Hashtag Extractor — Grab Every Tag From Any Post · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/highlights-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Highlights Downloader — Covers & Stories · InstaGrab",
+      "description": "Download Instagram story highlights from any public profile — save highlight covers and the stories inside them in HD. Free, no login, username-based.",
+      "canonical": "https://tumhara-domain.com/highlights-downloader",
+      "ogTitle": "Instagram Highlights Downloader — Covers & Stories · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/history": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Recent Grabs — Private, On-Device History · InstaGrab",
+      "description": "Your InstaGrab download history — stored only in your browser, visible only to you.",
+      "canonical": "https://tumhara-domain.com/history",
+      "ogTitle": "Recent Grabs — Private, On-Device History · InstaGrab",
+      "robots": "noindex, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/how-to-download": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "How to Download Instagram, Facebook, TikTok & More — Step by Step · InstaGrab",
+      "description": "Learn how to copy a link and download public Instagram, Facebook, TikTok, YouTube thumbnails, Pinterest, X and Threads media in HD — no login, nothing stored.",
+      "canonical": "https://tumhara-domain.com/how-to-download",
+      "ogTitle": "How to Download Instagram, Facebook, TikTok & More — Step by Step · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 2,
+      "jsonLdTypes": [
+        "FAQPage",
+        "HowTo"
+      ]
+    },
+    "/image-compressor": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Image Compressor — Shrink Photos Without Visible Loss · InstaGrab",
+      "description": "Compress images in your browser free: quality slider, live before/after size comparison, instant download. 100% on-device — photos are never uploaded.",
+      "canonical": "https://tumhara-domain.com/image-compressor",
+      "ogTitle": "Image Compressor — Shrink Photos Without Visible Loss · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/insta-guess": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "InstaGuess — Daily Blurred DP Guessing Game · InstaGrab",
+      "description": "Guess the celebrity from their blurred Instagram profile picture. A new mystery every day, build your streak — the daily Instagram game. Free, no login.",
+      "canonical": "https://tumhara-domain.com/insta-guess",
+      "ogTitle": "InstaGuess — Daily Blurred DP Guessing Game · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/insta-kundli": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Insta Kundli — AI Instagram Horoscope & Compatibility · InstaGrab",
+      "description": "Enter any Instagram @username and get a fun AI 'Insta Kundli' — your posting rashi, this week's bhavishya, lucky hashtag, plus couple compatibility %. Hinglish, free.",
+      "canonical": "https://tumhara-domain.com/insta-kundli",
+      "ogTitle": "Insta Kundli — AI Instagram Horoscope & Compatibility · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/insta-wrapped": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Insta Wrapped — Your Instagram Year in Review (Free) · InstaGrab",
+      "description": "Spotify-Wrapped for Instagram. Enter any @username → get a shareable card with followers, top post, engagement, posting personality and a fun title. Free, no login.",
+      "canonical": "https://tumhara-domain.com/insta-wrapped",
+      "ogTitle": "Insta Wrapped — Your Instagram Year in Review (Free) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/instagram-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Downloader — Reels, Stories, Photos, Highlights & DP in HD · InstaGrab",
+      "description": "One page for every Instagram download: Reels, Stories, Photos, Carousels, Highlights and profile pictures in HD. Link auto-detected, no login, nothing stored.",
+      "canonical": "https://tumhara-domain.com/instagram-downloader",
+      "ogTitle": "Instagram Downloader — Reels, Stories, Photos, Highlights & DP in HD · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/invisible-character": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Invisible Character for Instagram — Blank Name & Line Breaks · InstaGrab",
+      "description": "Copy invisible characters (Braille blank, zero-width space and more) for blank Instagram names, clean line breaks and spacing tricks. One-tap copy, free.",
+      "canonical": "https://tumhara-domain.com/invisible-character",
+      "ogTitle": "Invisible Character for Instagram — Blank Name & Line Breaks · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/is-instagram-down": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Is Instagram Down Right Now? — Live Status Check · InstaGrab",
+      "description": "Check if Instagram is down right now. Live server status check with response time — find out in seconds whether it's an outage or just your connection.",
+      "canonical": "https://tumhara-domain.com/is-instagram-down",
+      "ogTitle": "Is Instagram Down Right Now? — Live Status Check · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/link-shortener": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Link Shortener for Instagram Bio — Free Short Links · InstaGrab",
+      "description": "Shorten long links for your Instagram bio, stories and DMs free — clean short URLs that redirect instantly and stay valid for a year.",
+      "canonical": "https://tumhara-domain.com/link-shortener",
+      "ogTitle": "Link Shortener for Instagram Bio — Free Short Links · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/media-kit-generator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Free Instagram Media Kit Generator — Gold Editorial Design · InstaGrab",
+      "description": "Create a beautiful one-page Instagram media kit free: stats, audience, collab rates and contact — in a premium gold editorial design. Download as PNG, no login, no watermark fees.",
+      "canonical": "https://tumhara-domain.com/media-kit-generator",
+      "ogTitle": "Free Instagram Media Kit Generator — Gold Editorial Design · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/money-calculator": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Money Calculator — Earnings per Post (₹ / $) · InstaGrab",
+      "description": "Free Instagram money calculator: enter followers, engagement rate and niche to estimate earnings per sponsored post, story and reel — with Indian ₹ and global $ rates. No login.",
+      "canonical": "https://tumhara-domain.com/money-calculator",
+      "ogTitle": "Instagram Money Calculator — Earnings per Post (₹ / $) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/offline": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "You're offline · InstaGrab",
+      "description": "No connection right now — your saved history is still here.",
+      "canonical": null,
+      "ogTitle": "You're offline · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/photo-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Photo Downloader — Original Quality, Carousels Too · InstaGrab",
+      "description": "Download Instagram photos in original resolution — single posts and full carousels, every slide. Free, no login.",
+      "canonical": "https://tumhara-domain.com/photo-downloader",
+      "ogTitle": "Instagram Photo Downloader — Original Quality, Carousels Too · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/photo-downloader-hindi": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Photo Download Kaise Kare — फोटो डाउनलोडर (HD, फ्री) · InstaGrab",
+      "description": "Instagram se photo download karni hai full HD mein? Post ka link paste karo — original quality photo, carousel ki saari slides, caption ke saath. Free, bina login.",
+      "canonical": "https://tumhara-domain.com/photo-downloader-hindi",
+      "ogTitle": "Instagram Photo Download Kaise Kare — फोटो डाउनलोडर (HD, फ्री) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/photo-filters": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Photo Filters Online — 15 Instagram-Style Presets, Free · InstaGrab",
+      "description": "Apply 15 Instagram-style filters to any photo free: golden hour, noir, vintage, vivid and more — live thumbnail previews, full-resolution download, 100% on-device.",
+      "canonical": "https://tumhara-domain.com/photo-filters",
+      "ogTitle": "Photo Filters Online — 15 Instagram-Style Presets, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/photo-resizer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Photo Resizer — All Post, Story & DP Sizes · InstaGrab",
+      "description": "Resize any photo to Instagram's exact sizes free: square 1:1, portrait 4:5, story 9:16, reel cover, profile picture — crop-to-fill or blur-pad fit. 100% on-device.",
+      "canonical": "https://tumhara-domain.com/photo-resizer",
+      "ogTitle": "Instagram Photo Resizer — All Post, Story & DP Sizes · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/pinterest-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Pinterest Downloader — Save Pins, Images & Videos Free · InstaGrab",
+      "description": "Download Pinterest images and videos in original quality free: paste any pin link (pinterest.com or pin.it) and save the media. No login, no watermark.",
+      "canonical": "https://tumhara-domain.com/pinterest-downloader",
+      "ogTitle": "Pinterest Downloader — Save Pins, Images & Videos Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/privacy-policy": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Privacy Policy · InstaGrab",
+      "description": "What InstaGrab stores (almost nothing), how abuse protection works, cookies from ads and your rights.",
+      "canonical": "https://tumhara-domain.com/privacy-policy",
+      "ogTitle": "Privacy Policy · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/profile-audit": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Profile Audit — Free Smart Report on Your Account · InstaGrab",
+      "description": "Get a free smart audit of any public Instagram profile — engagement, posting consistency, best time, hashtag use and caption strength, with clear tips. No login.",
+      "canonical": "https://tumhara-domain.com/profile-audit",
+      "ogTitle": "Instagram Profile Audit — Free Smart Report on Your Account · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/profile-battle": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Profile Battle — Compare Two Accounts (VS Mode) · InstaGrab",
+      "description": "Put two Instagram profiles head-to-head: followers, engagement, likes, ratios — with a battle score and a winner. Free VS comparison tool, no login.",
+      "canonical": "https://tumhara-domain.com/profile-battle",
+      "ogTitle": "Instagram Profile Battle — Compare Two Accounts (VS Mode) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/profile-pic-zoom": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Profile Picture Zoom — View Any DP in Full HD · InstaGrab",
+      "description": "Zoom any Instagram profile picture to full size free — see the HD original instead of the tiny circle, and download it if you want. No login, anonymous.",
+      "canonical": "https://tumhara-domain.com/profile-pic-zoom",
+      "ogTitle": "Instagram Profile Picture Zoom — View Any DP in Full HD · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/profile-picture-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Profile Picture Downloader — Full HD DP · InstaGrab",
+      "description": "View and download any public Instagram profile picture (DP) in full HD. Enter a username, get the full-size photo instantly. Free, no login.",
+      "canonical": "https://tumhara-domain.com/profile-picture-downloader",
+      "ogTitle": "Instagram Profile Picture Downloader — Full HD DP · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/profile-roaster": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "AI Instagram Profile Roaster — Get Roasted (Funny, Free) · InstaGrab",
+      "description": "Enter any public Instagram username and let AI roast the profile — funny, PG-13 and shareable, in Hinglish, Hindi or English. The perfect group-chat weapon. Free.",
+      "canonical": "https://tumhara-domain.com/profile-roaster",
+      "ogTitle": "AI Instagram Profile Roaster — Get Roasted (Funny, Free) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/profile-viewer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Profile Viewer — Bio, Stats & Posts Anonymously · InstaGrab",
+      "description": "View any public Instagram profile anonymously — HD profile picture, bio, follower stats and a grid of recent posts, reels and carousels. No login, no trace.",
+      "canonical": "https://tumhara-domain.com/profile-viewer",
+      "ogTitle": "Instagram Profile Viewer — Bio, Stats & Posts Anonymously · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/quick-action": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Quick Download · InstaGrab",
+      "description": "Instant Instagram download.",
+      "canonical": null,
+      "ogTitle": "Quick Download · InstaGrab",
+      "robots": "noindex, nofollow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/quote-maker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Quote Post Maker — Aesthetic Quote Images for Instagram · InstaGrab",
+      "description": "Turn any text into a beautiful quote image for Instagram free: 5 editorial themes, post/story sizes, live preview, PNG download. No watermark, no login, on-device.",
+      "canonical": "https://tumhara-domain.com/quote-maker",
+      "ogTitle": "Quote Post Maker — Aesthetic Quote Images for Instagram · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reel-frame-grabber": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Reel Frame Grabber — Capture Any Second as HD Image · InstaGrab",
+      "description": "Grab a full-resolution frame from any second of an Instagram reel or video, free. Scrub to the exact moment, capture, download as PNG — sharper than any screenshot.",
+      "canonical": "https://tumhara-domain.com/reel-frame-grabber",
+      "ogTitle": "Reel Frame Grabber — Capture Any Second as HD Image · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reel-remix": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Reel Remix Studio — Copy a Viral Reel's Formula for Your Niche · InstaGrab",
+      "description": "Paste a viral Instagram reel — get its transcript, why it went viral, and a fully rewritten script for YOUR niche with hooks, caption and hashtags. Hinglish supported. Free.",
+      "canonical": "https://tumhara-domain.com/reel-remix",
+      "ogTitle": "Reel Remix Studio — Copy a Viral Reel's Formula for Your Niche · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reel-repurposer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Reel Repurposer — 1 Reel into 6 Content Pieces (AI) · InstaGrab",
+      "description": "Paste an Instagram reel and get 6 ready-to-post pieces: blog post, X thread, LinkedIn post, YouTube Shorts, WhatsApp status and newsletter snippet. Hinglish, free.",
+      "canonical": "https://tumhara-domain.com/reel-repurposer",
+      "ogTitle": "Reel Repurposer — 1 Reel into 6 Content Pieces (AI) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reel-to-mp3": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reel to MP3 Converter — True MP3, Free · InstaGrab",
+      "description": "Convert any Instagram reel's audio to a true MP3 (192 kbps) free — decoded and re-encoded in your browser, not a renamed M4A. Works in every player and editor.",
+      "canonical": "https://tumhara-domain.com/reel-to-mp3",
+      "ogTitle": "Instagram Reel to MP3 Converter — True MP3, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reel-transcript": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reel Transcript Extractor — Reel to Text, Free · InstaGrab",
+      "description": "Paste any Instagram reel link and get the full spoken script as text — Hindi, English and Hinglish supported, with romanized Hindi included. The only free reel-to-text tool.",
+      "canonical": "https://tumhara-domain.com/reel-transcript",
+      "ogTitle": "Instagram Reel Transcript Extractor — Reel to Text, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reels-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reels Downloader — HD MP4, Free, No Login · InstaGrab",
+      "description": "Download any public Instagram reel in HD MP4 with its caption and hashtags. Free, no watermark, no login required.",
+      "canonical": "https://tumhara-domain.com/reels-downloader",
+      "ogTitle": "Instagram Reels Downloader — HD MP4, Free, No Login · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/reels-downloader-hindi": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Reels Download Kaise Kare — रील्स डाउनलोडर (फ्री) · InstaGrab",
+      "description": "Instagram reels download karna hai? Link paste karo, HD MP4 video + poora caption + saare hashtags ek click mein. Free, bina login, bina watermark — hindi mein samjhaya gaya.",
+      "canonical": "https://tumhara-domain.com/reels-downloader-hindi",
+      "ogTitle": "Instagram Reels Download Kaise Kare — रील्स डाउनलोडर (फ्री) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/s/zzzzzz": {
+      "status": 302,
+      "inSitemap": false,
+      "location": "http://localhost:3123/"
+    },
+    "/settings": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "Settings · InstaGrab",
+      "description": "Language, theme, download preferences and app install.",
+      "canonical": "https://tumhara-domain.com/settings",
+      "ogTitle": "Settings · InstaGrab",
+      "robots": "noindex, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/shadowban-lab": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Shadowban Lab — Honest Instagram Reach Checker · InstaGrab",
+      "description": "Check any public account for shadowban signals — engagement drop, risky hashtags, reach health — with an honest, no-hype report of what you can actually fix. Free.",
+      "canonical": "https://tumhara-domain.com/shadowban-lab",
+      "ogTitle": "Shadowban Lab — Honest Instagram Reach Checker · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/snapinsta-alternative": {
+      "status": 200,
+      "inSitemap": false,
+      "lang": "en",
+      "title": "SnapInsta Alternative — InstaGrab (Free, No Ads Maze)",
+      "description": "Looking for a SnapInsta alternative? InstaGrab downloads reels, photos and stories in HD — plus captions, hashtags, 80+ creator tools and Hinglish AI. Free, no login.",
+      "canonical": "https://tumhara-domain.com/snapinsta-alternative",
+      "ogTitle": "SnapInsta Alternative — InstaGrab (Free, No Ads Maze)",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/story-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Story Downloader — Save Before They Vanish · InstaGrab",
+      "description": "Save public Instagram stories as video or photo before they disappear at 24 hours. Anonymous — no login, no view notification.",
+      "canonical": "https://tumhara-domain.com/story-downloader",
+      "ogTitle": "Instagram Story Downloader — Save Before They Vanish · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/story-downloader-hindi": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Story Download Kaise Kare — स्टोरी डाउनलोडर (फ्री) · InstaGrab",
+      "description": "Instagram story download karni hai bina dekhe? Username daalo — active stories anonymously dekho aur HD mein save karo. Free, bina login — hindi mein samjhaya gaya.",
+      "canonical": "https://tumhara-domain.com/story-downloader-hindi",
+      "ogTitle": "Instagram Story Download Kaise Kare — स्टोरी डाउनलोडर (फ्री) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/story-feed": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Multi-Account Story Viewer — All Stories in One Feed · InstaGrab",
+      "description": "Watch stories from all your favorite public Instagram accounts in one anonymous feed. Build a watchlist (saved on-device), load everything with one tap, download any story.",
+      "canonical": "https://tumhara-domain.com/story-feed",
+      "ogTitle": "Multi-Account Story Viewer — All Stories in One Feed · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/story-viewer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Anonymous Instagram Story Viewer — No Trace, No Login · InstaGrab",
+      "description": "Watch public Instagram stories anonymously — no login, no trace, the account owner never knows. View and optionally download in HD. Free.",
+      "canonical": "https://tumhara-domain.com/story-viewer",
+      "ogTitle": "Anonymous Instagram Story Viewer — No Trace, No Login · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/terms": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Terms of Service · InstaGrab",
+      "description": "The rules for using InstaGrab: public content only, your responsibility for what you download, and our limits.",
+      "canonical": "https://tumhara-domain.com/terms",
+      "ogTitle": "Terms of Service · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/threads-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Threads Downloader — Save Threads Videos & Photos Free · InstaGrab",
+      "description": "Download videos and photos from Threads posts free: paste a threads.net link and save the media in original quality. No login, no watermark.",
+      "canonical": "https://tumhara-domain.com/threads-downloader",
+      "ogTitle": "Threads Downloader — Save Threads Videos & Photos Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/thumbnail-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Thumbnail Downloader — Save Reel & Video Covers in HD · InstaGrab",
+      "description": "Download the cover image (thumbnail) of any public Instagram reel, video or IGTV in full HD. Free, no login — perfect for competitor and thumbnail research.",
+      "canonical": "https://tumhara-domain.com/thumbnail-downloader",
+      "ogTitle": "Instagram Thumbnail Downloader — Save Reel & Video Covers in HD · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/tiktok-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "TikTok Downloader — Save TikTok Videos Free · InstaGrab",
+      "description": "Download TikTok videos free: paste a tiktok.com or vm.tiktok.com link and save the video. Works with the share links from the app. No login.",
+      "canonical": "https://tumhara-domain.com/tiktok-downloader",
+      "ogTitle": "TikTok Downloader — Save TikTok Videos Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/time-capsule": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Time Capsule — Seal Your Stats, Open in 30 Days · InstaGrab",
+      "description": "Snapshot your Instagram stats today, lock them for 30 days, then open the capsule to see exactly how much you grew. A growth ritual you'll come back for. Free.",
+      "canonical": "https://tumhara-domain.com/time-capsule",
+      "ogTitle": "Instagram Time Capsule — Seal Your Stats, Open in 30 Days · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/tools": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "All Tools — Instagram, Facebook, TikTok Downloaders & Creator Tools · InstaGrab",
+      "description": "Browse all 94 free tools: Instagram, Facebook, TikTok, YouTube, Pinterest, X and Threads downloaders, AI caption & hashtag generators, analytics, photo studio and more.",
+      "canonical": "https://tumhara-domain.com/tools",
+      "ogTitle": "All Tools — Instagram, Facebook, TikTok Downloaders & Creator Tools · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 0,
+      "jsonLdTypes": []
+    },
+    "/trending-india": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Trend Radar India — Trending Hashtags, Audio & Reel Formats · InstaGrab",
+      "description": "What's working on Instagram India right now: copy-ready hashtag sets by category, audio strategy and the reel formats getting reach — curated and updated regularly.",
+      "canonical": "https://tumhara-domain.com/trending-india",
+      "ogTitle": "Trend Radar India — Trending Hashtags, Audio & Reel Formats · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/twitter-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Twitter / X Video Downloader — HD MP4, Free · InstaGrab",
+      "description": "Download Twitter (X) videos, GIFs and photos free: paste a tweet link, get the highest-bitrate MP4 and original-resolution images — plus the tweet text. No login.",
+      "canonical": "https://tumhara-domain.com/twitter-downloader",
+      "ogTitle": "Twitter / X Video Downloader — HD MP4, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/username-checker": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Username Checker — Is It Available? · InstaGrab",
+      "description": "Check if an Instagram username is available in seconds, free. Get instant availability plus smart alternative handle suggestions if it's taken. No login needed.",
+      "canonical": "https://tumhara-domain.com/username-checker",
+      "ogTitle": "Instagram Username Checker — Is It Available? · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/utm-builder": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "UTM Link Builder for Instagram — Track Your Bio Link · InstaGrab",
+      "description": "Build UTM tracking links for Instagram free: tag your bio, story and reel links so Google Analytics shows exactly which placement drives traffic and sales.",
+      "canonical": "https://tumhara-domain.com/utm-builder",
+      "ogTitle": "UTM Link Builder for Instagram — Track Your Bio Link · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/video-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Instagram Video Downloader — Save Videos & IGTV in HD · InstaGrab",
+      "description": "Download any Instagram video, reel or IGTV in HD MP4 for free. Fast, anonymous, no watermark, no login — plus the caption and every hashtag.",
+      "canonical": "https://tumhara-domain.com/video-downloader",
+      "ogTitle": "Instagram Video Downloader — Save Videos & IGTV in HD · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/video-to-gif": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Video to GIF Converter — Free, In Your Browser · InstaGrab",
+      "description": "Convert any video clip to a GIF free: pick the start and length (up to 8s), encode on-device, download a WhatsApp-friendly GIF. No upload, no watermark.",
+      "canonical": "https://tumhara-domain.com/video-to-gif",
+      "ogTitle": "Video to GIF Converter — Free, In Your Browser · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/video-trimmer": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Video Trimmer Online — Cut Clips in Your Browser, Free · InstaGrab",
+      "description": "Trim any video in your browser free: set start and end, get your clip — no upload, no watermark, no install. Great for cutting reels and stories to length.",
+      "canonical": "https://tumhara-domain.com/video-trimmer",
+      "ogTitle": "Video Trimmer Online — Cut Clips in Your Browser, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/virality-score": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Reel Virality Score Calculator — Rate Your Reel /100 · InstaGrab",
+      "description": "Score any reel out of 100: enter views, likes, comments, shares and followers — get a virality score with specific tips on what to improve. Free, no login.",
+      "canonical": "https://tumhara-domain.com/virality-score",
+      "ogTitle": "Reel Virality Score Calculator — Rate Your Reel /100 · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/voice-cloner": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Caption Voice Cloner — Write in Any Creator's Style (AI) · InstaGrab",
+      "description": "AI learns any public creator's caption style — tone, emojis, structure — then writes YOUR caption in that exact voice. The only style-transfer caption tool. Free.",
+      "canonical": "https://tumhara-domain.com/voice-cloner",
+      "ogTitle": "Caption Voice Cloner — Write in Any Creator's Style (AI) · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/wheel-spinner": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Wheel Spinner — Random Name Picker for Giveaways · InstaGrab",
+      "description": "Free spinning wheel name picker for Instagram giveaways: paste entrants, spin a beautiful gold wheel, get a provably random winner. Perfect for screen-recorded draws.",
+      "canonical": "https://tumhara-domain.com/wheel-spinner",
+      "ogTitle": "Wheel Spinner — Random Name Picker for Giveaways · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/winner-certificate": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "Giveaway Winner Certificate Generator — Free, Verifiable · InstaGrab",
+      "description": "Create an official-looking giveaway winner certificate free: winner's name, prize, date and a unique certificate ID on a gold-framed PNG — ready for your story.",
+      "canonical": "https://tumhara-domain.com/winner-certificate",
+      "ogTitle": "Giveaway Winner Certificate Generator — Free, Verifiable · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    },
+    "/youtube-thumbnail-downloader": {
+      "status": 200,
+      "inSitemap": true,
+      "lang": "en",
+      "title": "YouTube Thumbnail Downloader — Full HD, Free · InstaGrab",
+      "description": "Download any YouTube video's thumbnail in Full HD (1280×720), free. Works with normal videos, Shorts and youtu.be links — paste the URL, save the image. No login.",
+      "canonical": "https://tumhara-domain.com/youtube-thumbnail-downloader",
+      "ogTitle": "YouTube Thumbnail Downloader — Full HD, Free · InstaGrab",
+      "robots": "index, follow",
+      "jsonLdCount": 1,
+      "jsonLdTypes": [
+        "FAQPage"
+      ]
+    }
+  },
+  "assets": {
+    "/apple-icon.png": {
+      "status": 200,
+      "contentType": "image/png"
+    },
+    "/icon.svg": {
+      "status": 200,
+      "contentType": "image/svg+xml"
+    },
+    "/manifest.webmanifest": {
+      "status": 200,
+      "contentType": "application/manifest+json"
+    },
+    "/opengraph-image": {
+      "status": 200,
+      "contentType": "image/png"
+    },
+    "/robots.txt": {
+      "status": 200,
+      "contentType": "text/plain"
+    },
+    "/sitemap.xml": {
+      "status": 200,
+      "contentType": "application/xml"
+    }
+  },
+  "sitemap": [
+    "/",
+    "/about",
+    "/account-health",
+    "/ai-alt-text",
+    "/ai/bio-generator",
+    "/ai/caption-generator",
+    "/ai/caption-translator",
+    "/ai/carousel-outline",
+    "/ai/content-ideas",
+    "/ai/giveaway-caption",
+    "/ai/growth-strategy",
+    "/ai/hashtag-generator",
+    "/ai/hook-generator",
+    "/ai/reel-script-generator",
+    "/ai/reply-generator",
+    "/ai/story-poll-ideas",
+    "/ai/username-generator",
+    "/audio-downloader",
+    "/batch-downloader",
+    "/best-time-to-post",
+    "/blog",
+    "/blog/best-time-to-post-reels",
+    "/blog/copy-instagram-caption-full-text",
+    "/blog/download-instagram-profile-picture-hd",
+    "/blog/download-instagram-stories-anonymously",
+    "/blog/find-trending-hashtags-instagram",
+    "/blog/get-brand-deals-small-creator-india",
+    "/blog/how-to-download-instagram-reels-with-caption",
+    "/blog/instagram-giveaway-guide-india",
+    "/blog/instagram-hashtag-strategy-2026",
+    "/blog/instagram-reels-hd-vs-4k-quality",
+    "/blog/instagram-seo-alt-text-keywords",
+    "/blog/instagram-story-vs-reel-vs-post",
+    "/blog/repurpose-instagram-content-legally",
+    "/blog/spot-fake-followers-before-collab",
+    "/blog/viral-reel-script-formula",
+    "/blur-tool",
+    "/bulk-downloader",
+    "/caption-extractor",
+    "/caption-fixer",
+    "/carousel-downloader",
+    "/case-converter",
+    "/character-counter",
+    "/collage-maker",
+    "/color-palette",
+    "/comments-exporter",
+    "/contact",
+    "/crystal-ball",
+    "/dm-link-generator",
+    "/dmca",
+    "/dp-ring-maker",
+    "/emv-calculator",
+    "/engagement-calculator",
+    "/facebook-downloader",
+    "/fake-follower-checker",
+    "/follower-ratio-checker",
+    "/follower-tracker",
+    "/font-generator",
+    "/ghost-feed",
+    "/giveaway-picker",
+    "/grid-architect",
+    "/grid-planner",
+    "/grid-splitter",
+    "/hashtag-checker",
+    "/hashtag-counter",
+    "/hashtag-extractor",
+    "/highlights-downloader",
+    "/how-to-download",
+    "/image-compressor",
+    "/insta-guess",
+    "/insta-kundli",
+    "/insta-wrapped",
+    "/instagram-downloader",
+    "/invisible-character",
+    "/is-instagram-down",
+    "/link-shortener",
+    "/media-kit-generator",
+    "/money-calculator",
+    "/photo-downloader",
+    "/photo-downloader-hindi",
+    "/photo-filters",
+    "/photo-resizer",
+    "/pinterest-downloader",
+    "/privacy-policy",
+    "/profile-audit",
+    "/profile-battle",
+    "/profile-pic-zoom",
+    "/profile-picture-downloader",
+    "/profile-roaster",
+    "/profile-viewer",
+    "/quote-maker",
+    "/reel-frame-grabber",
+    "/reel-remix",
+    "/reel-repurposer",
+    "/reel-to-mp3",
+    "/reel-transcript",
+    "/reels-downloader",
+    "/reels-downloader-hindi",
+    "/shadowban-lab",
+    "/story-downloader",
+    "/story-downloader-hindi",
+    "/story-feed",
+    "/story-viewer",
+    "/terms",
+    "/threads-downloader",
+    "/thumbnail-downloader",
+    "/tiktok-downloader",
+    "/time-capsule",
+    "/tools",
+    "/trending-india",
+    "/twitter-downloader",
+    "/username-checker",
+    "/utm-builder",
+    "/video-downloader",
+    "/video-to-gif",
+    "/video-trimmer",
+    "/virality-score",
+    "/voice-cloner",
+    "/wheel-spinner",
+    "/winner-certificate",
+    "/youtube-thumbnail-downloader"
+  ]
+}

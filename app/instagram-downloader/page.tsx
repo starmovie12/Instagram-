@@ -16,7 +16,7 @@ export default function Page() {
       faq={[
         { q: "What can I download?", a: "Public Reels, Stories, Photos, Carousels, IGTV videos, Highlights and profile pictures — in the original quality Instagram serves." },
         { q: "Do I have to pick Reel or Story first?", a: "No. Auto mode recognises the link type for you. You can still choose a type manually if you prefer." },
-        { q: "Does it work for private accounts?", a: "No. Only public content downloads. For accounts you follow, you can optionally add a Session ID in Settings → Advanced." },
+        { q: "Does it work for private accounts?", a: "No. Only public content downloads — private accounts stay private, even if you add a Session ID in Settings." },
         { q: "Is my link stored?", a: "No. Links are processed in memory and never written to a database. Your history lives only in your browser." },
       ]}
     >

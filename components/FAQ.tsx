@@ -1,48 +1,26 @@
-"use client";
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import Reveal from "./Reveal";
 import { DEFAULT_FAQ, type QA } from "@/lib/seo";
 
 export type { QA };
 
-export default function FAQ({ items = DEFAULT_FAQ }: { items?: QA[] }) {
-  const [open, setOpen] = useState<number>(-1);
+/**
+ * FAQ — native <details>/<summary>: works without JS, keyboard + screen-reader friendly,
+ * and every answer is in the server HTML (matches the FAQPage JSON-LD on the page).
+ */
+export default function FAQ({ items = DEFAULT_FAQ, title = "Frequently asked questions" }: { items?: QA[]; title?: string }) {
   return (
-    <section id="faq" className="section" style={{ paddingTop: 0 }}>
-      <div className="container" style={{ maxWidth: 760 }}>
-        <Reveal>
-          <span className="label">FAQ</span>
-          <h2 style={{ marginTop: 12, marginBottom: 32 }}>Quiet answers.</h2>
-        </Reveal>
-        <Reveal>
-          <div style={{ borderTop: "1px solid var(--line)" }}>
-            {items.map((item, i) => (
-              <div key={i} style={{ borderBottom: "1px solid var(--line)" }}>
-                <button
-                  onClick={() => setOpen(open === i ? -1 : i)}
-                  aria-expanded={open === i}
-                  style={{
-                    display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between",
-                    gap: 16, padding: "18px 4px", background: "none", border: "none", cursor: "pointer",
-                    fontWeight: 600, fontSize: "var(--t-body)", textAlign: "left",
-                  }}>
-                  {item.q}
-                  <ChevronDown size={20} strokeWidth={1.5} style={{
-                    flexShrink: 0, color: "var(--ink-3)",
-                    transform: open === i ? "rotate(180deg)" : "none",
-                    transition: "transform 300ms var(--ease-hinge)",
-                  }} />
-                </button>
-                <div className={`expander ${open === i ? "open" : ""}`}>
-                  <div>
-                    <p style={{ color: "var(--ink-2)", padding: "0 4px 18px", fontSize: "var(--t-small)", maxWidth: "60ch" }}>{item.a}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+    <section id="faq" className="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title" className="faq__title">{title}</h2>
+      <div className="faq__list">
+        {items.map((item, i) => (
+          <details key={i} className="faq__item">
+            <summary className="faq__q">
+              <span>{item.q}</span>
+              <ChevronDown className="faq__chev" size={20} strokeWidth={2} aria-hidden="true" />
+            </summary>
+            <p className="faq__a">{item.a}</p>
+          </details>
+        ))}
       </div>
     </section>
   );

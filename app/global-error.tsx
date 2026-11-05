@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import ErrorScreen from "@/components/ui/ErrorScreen";
-import { translate } from "@/lib/i18n";
+import { loadLocale, translate } from "@/lib/i18n";
 import "./globals.css";
 import "./shell.css";
 
@@ -14,7 +14,8 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
   const [theme, setTheme] = useState("light");
   useEffect(() => {
     try {
-      setLang(localStorage.getItem("ig-lang") || "en");
+      const l = localStorage.getItem("ig-lang") || "en";
+      void loadLocale(l).then(() => setLang(l));
       setTheme(localStorage.getItem("ig-theme") || "light");
     } catch { /* private mode: defaults */ }
     console.error(JSON.stringify({ level: "error", msg: "global_error", digest: error.digest ?? null }));

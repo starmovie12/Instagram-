@@ -1,9 +1,8 @@
-import { Suspense } from "react";
+import "./downloader.css";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import PlatformDownloader from "@/components/PlatformDownloader";
-import HowItWorks from "@/components/HowItWorks";
 import FAQ from "@/components/FAQ";
-import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
 import LegalFoot from "@/components/LegalFoot";
 import ToolIcon from "@/components/ToolIcon";
@@ -12,81 +11,82 @@ import { visibleTools } from "@/lib/registry";
 import { DEFAULT_FAQ, faqJsonLd, type QA } from "@/lib/seo";
 
 /**
- * App page shell (PRD §10, §10.9, §17.1) — Back Bar AppShell se; yahan: PlatformDownloader (fold ke upar),
- * fold ke neeche SEO prose + FAQ + Related tools normal HTML me (JS-only hide nahi).
- * Purane SEO URLs jaise hain waise; Instagram preset + pill preselected.
+ * App page (PRD §10, §10.9, §17.1). Above the fold: the workspace (server-rendered, hydrated).
+ * Below the fold, plain HTML for SEO: Supported formats → How to download from {App} (3 steps)
+ * → About prose (children) → FAQ → Related tools (3–6) → disclaimer. Ads only under a result.
+ * Legacy SEO URLs keep their own metadata and render this with a preselected pill.
  */
 export default function PlatformPage({
   platform, pill, h1, lead, faq, children, self,
 }: {
   platform: PlatformId;
   pill?: string;
+  /** @deprecated kept for older page files; the hero no longer shows an eyebrow */
   eyebrow?: string;
   h1: React.ReactNode;
   lead: string;
   faq?: QA[];
   children?: React.ReactNode;
-  /** is page ka apna href (Related tools se hatane ke liye) */
+  /** this page's own href (excluded from Related tools) */
   self?: string;
 }) {
   const def = platformById(platform)!;
   const formats = def.pills.filter((p) => p.id !== "auto");
-  const related = visibleTools.filter((t) => t.href !== self && t.href !== def.route && (platform === "instagram" ? t.category === "downloaders" : t.category === "platforms")).slice(0, 6);
+  const related = visibleTools
+    .filter((t) => t.href !== self && t.href !== def.route && (platform === "instagram" ? t.category === "downloaders" : t.category === "platforms"))
+    .slice(0, 6);
+  const steps: [string, string][] = [
+    ["Copy the link", `Open the post in the ${def.name} app or website and tap Share → Copy link.`],
+    ["Paste it here", "Tap Paste (or drop the link in the box). The type is detected for you."],
+    ["Download", "Tap Download — the file is saved in its original quality, ready to use."],
+  ];
+
   return (
     <>
       <JsonLd data={faqJsonLd(faq ?? DEFAULT_FAQ)} />
-      <main>
-        <section style={{ position: "relative", padding: "clamp(12px, 3vw, 24px) 0 clamp(24px, 5vw, 40px)" }}>
-          <div className="container" style={{ maxWidth: 760 }}>
-            <Suspense fallback={null}>
-              <PlatformDownloader platform={platform} presetPill={pill} h1={h1} lead={lead} />
-            </Suspense>
-          </div>
+      <main className="pp-main">
+        <section className="pp-top">
+          <PlatformDownloader platform={platform} presetPill={pill} h1={h1} lead={lead} />
         </section>
 
-        <section className="section" style={{ paddingTop: 0 }}>
-          <div className="container" style={{ maxWidth: 760 }}>
-            <Reveal>
-              <span className="label">Supported formats</span>
-              <ul className="pp-formats">
-                {formats.map((f) => <li key={f.id}>{f.label}</li>)}
+        <div className="pp">
+          {formats.length > 0 && (
+            <section className="pp__sec" aria-labelledby="pp-formats">
+              <h2 id="pp-formats" className="pp__h">Supported formats</h2>
+              <ul className="pp__formats">
+                {formats.map((f) => <li key={f.id}><Check size={18} strokeWidth={2.6} aria-hidden="true" /> {f.label}</li>)}
               </ul>
-            </Reveal>
-          </div>
-        </section>
+            </section>
+          )}
 
-        <HowItWorks />
-
-        {children && (
-          <section className="section" style={{ paddingTop: 0 }}>
-            <div className="container"><Reveal><div className="article">{children}</div></Reveal></div>
+          <section className="pp__sec" aria-labelledby="pp-how">
+            <h2 id="pp-how" className="pp__h">How to download from {def.name}</h2>
+            <ol className="pp__steps">
+              {steps.map(([title, body]) => <li key={title}><strong>{title}</strong>{body}</li>)}
+            </ol>
           </section>
-        )}
+
+          {children && <section className="pp__sec pp__prose">{children}</section>}
+        </div>
 
         <FAQ items={faq} />
 
         {related.length > 0 && (
-          <section className="section" style={{ paddingTop: 0 }}>
-            <div className="container">
-              <span className="label">Related tools</span>
-              <ul className="pp-related">
+          <div className="pp">
+            <section className="pp__sec" aria-labelledby="pp-related">
+              <h2 id="pp-related" className="pp__h">Related tools</h2>
+              <ul className="pp__related">
                 {related.map((t) => (
                   <li key={t.href}>
                     <Link href={t.href}><ToolIcon category={t.category} size={40} /><span>{t.name}</span></Link>
                   </li>
                 ))}
               </ul>
-            </div>
-          </section>
+            </section>
+          </div>
         )}
       </main>
       <LegalFoot />
-      <style>{`
-        .pp-formats { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-        .pp-formats li { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--gold-ink); background: rgb(var(--c-cyan-rgb) / .08); border: 1px solid var(--line-strong); }
-        .pp-related { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-        .pp-related a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border-radius: 16px; text-decoration: none; color: var(--ink); font-weight: 600; background: var(--bg-surface); border: 1px solid var(--line); }
-      `}</style>
     </>
   );
 }

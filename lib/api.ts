@@ -9,14 +9,24 @@ import { getCobaltInstance, getSessionId } from "./storage";
 import { resolveRoute } from "./router";
 import type { PlatformId } from "./platforms";
 
-export type ErrorCode = "PRIVATE" | "INVALID_URL" | "EXTRACTOR_DOWN" | "RATE_LIMITED" | "STORY_EXPIRED" | "OFFLINE" | "NOT_FOUND";
+export type ErrorCode = "PRIVATE" | "INVALID_URL" | "EXTRACTOR_DOWN" | "RATE_LIMITED" | "STORY_EXPIRED" | "OFFLINE" | "NOT_FOUND" | "BANNED";
 export type GrabOk = { ok: true; data: ExtractedResult; platform: PlatformId };
-export type GrabErr = { ok: false; code: ErrorCode; message: string };
+/** `retryAfter` (seconds) comes from the `Retry-After` header on 429 / ban responses. */
+export type GrabErr = { ok: false; code: ErrorCode; message: string; retryAfter?: number };
 export type GrabResult = GrabOk | GrabErr;
 
-const CODES: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND"];
+const CODES: ErrorCode[] = ["PRIVATE", "INVALID_URL", "EXTRACTOR_DOWN", "RATE_LIMITED", "STORY_EXPIRED", "OFFLINE", "NOT_FOUND", "BANNED"];
 
-function codeFrom(status: number, body: unknown): { code: ErrorCode; message: string } {
+/** Seconds from a `Retry-After` header (delta-seconds or HTTP date); capped to 24 h. */
+export function retryAfterSeconds(header: string | null, now = Date.now()): number | undefined {
+  if (!header) return undefined;
+  const n = Number(header);
+  if (Number.isFinite(n) && n >= 0) return Math.min(Math.ceil(n), 86_400);
+  const at = Date.parse(header);
+  return Number.isNaN(at) ? undefined : Math.min(Math.max(0, Math.ceil((at - now) / 1000)), 86_400);
+}
+
+export function codeFrom(status: number, body: unknown, headers?: Headers): { code: ErrorCode; message: string; retryAfter?: number } {
   let raw = "";
   let message = "";
   if (body && typeof body === "object") {
@@ -34,12 +44,14 @@ function codeFrom(status: number, body: unknown): { code: ErrorCode; message: st
   if (!code) {
     if (raw === "INVALID_USERNAME") code = "INVALID_URL";
     else if (raw === "NO_STORIES" || raw === "STORY_UNSUPPORTED") code = "STORY_EXPIRED";
+    else if (raw === "IP_BANNED" || raw === "BLOCKED") code = "BANNED";
     else if (status === 429) code = "RATE_LIMITED";
     else if (status === 400) code = "INVALID_URL";
     else if (status === 404) code = "NOT_FOUND";
     else code = "EXTRACTOR_DOWN";
   }
-  return { code, message };
+  const retryAfter = retryAfterSeconds(headers?.get("retry-after") ?? null);
+  return retryAfter === undefined ? { code, message } : { code, message, retryAfter };
 }
 
 async function postJson(path: string, body: unknown, signal?: AbortSignal): Promise<{ res: Response; json: unknown }> {
@@ -94,7 +106,7 @@ export async function grab(opts: { input: string; platform?: PlatformId; mode?: 
     if (isProfile) {
       const username = (route.type === "app" ? route.url : input).replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").split(/[/?#]/)[0];
       const { res, json } = await postJson("/api/profile", { type: "dp", username, ...(sessionId ? { sessionId } : {}) }, opts.signal);
-      if (!res.ok) { const e = codeFrom(res.status, json); return { ok: false, ...e }; }
+      if (!res.ok) { const e = codeFrom(res.status, json, res.headers); return { ok: false, ...e }; }
       const p = json as Record<string, unknown>;
       const data = normalizeApiResponse({ ...p, type: "profile", platform: "instagram", postsCount: p.posts }, "@" + username);
       data.type = "profile";
@@ -108,10 +120,10 @@ export async function grab(opts: { input: string; platform?: PlatformId; mode?: 
     if (cobaltInstance) body.cobaltInstance = cobaltInstance;
     const first = await postJson("/api/extract", body, opts.signal);
     let payload: unknown = first.res.ok ? first.json : null;
-    let failure = first.res.ok ? null : codeFrom(first.res.status, first.json);
+    let failure = first.res.ok ? null : codeFrom(first.res.status, first.json, first.res.headers);
 
     // Fallback ladder (purane GoldenBar jaisa)
-    if (!payload && failure && failure.code !== "RATE_LIMITED" && failure.code !== "PRIVATE") {
+    if (!payload && failure && failure.code !== "RATE_LIMITED" && failure.code !== "PRIVATE" && failure.code !== "BANNED") {
       if (platform === "x") {
         const r = await postJson("/api/twitter", { url }, opts.signal);
         if (r.res.ok && !(r.json as Record<string, unknown> | null)?.error) payload = r.json;
@@ -140,6 +152,6 @@ export async function grab(opts: { input: string; platform?: PlatformId; mode?: 
 export async function profileExtras(username: string, type: "stories" | "highlights" | "highlight-items", extra: { highlightId?: string } = {}, signal?: AbortSignal) {
   const sessionId = getSessionId();
   const { res, json } = await postJson("/api/profile", { type, username, ...extra, ...(sessionId ? { sessionId } : {}) }, signal);
-  if (!res.ok) return { ok: false as const, ...codeFrom(res.status, json) };
+  if (!res.ok) return { ok: false as const, ...codeFrom(res.status, json, res.headers) };
   return { ok: true as const, json: json as Record<string, unknown> };
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SimpleToolLanding from "@/components/SimpleToolLanding";
-import GoldenBar from "@/components/GoldenBar";
+import PlatformDownloader from "@/components/PlatformDownloader";
 
 export const metadata: Metadata = {
   title: "Instagram Reels Download Kaise Kare — रील्स डाउनलोडर (फ्री)",
@@ -15,7 +15,7 @@ export default function Page() {
       eyebrow="रील्स डाउनलोडर · हिन्दी"
       h1={<>Instagram Reels <em className="gilded">Download</em> — 1 क्लिक में।</>}
       lead="Reel ka link paste karo — HD video, poora caption aur saare hashtags turant mil jayenge. Free, bina login."
-      tool={<GoldenBar />}
+      tool={<PlatformDownloader platform="instagram" embedded />}
       faq={[
         { q: "Instagram se reel download kaise kare?", a: "Instagram app mein reel kholo → Share (➤) button dabao → 'Copy Link' → yahan upar wale box mein paste karo → Download dabao. HD MP4 video, caption aur hashtags — sab ek saath mil jayega." },
         { q: "Kya yeh bilkul free hai?", a: "Haan — na login chahiye, na app install, na koi limit (fair-use ke andar). Watermark bhi nahi lagta." },

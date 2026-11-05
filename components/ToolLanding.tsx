@@ -1,5 +1,5 @@
 import LegalFoot from "@/components/LegalFoot";
-import GoldenBar from "./GoldenBar";
+import PlatformDownloader from "./PlatformDownloader";
 import TrustLine from "./TrustLine";
 import HowItWorks from "./HowItWorks";
 import FAQ from "./FAQ";
@@ -34,7 +34,7 @@ export default function ToolLanding({
             </h1>
             <p className="lead intro-rise" style={{ margin: "20px auto 0", ["--dl" as string]: "200ms" }}>{lead}</p>
             <div className="intro-rise" style={{ marginTop: 36, ["--dl" as string]: "300ms" }}>
-              <GoldenBar />
+              <PlatformDownloader platform="instagram" embedded />
             </div>
             <div className="intro-rise" style={{ marginTop: 18, ["--dl" as string]: "400ms" }}>
               <TrustLine />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SimpleToolLanding from "@/components/SimpleToolLanding";
-import GoldenBar from "@/components/GoldenBar";
+import PlatformDownloader from "@/components/PlatformDownloader";
 
 export const metadata: Metadata = {
   title: "Instagram Photo Download Kaise Kare — फोटो डाउनलोडर (HD, फ्री)",
@@ -15,7 +15,7 @@ export default function Page() {
       eyebrow="फोटो डाउनलोडर · हिन्दी"
       h1={<>Instagram Photo <em className="gilded">HD mein</em> download karo.</>}
       lead="Post ka link paste karo — original quality photo milegi, screenshot se kahin behtar. Carousel ki saari slides bhi."
-      tool={<GoldenBar />}
+      tool={<PlatformDownloader platform="instagram" embedded />}
       faq={[
         { q: "Instagram se photo kaise download kare?", a: "Post kholo → Share (➤) → Copy Link → yahan paste karo → Download. Original resolution wali photo save hogi — woh compressed version nahi jo screenshot mein aata hai." },
         { q: "Screenshot se kya fark hai?", a: "Bahut bada. Screenshot aapki screen ki resolution par hota hai, UI ke saath aur compressed. Yahan se aapko Instagram ke server wali original HD file milti hai — print karne layak quality." },

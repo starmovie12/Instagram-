@@ -99,7 +99,7 @@ export default function Page() {
           </section>
 
           <section><h2>Private accounts &amp; stories</h2>
-            <p>Only public content downloads. For accounts you follow, an optional Instagram Session ID can be added in <Link href="/settings">Settings → Advanced</Link>. It works like your login — never share it, and use a separate account if you can.</p>
+            <p>Only public content downloads — private accounts stay private, even with a Session ID. The optional Session ID in <Link href="/settings">Settings → Advanced</Link> only improves reliability for public content. It works like your login — never share it, and use a separate account if you can.</p>
           </section>
 
           <section><h2>If something goes wrong</h2>
