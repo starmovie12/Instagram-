@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { callGemini, AiError } from "@/lib/ai";
 import { CRYSTAL_PROMPT } from "@/lib/inventions";
 import { isRateLimited } from "@/lib/rate-limit";
@@ -11,7 +12,7 @@ export const maxDuration = 45;
 const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("crystal:" + ip, 5)) {
     return NextResponse.json({ error: "Slow down a bit — wait a minute." }, { status: 429 });
@@ -44,7 +45,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ report: text });
   } catch (err) {
     if (err instanceof AiError) return NextResponse.json({ error: err.message }, { status: err.code === "NO_KEY" ? 503 : 502 });
-    console.error("crystal failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/invent/crystal", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json({ error: "Something went wrong — please try again." }, { status: 500 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/invent/crystal", { profile: "ai", methods: ["POST"], maxBody: 6291456 }, handlePOST);

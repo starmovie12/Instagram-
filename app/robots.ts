@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-url";
+import { HONEYPOT_PATHS } from "@/lib/security/honeypots";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -14,6 +15,8 @@ export default function robots(): MetadataRoute.Robots {
           "/offline",
           "/quick-action",
           "/s/",
+          // Honeypots (PRD §21.3): well-behaved crawlers stay out; only scanners hit them.
+          ...HONEYPOT_PATHS,
         ],
       },
     ],

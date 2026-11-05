@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard, type GuardContext } from "@/lib/security/guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Short-link redirector for /api/shorten. Unknown or expired codes go home. */
-export async function GET(req: NextRequest, ctx: { params: Promise<{ code: string }> }) {
+async function handleGET(req: NextRequest, _g: GuardContext, ctx: { params: Promise<{ code: string }> }) {
   const { code } = await ctx.params;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -29,3 +30,6 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ code: strin
   } catch { /* fall through to home */ }
   return NextResponse.redirect(home, 302);
 }
+
+/* Links are opened from anywhere (origin "any"); ban + rate limit slow down code enumeration. */
+export const GET = withGuard<{ params: Promise<{ code: string }> }>("/s", { profile: "light", methods: ["GET", "HEAD"], origin: "any" }, handleGET);

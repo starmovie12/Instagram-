@@ -77,6 +77,38 @@ const NOINDEX_PATHS = [
   "/youtube-thumbnail-downloader",
 ];
 
+/**
+ * Security headers on every response (PRD §21.6). CSP ships Report-Only (D20) so third-party
+ * ad scripts keep working while violations are collected at /api/csp-report.
+ * No page uses camera / microphone / geolocation (checked), so all three are disabled.
+ */
+const CSP_REPORT_ONLY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "upgrade-insecure-requests",
+  "report-uri /api/csp-report",
+  "report-to csp-endpoint",
+].join("; ");
+
+const SECURITY_HEADERS = [
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Content-Security-Policy-Report-Only", value: CSP_REPORT_ONLY },
+  { key: "Reporting-Endpoints", value: 'csp-endpoint="/api/csp-report"' },
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
@@ -86,7 +118,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return NOINDEX_PATHS.map((source) => ({
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }, ...NOINDEX_PATHS.map((source) => ({
       source,
       headers: [
         {
@@ -94,7 +126,7 @@ const nextConfig: NextConfig = {
           value: "noindex, nofollow",
         },
       ],
-    }));
+    }))];
   },
 };
 

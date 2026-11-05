@@ -39,19 +39,28 @@ export default function BatchDownloader() {
     setRows(init);
     for (let i = 0; i < urls.length; i++) {
       setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "loading" } : row)));
-      try {
-        const res = await fetch("/api/extract", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: urls[i] }),
-        });
-        const json = await res.json().catch(() => null);
-        if (!res.ok || json?.error) {
+      // Server allows ~10 extracts a minute: on 429 wait for Retry-After and retry the same link (max 3 waits).
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          const res = await fetch("/api/extract", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: urls[i] }),
+          });
+          if (res.status === 429 && attempt < 3) {
+            const wait = Math.min(Math.max(Number(res.headers.get("Retry-After")) || 30, 1), 90);
+            await new Promise((done) => setTimeout(done, wait * 1000));
+            continue;
+          }
+          const json = await res.json().catch(() => null);
+          if (!res.ok || json?.error) {
+            setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "error" } : row)));
+          } else {
+            setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "done", data: json.data } : row)));
+          }
+        } catch {
           setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "error" } : row)));
-        } else {
-          setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "done", data: json.data } : row)));
         }
-      } catch {
-        setRows((r) => r.map((row, j) => (j === i ? { ...row, status: "error" } : row)));
+        break;
       }
     }
     setRunning(false);

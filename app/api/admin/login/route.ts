@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { adminEnabled, checkPassword, makeToken, verifyToken, ADMIN_COOKIE, COOKIE_OPTIONS } from "@/lib/admin-auth";
 import { kvConfigured } from "@/lib/runtime-config";
 import { isRateLimited } from "@/lib/rate-limit";
@@ -7,13 +8,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** GET → current session status (used by the admin page to decide what to show). */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const authed = verifyToken(req.cookies.get(ADMIN_COOKIE)?.value);
   return NextResponse.json({ enabled: adminEnabled(), authed, kvConfigured: kvConfigured() });
 }
 
 /** POST { password } → set the signed session cookie on success. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   // Brute-force guard: 5 attempts per IP per minute.
   if (isRateLimited("adminlogin:" + ip, 5)) {
@@ -41,8 +42,13 @@ export async function POST(req: NextRequest) {
 }
 
 /** DELETE → log out (clear the cookie). */
-export async function DELETE() {
+async function handleDELETE(_req: NextRequest) {
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ADMIN_COOKIE, "", { ...COOKIE_OPTIONS, maxAge: 0 });
   return res;
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/admin/login", { profile: "extract", methods: ["GET", "POST", "DELETE"] }, handleGET);
+export const POST = withGuard("/api/admin/login", { profile: "extract", methods: ["GET", "POST", "DELETE"] }, handlePOST);
+export const DELETE = withGuard("/api/admin/login", { profile: "extract", methods: ["GET", "POST", "DELETE"] }, handleDELETE);

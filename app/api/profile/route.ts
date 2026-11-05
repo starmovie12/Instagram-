@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { withGuard, type GuardContext } from "@/lib/security/guard";
 import {
   extractProfile,
   extractProfileFeed,
@@ -78,7 +80,7 @@ async function handle(req: NextRequest, r: ProfileRequest) {
     if (err instanceof ExtractError) {
       return NextResponse.json({ error: err.message, code: err.code }, { status: statusFor(err.code) });
     }
-    console.error("profile route failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/profile", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json(
       { error: "Something went wrong on our side. Please try again." },
       { status: 500 }
@@ -87,26 +89,32 @@ async function handle(req: NextRequest, r: ProfileRequest) {
 }
 
 /** GET /api/profile?username=xyz  (purana GoldenBar flow pehle GET try karta hai) → DP/profile */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const username = req.nextUrl.searchParams.get("username") ?? "";
   return handle(req, { type: "dp", username, highlightId: "", sessionId: null });
 }
 
-export async function POST(req: NextRequest) {
-  let type = "";
-  let username = "";
-  let highlightId = "";
-  let sessionId: string | null = null;
-  try {
-    const body = await req.json();
-    username = String(body?.username ?? "");
-    highlightId = String(body?.highlightId ?? "");
-    // Purana GoldenBar sirf { username } bhejta hai (type nahi) — usse DP maano.
-    type = String(body?.type ?? "") || (username ? "dp" : "");
-    // Session ID: sirf POST body, log/store/echo nahi
-    if (typeof body?.sessionId === "string" && body.sessionId.length <= 600) sessionId = body.sessionId;
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+/** PRD §21.1 step 6 — bounded fields; unknown keys are dropped (≈15 tools call this route). */
+const BodySchema = z.object({
+  type: z.enum(["dp", "feed", "stories", "highlights", "highlight-items", ""]).optional(),
+  username: z.string().max(64).optional(),
+  highlightId: z.string().max(40).regex(/^[0-9]*$/).optional(),
+  sessionId: z.string().max(512).regex(/^[A-Za-z0-9%._:-]*$/).optional(),
+});
+
+async function handlePOST(req: NextRequest, ctx: GuardContext) {
+  const parsed = BodySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    await ctx.signal("VALIDATION_FAIL");
+    return NextResponse.json({ error: "Invalid request.", code: "INVALID_URL" }, { status: 400 });
   }
-  return handle(req, { type, username, highlightId, sessionId });
+  const username = parsed.data.username ?? "";
+  // Purana GoldenBar sirf { username } bhejta hai (type nahi) — usse DP maano.
+  const type = parsed.data.type || (username ? "dp" : "");
+  // Session ID: sirf POST body, log/store/echo nahi
+  return handle(req, { type, username, highlightId: parsed.data.highlightId ?? "", sessionId: parsed.data.sessionId || null });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/profile", { profile: "extract", methods: ["GET", "POST"] }, handleGET);
+export const POST = withGuard("/api/profile", { profile: "extract", methods: ["GET", "POST"] }, handlePOST);

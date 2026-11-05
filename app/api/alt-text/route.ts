@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { callGemini, AiError } from "@/lib/ai";
 import { isRateLimited } from "@/lib/rate-limit";
 
@@ -10,7 +11,7 @@ export const maxDuration = 30;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("alttext:" + ip, 5)) {
     return NextResponse.json({ error: "Slow down a bit — wait a minute between batches." }, { status: 429 });
@@ -50,7 +51,10 @@ Rules: describe only what is visible, no "image of/photo of" prefixes, no hashta
     if (err instanceof AiError) {
       return NextResponse.json({ error: err.message }, { status: err.code === "NO_KEY" ? 503 : 502 });
     }
-    console.error("alt-text failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/alt-text", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json({ error: "Something went wrong — please try again." }, { status: 500 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/alt-text", { profile: "ai", methods: ["POST"], maxBody: 6291456 }, handlePOST);

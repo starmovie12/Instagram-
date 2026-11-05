@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { isRateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -30,7 +31,7 @@ async function probe(url: string, timeoutMs: number) {
   }
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("igstatus:" + ip, 10)) {
     return NextResponse.json({ error: "Too many checks — wait a few seconds." }, { status: 429 });
@@ -46,3 +47,6 @@ export async function GET(req: NextRequest) {
     checkedAt: new Date().toISOString(),
   });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/ig-status", { profile: "light", methods: ["GET"] }, handleGET);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { isRateLimited } from "@/lib/rate-limit";
 import { verifyToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 import { diagnoseInstagram, diagnoseProfile, parseInstagramUrl, normalizeUsername } from "@/lib/instagram-extractor";
@@ -19,7 +20,7 @@ export const maxDuration = 60;
  * Har engine alag chalke batata hai: HTTP status, login-wall, kaun chala / kaun block hua.
  * Koi cookie / key / session output me NAHI aata (sirf "set hai ya nahi"). Rate-limited.
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   // Owner-only in production (it fans out to several upstreams and reveals which
   // env vars are configured). Log in at /admin first; dev/preview stays open.
   if (process.env.VERCEL_ENV === "production" && !verifyToken(req.cookies.get(ADMIN_COOKIE)?.value)) {
@@ -70,3 +71,6 @@ export async function GET(req: NextRequest) {
 
   return pretty({ error: "Only Instagram and Facebook links are supported here.", env });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/diag", { profile: "light", methods: ["GET"] }, handleGET);

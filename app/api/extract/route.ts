@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { withGuard, type GuardContext } from "@/lib/security/guard";
 import {
   extract,
   extractStories,
@@ -452,38 +454,59 @@ async function resolve(raw: string, opts: RequestOptions = {}): Promise<UnifiedE
   }
 }
 
-export async function POST(req: NextRequest) {
+/** PRD §21.1 step 6 — strict body. `mode` is a bounded slug (older clients send their own mode names). */
+const BodySchema = z.strictObject({
+  url: z.string().min(1).max(2048),
+  mode: z.string().max(32).regex(/^[a-z0-9-]*$/i).optional(),
+  sessionId: z.string().max(512).regex(/^[A-Za-z0-9%._:-]*$/).optional(),
+  cobaltInstance: z.string().max(200).optional(),
+});
+
+/** Step 7 — links that try to point the server at itself or a private network. */
+function looksLikeSsrf(raw: string): boolean {
+  try {
+    const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    const host = u.hostname.replace(/^\[|\]$/g, "");
+    return Boolean(u.username || u.password || (u.port && u.port !== "443" && u.port !== "80") || /^(localhost|.*\.local|.*\.internal)$/i.test(host) || /^[\d.]+$|:/.test(host));
+  } catch { return false; }
+}
+
+async function handlePOST(req: NextRequest, ctx: GuardContext) {
   const cfg = await getLiveConfig();
   if (isRateLimited("extract:" + clientIp(req), cfg.rateLimitPerMinute)) {
     return errorJson("RATE_LIMITED", "Too many requests — please wait a minute and try again.", 429);
   }
 
-  let url = "";
-  let sessionId: string | null = null;
-  let cobaltRaw: unknown = null;
-  try {
-    const body = await req.json();
-    url = String(body?.url ?? "");
-    // Session ID sirf POST body se (URL/query me kabhi nahi), kabhi log/store/echo nahi hota.
-    if (typeof body?.sessionId === "string" && body.sessionId.length <= 600) sessionId = body.sessionId;
-    cobaltRaw = body?.cobaltInstance;
-  } catch {
-    return errorJson("INVALID_URL", "Invalid request body.", 400);
+  const parsed = BodySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    await ctx.signal("VALIDATION_FAIL");
+    return errorJson("INVALID_URL", "Paste a valid link first.", 400);
   }
+  const { url, sessionId = null, cobaltInstance: cobaltRaw } = parsed.data;
   if (!url.trim()) return errorJson("INVALID_URL", "Paste a link first.", 400);
+  if (looksLikeSsrf(url.trim())) {
+    await ctx.signal("SSRF_ATTEMPT");
+    return errorJson("INVALID_URL", "Please paste a valid Instagram, Facebook, YouTube, X, TikTok, Pinterest or Threads link.", 400);
+  }
 
   // Cobalt URL: SSRF-safe ya chupchap ignore (server default COBALT_INSTANCE chalega)
   const cobaltInstance = cobaltRaw ? await validateCobaltInstance(cobaltRaw) : null;
 
   try {
+    // Session ID sirf POST body se (URL/query me kabhi nahi), kabhi log/store/echo nahi hota.
     const data = await resolve(url, { sessionId, cobaltInstance });
     return NextResponse.json({ data }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     if (err instanceof ExtractError) {
       const code = toUiErrorCode(err.code);
+      if (code === "INVALID_URL") await ctx.signal("VALIDATION_FAIL");
       return errorJson(code, err.message, statusForUiError(code));
     }
-    console.error("extract failed:", err);
+    // No URL / Session ID / error message in logs (PRD §21.1 step 10) — the guard logs status + traceId.
+    console.error(JSON.stringify({ level: "error", route: "/api/extract", error: (err as Error)?.name ?? "Error", traceId: ctx.traceId }));
     return errorJson("EXTRACTOR_DOWN", "Something went wrong on our side. Please try again in a moment.", 503);
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/extract", { profile: "extract", methods: ["POST"], errorShape: "object" }, handlePOST);

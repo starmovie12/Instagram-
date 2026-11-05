@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { extract, ExtractError } from "@/lib/instagram-extractor";
 import { callGemini, AiError } from "@/lib/ai";
 import { isRateLimited } from "@/lib/rate-limit";
@@ -14,7 +15,7 @@ export const maxDuration = 60;
  */
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024; // Gemini inline limit is ~20MB; stay safe
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   // Transcription is the most expensive call on the site — keep it tight.
   if (isRateLimited("transcribe:" + ip, 3)) {
@@ -92,7 +93,10 @@ Rules:
     if (err instanceof AiError) {
       return NextResponse.json({ error: err.message }, { status: err.code === "NO_KEY" ? 503 : 502 });
     }
-    console.error("transcribe failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/transcribe", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json({ error: "Something went wrong — please try again." }, { status: 500 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/transcribe", { profile: "ai", methods: ["POST"] }, handlePOST);

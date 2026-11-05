@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
+import { randomCode } from "@/lib/short-code";
 import { isRateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -31,12 +33,7 @@ async function redis(cmd: (string | number)[]): Promise<unknown> {
   return json?.result ?? null;
 }
 
-function randomCode(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(5));
-  return Array.from(bytes, (b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("").slice(0, 6);
-}
-
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
     return NextResponse.json(
       { error: "The shortener isn't configured yet — the site owner needs to add a free Upstash Redis (UPSTASH_REDIS_REST_URL + TOKEN)." },
@@ -84,3 +81,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "The link store is unreachable — try again in a moment." }, { status: 502 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/shorten", { profile: "light", methods: ["POST"] }, handlePOST);

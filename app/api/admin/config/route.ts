@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { verifyToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 import { IG_CONFIG } from "@/lib/instagram-config";
 import {
@@ -20,7 +21,7 @@ function guard(req: NextRequest): NextResponse | null {
 }
 
 /** GET → the current override plus the built-in defaults (so the form can show both). */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const denied = guard(req);
   if (denied) return denied;
 
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 }
 
 /** POST → save the override object. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const denied = guard(req);
   if (denied) return denied;
 
@@ -63,3 +64,7 @@ export async function POST(req: NextRequest) {
   if (!ok) return NextResponse.json({ error: "Couldn't save — storage unreachable." }, { status: 502 });
   return NextResponse.json({ ok: true, saved: clean });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/admin/config", { profile: "light", methods: ["GET", "POST"], maxBody: 16384 }, handleGET);
+export const POST = withGuard("/api/admin/config", { profile: "light", methods: ["GET", "POST"], maxBody: 16384 }, handlePOST);

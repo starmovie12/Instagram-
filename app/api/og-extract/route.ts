@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard, type GuardContext } from "@/lib/security/guard";
+import { safeFetch, readTextCapped, SafeFetchError } from "@/lib/security/safeFetch";
+import { hostMatches, PLATFORMS } from "@/lib/platforms";
 import { isRateLimited } from "@/lib/rate-limit";
 import { extractFacebookVideo, FbError } from "@/lib/facebook-extractor";
 
@@ -18,6 +21,11 @@ const ALLOWED_PAGE_HOSTS = new Set([
   "www.tiktok.com", "tiktok.com", "m.tiktok.com", "vm.tiktok.com", "vt.tiktok.com",
   "www.facebook.com", "facebook.com", "m.facebook.com", "web.facebook.com", "fb.watch",
 ]);
+
+/** Redirect hops may land on any supported platform domain (e.g. pin.it → pinterest.co.uk). */
+function onPlatformHost(u: URL): boolean {
+  return PLATFORMS.some((p) => hostMatches(u.hostname, p.hostSuffixes) || Boolean(p.hostPattern?.test(u.hostname)));
+}
 
 /** TikTok fallback — pull playAddr out of the hydration JSON. */
 function tiktokPlayUrl(html: string): string | null {
@@ -39,7 +47,7 @@ function metaContent(html: string, property: string): string | null {
   return m ? m[1].replace(/&amp;/g, "&") : null;
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest, ctx: GuardContext) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("og:" + ip, 15)) {
     return NextResponse.json({ error: "Too many requests — wait a minute." }, { status: 429 });
@@ -85,20 +93,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(target.toString(), {
+    // Redirects are followed by hand (max 3); every hop must stay on a supported platform and a public IP.
+    const res = await safeFetch(target.toString(), {
       headers: {
         // A generic bot UA gets the static OG-tag version of these pages.
         "User-Agent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
         Accept: "text/html",
       },
-      redirect: "follow",
       cache: "no-store",
-      signal: AbortSignal.timeout(15_000),
-    });
+    }, { allow: onPlatformHost, timeoutMs: 8000 });
     if (!res.ok) {
       return NextResponse.json({ error: `The page returned HTTP ${res.status} — is the link public?` }, { status: 502 });
     }
-    const html = (await res.text()).slice(0, 1_500_000);
+    const html = await readTextCapped(res, 2 * 1024 * 1024);
 
     let video = metaContent(html, "og:video") ?? metaContent(html, "og:video:url") ?? metaContent(html, "og:video:secure_url") ?? metaContent(html, "twitter:player:stream");
     if (!video && /tiktok\.com$/.test(target.hostname.replace(/^(www|m|vm|vt)\./, "")) ) {
@@ -121,7 +128,14 @@ export async function POST(req: NextRequest) {
       description,
       host: target.hostname,
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof SafeFetchError && e.reason === "SSRF") {
+      await ctx.signal("SSRF_ATTEMPT");
+      return NextResponse.json({ error: "That link redirects somewhere we can't follow." }, { status: 400 });
+    }
     return NextResponse.json({ error: "Couldn't reach that page — try again in a moment." }, { status: 502 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/og-extract", { profile: "og", methods: ["POST"] }, handlePOST);

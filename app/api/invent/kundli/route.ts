@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { extractProfileFeed, ExtractError } from "@/lib/instagram-extractor";
 import { callGemini, AiError, type AiLanguage } from "@/lib/ai";
 import { profileFacts, kundliPrompt, compatibilityPrompt } from "@/lib/inventions";
@@ -10,7 +11,7 @@ export const maxDuration = 45;
 
 const LANGS: AiLanguage[] = ["english", "hinglish", "hindi"];
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("kundli:" + ip, 6)) {
     return NextResponse.json({ error: "Thoda ruko — ek minute baad phir try karo." }, { status: 429 });
@@ -50,7 +51,10 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof ExtractError) return NextResponse.json({ error: err.message }, { status: 404 });
     if (err instanceof AiError) return NextResponse.json({ error: err.message }, { status: err.code === "NO_KEY" ? 503 : 502 });
-    console.error("kundli failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/invent/kundli", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json({ error: "Kuch gadbad ho gayi — phir try karo." }, { status: 500 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/invent/kundli", { profile: "ai", methods: ["POST"] }, handlePOST);

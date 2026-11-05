@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { isRateLimited } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -47,7 +48,7 @@ function safeFilename(name: string, fallback: string): string {
   return cleaned || fallback;
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("dl:" + ip, 60)) {
@@ -141,3 +142,6 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const GET = withGuard("/api/download", { profile: "download", methods: ["GET", "HEAD"] }, handleGET);

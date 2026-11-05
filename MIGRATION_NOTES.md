@@ -411,3 +411,99 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
 | 3.6.a | Undo uses the global toast bus instead of a History-only snackbar | One live region for all toasts; same 6 s timing; positioned above the island. |
 | 3.6.b | Install card is non-modal | PRD §17.3 places it above the bar; a modal would block the page right after a download. |
 | 3.6.c | Global `[hidden] { display: none !important }` | Component `display` rules were overriding the `hidden` attribute (Advanced section showed while collapsed). |
+
+### Incident check — "Instagram / Facebook links don't download on the live site" (2026-11-05)
+
+Reported by the owner: links fail on the live site but work on
+[andresapitt/instagrab](https://github.com/andresapitt/instagrab). Investigated with live
+requests from this sandbox (a datacenter IP, like Vercel), A/B against a build of `main`.
+
+| Link | `main` (live site) | `redesign/app-shell` |
+|---|---|---|
+| Instagram image post `/p/DYhqaremniv/` | 503 EXTRACTOR_DOWN | 200 — 1 image (1.1 s) |
+| Instagram video post `/p/DZI4ywZv4td/` | 503 EXTRACTOR_DOWN | 200 — 1 video (0.5 s) |
+| Same as `/reel/…?igsh=` share link | 503 EXTRACTOR_DOWN | 200 — 1 video (0.3 s) |
+| Facebook `watch/?v=647537299265662` | 200 | 200 |
+| Facebook `video.php?v=274175099429670` | 404 NOT_FOUND | 200 — 1 video |
+| 2 older Facebook videos (yt-dlp test URLs) | 404 | 404 (inconclusive: Facebook serves a login shell to datacenter IPs) |
+
+- **Root cause:** from a datacenter IP Instagram answers every direct request with
+  `403 login_required` (embed context missing, mobile API, GraphQL). `main` only has those
+  direct engines; this branch adds the SnapSave / embed / public-resolver / Cobalt last-resort
+  stage (from `ail`, Phase 1) and the multi-engine `lib/facebook-extractor.ts`, which does not
+  exist on `main`. The download proxy was verified too: real JPEG and MP4 bytes with
+  `Content-Disposition: attachment`.
+- **Not the cause:** the reference repo has no hard-coded Session ID — `INSTAGRAM_SESSION_ID`
+  is the same optional env var this app already reads. The Phase 3.1 public-only guard only
+  blocks when a result is positively private (`is_private === true`).
+- **Reference repo not copied:** its engines are already here, and it runs SnapSave's packed
+  response with `new Function()` — remote code from a third party executing inside the server.
+  This app decodes that response with pure unpackers (`lib/snapsave.test.ts`).
+- **Fix delivery:** the working code reaches the live site when this branch is merged (or on
+  the branch's Vercel preview deployment). Nothing is committed to `main` (rule 1).
+
+### 3.8 Security perimeter (PRD §21, AC-46…49, AC-61)
+
+- **`withGuard()` on every API route** (`lib/security/guard.ts`, 19 handlers + `/s/[code]`):
+  method / content-type / body cap (4 KB; 64 KB AI text; 6 MB for the two image-upload
+  tools) → same-origin check (`Origin` / `Sec-Fetch-Site`; neither header = half budget) →
+  ban check → behaviour score → tarpit → rate limit (`429` + `Retry-After`, exponential
+  penalty on repeats) → handler → `no-store`, `nosniff`, `X-Trace-Id`, one structured log
+  line (route, status, durationMs, correlationId — never URLs, bodies, Session IDs or IPs);
+  unexpected errors become a generic 500 with the trace id. Each route's existing
+  per-minute limiter still runs inside (nothing loosened).
+- **Subjects** are `HMAC-SHA256(ip, IP_HASH_SECRET)` (16 hex) + a UA hash; scripts without a
+  browser UA get the stricter budget. **Store:** Upstash Redis when the existing
+  `UPSTASH_REDIS_REST_*` vars are set (shared by all instances and the middleware),
+  otherwise bounded per-instance memory; a store outage never blocks a user.
+- **Profiles:** extract/profile 10 per minute (aggregate 60, non-browser 5); og/twitter 20;
+  download **60** (the proxy's existing limit — result previews stream through it); AI 10;
+  light 30. Counters are per route.
+- **Signals → bans** exactly as §21.4/§21.5 (honeypot 1 → 24 h; SSRF 3/5 min → 24 h;
+  prompt injection 3/h → 24 h; origin 20/min, validation 50/min, rate-limited 10/10 min → 1 h).
+- **Validation:** `/api/extract` strict Zod body (url ≤ 2048, `mode` bounded slug, Session ID
+  ≤ 512 safe chars, Cobalt ≤ 200); IP-literal / localhost / credential / custom-port links →
+  400 + SSRF signal. `/api/profile` bounded fields (unknown keys dropped — ~15 tools call it).
+- **Outbound:** `lib/security/safeFetch.ts` — manual redirects (max 3), every hop https +
+  platform allowlist + public DNS, 8 s timeout, 2 MB body cap. `og-extract` used to follow
+  redirects blindly; it now goes through `safeFetch`.
+- **Middleware** (edge): honeypots (`/wp-admin/`, `/wp-login.php`, `/.env`, `/.git/config`,
+  `/phpmyadmin/`, `/api/debug`, `/api/internal/dump`, `/api/v1/users/.json`) → signal +
+  24 h ban + 4–8 s tarpit + generic 500; early ban check on `/api/*` when the store is
+  shared. Honeypots are `Disallow`ed in robots.
+- **Headers** on every response: HSTS (2 y, preload), nosniff, strict-origin-when-cross-origin,
+  `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`,
+  `X-Frame-Options: DENY`, CSP **Report-Only** → `/api/csp-report` (logs directive + blocked
+  origin only). New `/api/health`.
+- **AI (§21.7):** user text is stripped of tags / chat-template tokens / "ignore previous
+  instructions" phrasing and fenced in `<user_input>`; every prompt starts with a data-only
+  guard line; detected attempts raise a signal. Raw `console.error(err)` calls in API routes
+  (could print prompts or links) replaced by name-only structured logs.
+- **`/s/[code]` audit:** codes were 5 characters with modulo bias (~2.9 × 10⁷ space) → now 8
+  characters by rejection sampling (~8.5 × 10¹¹); old codes still resolve; the redirector is
+  rate-limited. Links expire after 1 year (unchanged).
+- **Batch downloader** waits for `Retry-After` and retries the same link instead of failing
+  the 11th link of a batch.
+- **Verified over HTTP:** same-origin POST 200; cross-site 403 FORBIDDEN_ORIGIN; text/plain
+  415; 5 KB body 413; PUT 405; `http://169.254.169.254/…` 400; extra body key 400; 11th
+  extract in a minute 429 + Retry-After; all honeypots 500 after 4–8 s while `/blog` stays
+  200; headers present on pages; health 200; CSP report 204. **Real browser, no mocks:**
+  Home → reel link → `/instagram-downloader` → video result → Download HD saved a 350 KB
+  MP4; photo post result. Tests: `lib/security.test.ts` (12) → `npm test` 139 / 139.
+
+**Set in Vercel (all optional, no renames):**
+
+| Variable | Why |
+|---|---|
+| `IP_HASH_SECRET` | ≥ 32 random chars; stable IP pseudonyms across instances (rotate every 90 days). Without it each instance uses a random key. |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Already used by the shortener/admin; when set, bans and rate limits are shared by every instance and the middleware. |
+| `TARPIT_DELAY_MS_MAX` | Optional cap for tarpit delays (500–10 000, default 8 000). |
+| `NEXT_PUBLIC_APP_URL` | Optional extra allowed origin (e.g. a custom domain) for the same-origin check. |
+
+| # | Decision | Why |
+|---|---|---|
+| 3.8.a | Download profile 60/min per key (PRD 30) | The proxy also serves result previews (carousel = 10+ requests); 60 was the existing limit. |
+| 3.8.b | `/api/profile` drops unknown keys instead of rejecting | Many existing tools post extra fields; rejecting would break them. `/api/extract` is strict. |
+| 3.8.c | CSP stays Report-Only | PRD D20; ad network scripts would break under an enforced CSP. |
+| 3.8.d | `microphone=()` instead of `(self)` | Verified no page uses getUserMedia (Voice Cloner writes text). |
+| 3.8.e | `browsing-topics=()` instead of `interest-cohort=()` | `interest-cohort` is unrecognised by current browsers and logs a console error. |

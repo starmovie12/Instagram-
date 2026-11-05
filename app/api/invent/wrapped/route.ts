@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { extractProfileFeed, ExtractError } from "@/lib/instagram-extractor";
 import { callGemini, type AiLanguage } from "@/lib/ai";
 import { profileFacts, wrappedPrompt } from "@/lib/inventions";
@@ -10,7 +11,7 @@ export const maxDuration = 45;
 
 const LANGS: AiLanguage[] = ["english", "hinglish", "hindi"];
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("wrapped:" + ip, 6)) {
     return NextResponse.json({ error: "Too many requests — wait a minute." }, { status: 429 });
@@ -62,7 +63,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     if (err instanceof ExtractError) return NextResponse.json({ error: err.message }, { status: 404 });
-    console.error("wrapped failed:", err);
+    console.error(JSON.stringify({ level: "error", route: "/api/invent/wrapped", error: (err as Error)?.name ?? "Error" }));
     return NextResponse.json({ error: "Something went wrong — please try again." }, { status: 500 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/invent/wrapped", { profile: "ai", methods: ["POST"] }, handlePOST);

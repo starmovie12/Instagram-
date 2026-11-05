@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { extract, ExtractError } from "@/lib/instagram-extractor";
 
 export const runtime = "nodejs";
@@ -29,7 +30,7 @@ async function tg(method: string, payload: Record<string, unknown>) {
   }).catch(() => { /* best-effort — Telegram retries the webhook on failure */ });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   if (!process.env.TELEGRAM_BOT_TOKEN) {
     return NextResponse.json({ error: "Bot not configured (TELEGRAM_BOT_TOKEN missing)." }, { status: 503 });
   }
@@ -92,3 +93,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/telegram", { profile: "light", methods: ["POST"], origin: "any", maxBody: 262144 }, handlePOST);

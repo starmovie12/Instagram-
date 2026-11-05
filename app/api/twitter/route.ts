@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withGuard } from "@/lib/security/guard";
 import { isRateLimited } from "@/lib/rate-limit";
 
 /** Fields we read from cdn.syndication.twimg.com (everything optional — third-party JSON). */
@@ -28,7 +29,7 @@ function syndicationToken(id: string): string {
 
 type MediaOut = { type: "video" | "image"; url: string; thumbnail: string; label?: string };
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("tw:" + ip, 15)) {
     return NextResponse.json({ error: "Too many requests — wait a minute." }, { status: 429 });
@@ -98,3 +99,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't reach Twitter — try again in a moment." }, { status: 502 });
   }
 }
+
+/* PRD §21.1 perimeter: origin · ban · tarpit · rate limit · headers · structured log */
+export const POST = withGuard("/api/twitter", { profile: "og", methods: ["POST"] }, handlePOST);
