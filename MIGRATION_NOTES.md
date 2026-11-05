@@ -365,3 +365,49 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
 | 3.5.d | "@user on TikTok / X" (D13) links go to the official profile URLs in a new tab | Our TikTok/X pages download posts, they cannot search users. |
 | 3.5.e | Story-Ring also frames the app-page URL card; `glow-neon` stays Home-only | One spectrum surface per page (AC-77); PRD reserves the neon glow for Home. |
 | 3.5.f | Hindi landing pages keep the visitor's chosen language instead of forcing `lang=hi` | Forcing a locale per URL would override an explicit choice in Settings; their prose is already Hindi. |
+
+### 3.6 History, Settings, How-to, Coming soon, tour, install card (PRD §8, §12, §13, §7.6.9, §17.3)
+
+- **History** (`components/HistoryScreen.tsx` + route-scoped `app/history/history.css`):
+  "Recent Grabs (n)" + "{n} grabs saved locally" chip + desktop Clear All; app filter
+  chips (only apps present, **max 5** with "+N More" sheet, sticky with Quick Return);
+  72 px rows (thumb 56 or app tile, @author, "Instagram · Reel · 2 min. ago" localised
+  with `Intl.RelativeTimeFormat`), row tap / 48 px Re-grab → read-once handoff
+  `src=history`, 48 px Trash → 6 s Undo snackbar on the shared toast bus; Clear All
+  2-step (4 s "Tap again to confirm") + "Stored locally on your device"; empty state
+  with one action ("Paste a link" → `/?focus=1`); 2 columns ≥ 1024, 3 ≥ 1440;
+  `useSyncExternalStore` → content-shaped skeleton on the server, cross-tab updates.
+- **Settings** (`components/SettingsScreen.tsx` + `app/settings/settings.css`): cards
+  Appearance & Language (language, dark mode synced with the header button, **solid
+  surfaces**, **ambient glow**), Download preferences (auto-fetch, auto-route,
+  auto-save, default quality, clipboard suggest, sound, haptics — disabled with a note
+  where the browser cannot vibrate), Advanced (collapsed; Session ID as a password
+  field with eye toggle, PRD helper text, warning incl. third-party ad scripts,
+  **"Remember on this device"** — off = `sessionStorage`, on = `localStorage` —,
+  Remove; Cobalt URL https-only with inline error; "Save preferences" → toast),
+  App & storage (install card, Clear history and Reset all — both 2-step), links,
+  disclaimer, © + version from `package.json` (tree-shaken), quiet admin dot.
+  Toggles are 52×32 with a 48 px hit area; two columns ≥ 1024 px. Prefs are read
+  through `useSyncExternalStore` (skeleton on the server, no toggle flash).
+- **How to download**: 700-line inline `<style>` replaced by `how-to.css` (tokens),
+  `Reveal` removed, CTA "Try it now" → `/?focus=1`; 13 sections, HowTo + FAQPage
+  JSON-LD unchanged; one AdFrame at the end.
+- **Coming soon** `/coming-soon/[id]`: translated copy, supported-app tiles, one action
+  ("Tell us to prioritise this app"), noindex, still not in the sitemap.
+- **Onboarding tour**: new 3-step copy (paste any link → original quality → private by
+  design), shown once on Home via the shared bottom sheet (no extra blur surface),
+  skipped while the user is typing; initial focus on "Next".
+- **Install card**: only where the browser offers install; after the first successful
+  grab or 20 s; never during a fetch, while typing or over a dialog; non-modal card
+  12 px above the island (safe area on detail pages, bottom-right on desktop).
+- Verified in Chromium (390 / 1280 px): filter chips "All · Instagram · Facebook ·
+  TikTok · +3 More", delete → "Removed @natgeo from history" → Undo restores, Clear All
+  2-step → empty state, Cobalt `http://localhost` rejected, Session ID saved to
+  `sessionStorage` only, dark-mode switch updates the header button, tour on first
+  visit, install card after a simulated grab; no page errors.
+
+| # | Decision | Why |
+|---|---|---|
+| 3.6.a | Undo uses the global toast bus instead of a History-only snackbar | One live region for all toasts; same 6 s timing; positioned above the island. |
+| 3.6.b | Install card is non-modal | PRD §17.3 places it above the bar; a modal would block the page right after a download. |
+| 3.6.c | Global `[hidden] { display: none !important }` | Component `display` rules were overriding the `hidden` attribute (Advanced section showed while collapsed). |

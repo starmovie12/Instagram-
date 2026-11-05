@@ -1,71 +1,69 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Download, X, Share2 } from "lucide-react";
+/**
+ * Install card (PRD §17.3). Appears only where the browser offers PWA install, once until dismissed,
+ * after the first successful grab or 20 s on the site — never during a fetch, while typing or over a dialog.
+ * Non-modal card sitting 12 px above the bottom bar (or the safe area on detail pages).
+ */
+import { useEffect, useRef, useState } from "react";
+import { Download, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { EV } from "@/lib/events";
+import { lsGet, lsSet } from "@/lib/storage";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+const DISMISSED = "ig-install-dismissed";
 
-/** Centered, premium install modal (not a bottom sheet). Appears only on
- *  browsers that support PWA install, and only once until dismissed. Installing
- *  puts InstaGrab in the Android share sheet (manifest share_target). */
+function blocked(): boolean {
+  return Boolean(
+    document.querySelector('[data-phase="fetching"], dialog[open]') ||
+    document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement,
+  );
+}
+
 export default function InstallPrompt() {
-  const [evt, setEvt] = useState<BIPEvent | null>(null);
+  const { t } = useI18n();
+  const evt = useRef<BIPEvent | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    try { if (localStorage.getItem("ig-install-dismissed") === "1") return; } catch {}
-    if (window.matchMedia("(display-mode: standalone)").matches) return; // already installed
-    const onBIP = (e: Event) => {
-      e.preventDefault();
-      setEvt(e as BIPEvent);
-      setTimeout(() => setOpen(true), 2500); // let the page settle first
+    if (lsGet(DISMISSED) || matchMedia("(display-mode: standalone)").matches) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const tryShow = () => {
+      if (!evt.current) return;
+      if (blocked()) { timer = setTimeout(tryShow, 5000); return; }
+      setOpen(true);
     };
-    window.addEventListener("beforeinstallprompt", onBIP as EventListener);
-    return () => window.removeEventListener("beforeinstallprompt", onBIP as EventListener);
+    const onBIP = (e: Event) => { e.preventDefault(); evt.current = e as BIPEvent; };
+    const onGrab = () => { clearTimeout(timer); timer = setTimeout(tryShow, 1500); };
+    window.addEventListener("beforeinstallprompt", onBIP);
+    window.addEventListener(EV.historyUpdated, onGrab, { once: true });
+    timer = setTimeout(tryShow, 20_000);
+    return () => { clearTimeout(timer); window.removeEventListener("beforeinstallprompt", onBIP); window.removeEventListener(EV.historyUpdated, onGrab); };
   }, []);
 
-  function dismiss() {
-    setOpen(false);
-    try { localStorage.setItem("ig-install-dismissed", "1"); } catch {}
-  }
+  function dismiss() { setOpen(false); lsSet(DISMISSED, String(Date.now())); }
   async function install() {
-    if (!evt) return;
+    const e = evt.current;
     setOpen(false);
-    try { await evt.prompt(); await evt.userChoice; } catch {}
-    try { localStorage.setItem("ig-install-dismissed", "1"); } catch {}
-    setEvt(null);
+    if (!e) return;
+    try { await e.prompt(); await e.userChoice; } catch { /* user closed the browser prompt */ }
+    lsSet(DISMISSED, String(Date.now()));
+    evt.current = null;
   }
 
-  if (!open || !evt) return null;
+  if (!open) return null;
   return (
-    <div onClick={dismiss} role="dialog" aria-modal="true" style={{
-      position: "fixed", inset: 0, zIndex: 135, display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 20, background: "var(--overlay-scrim)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-      animation: "fadeIn 240ms var(--ease-silk)",
-    }}>
-      <div onClick={(e) => e.stopPropagation()} className="card" style={{
-        maxWidth: 400, width: "100%", padding: 28, textAlign: "center", position: "relative",
-        animation: "popIn 300ms var(--ease-coin)",
-      }}>
-        <button onClick={dismiss} aria-label="Close" className="btn-icon" style={{ position: "absolute", top: 12, right: 12 }}>
-          <X size={18} strokeWidth={1.5} />
-        </button>
-        <span className="medallion" style={{ margin: "0 auto" }}><Share2 size={24} strokeWidth={1.5} /></span>
-        <h3 style={{ fontSize: 20, margin: "16px 0 8px" }}>Add InstaGrab to your Share menu</h3>
-        <p style={{ color: "var(--ink-2)", fontSize: "var(--t-small)", marginBottom: 20 }}>
-          Install the app and you can share any reel straight from Instagram — it opens right here with the download ready.
-        </p>
-        <button className="btn btn-molten" onClick={install} style={{ width: "100%", height: 48 }}>
-          <Download size={18} strokeWidth={1.5} /> Install InstaGrab
-        </button>
-        <button onClick={dismiss} className="mono" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-3)", fontSize: 12, marginTop: 12 }}>
-          Maybe later
-        </button>
+    <section className="ipc" role="dialog" aria-modal="false" aria-labelledby="ipc-title">
+      <span className="ipc__icon" aria-hidden="true"><Download size={22} strokeWidth={2} /></span>
+      <div className="ipc__txt">
+        <h2 id="ipc-title" className="ipc__title">{t("install.title")}</h2>
+        <p className="ipc__body">{t("install.body")}</p>
+        <div className="ipc__acts">
+          <button type="button" className="ipc__cta" onClick={() => { void install(); }}>{t("install.cta")}</button>
+          <button type="button" className="ipc__later" onClick={dismiss}>{t("install.later")}</button>
+        </div>
       </div>
-      <style jsx>{`
-        @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
-        @keyframes popIn{ from{ opacity:0; transform:translateY(12px) scale(.96); } to{ opacity:1; transform:none; } }
-      `}</style>
-    </div>
+      <button type="button" className="icon-btn ipc__x" onClick={dismiss} aria-label={t("sheet.close")}><X size={20} strokeWidth={2} aria-hidden="true" /></button>
+    </section>
   );
 }

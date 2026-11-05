@@ -1,0 +1,11 @@
+/* Coming soon (PRD §7.6.9, §14.3 width 720) — tokens only */
+.soon { width: 100%; max-width: calc(720px + 2 * var(--sp-4)); margin: 0 auto; padding: var(--sp-8) var(--sp-4) var(--sp-6); display: grid; justify-items: center; gap: var(--sp-3); text-align: center; }
+.soon__h1 { margin: var(--sp-2) 0 0; font: 700 var(--fs-page-title)/var(--lh-page-title) var(--font-stack); letter-spacing: -0.01em; color: var(--text-primary); text-wrap: balance; }
+.soon__body { margin: 0; color: var(--text-secondary); font: 400 16px/24px var(--font-stack); }
+.soon__apps { list-style: none; width: 100%; margin: var(--sp-2) 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: var(--sp-3); }
+.soon__app { display: grid; justify-items: center; gap: var(--sp-2); min-height: 88px; padding: var(--sp-2); border-radius: var(--radius-base); color: var(--text-primary); font: 600 13px/16px var(--font-stack); text-decoration: none; }
+@media (hover: hover) and (pointer: fine) { .soon__app:hover { background: var(--bg-surface-2); } }
+.soon__cta {
+  display: inline-flex; align-items: center; min-height: 52px; padding: 0 var(--sp-6); border-radius: var(--radius-base);
+  border: 1px solid var(--border-strong); background: var(--bg-surface); color: var(--text-primary); font: 600 16px/24px var(--font-stack); text-decoration: none;
+}

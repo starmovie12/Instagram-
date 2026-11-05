@@ -1,9 +1,9 @@
+import "./how-to.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TextQuote, Download, GalleryHorizontalEnd, ShieldCheck } from "lucide-react";
 import FAQ from "@/components/FAQ";
 import JsonLd from "@/components/JsonLd";
-import Reveal from "@/components/Reveal";
 import AdFrame from "@/components/AdFrame";
 import LegalFoot from "@/components/LegalFoot";
 import { PlatformTile } from "@/components/PlatformIcons";
@@ -44,9 +44,9 @@ export default function Page() {
       <JsonLd data={howToJsonLd()} />
       <JsonLd data={faqJsonLd(DEFAULT_FAQ)} />
       <main className="htd">
-        <div className="container" style={{ maxWidth: 760 }}>
+        <div className="htd__in">
           <section className="htd-hero">
-            <h1>Download any media in <em className="gilded">3 steps</em></h1>
+            <h1>Download any media in <em>3 steps</em></h1>
             <ol className="htd-steps">
               <li><b>1</b> Copy the link</li><li><b>2</b> Paste it</li><li><b>3</b> Download</li>
             </ol>
@@ -109,7 +109,7 @@ export default function Page() {
           <section><h2>Why InstaGrab</h2>
             <div className="htd-why">
               {QUARTET.map((f) => { const Icon = ICONS[f.icon]; return (
-                <div key={f.t} className="card" style={{ padding: 16 }}><span className="medallion" style={{ marginBottom: 10 }}><Icon size={22} strokeWidth={1.6} /></span><b>{f.t}</b><p>{f.d}</p></div>
+                <div key={f.t} className="htd-why__card"><span className="htd-why__icon" aria-hidden="true"><Icon size={22} strokeWidth={1.75} /></span><b>{f.t}</b><p>{f.d}</p></div>
               ); })}
             </div>
           </section>
@@ -117,42 +117,18 @@ export default function Page() {
 
         <FAQ />
 
-        <div className="container" style={{ maxWidth: 760 }}>
+        <div className="htd__in">
           <section><h2>Creator guides</h2>
             <ul className="htd-guides">
               {guides.map((g) => <li key={g.slug}><Link href={`/blog/${g.slug}`}><b>{g.title}</b><span>{g.description}</span></Link></li>)}
             </ul>
           </section>
           <p className="htd-disc">Not affiliated with Instagram™ / Meta. Download only content you own or have permission to use. See <Link href="/privacy-policy">Privacy</Link>, <Link href="/terms">Terms</Link> and <Link href="/dmca">DMCA</Link>.</p>
-          <Reveal><AdFrame slotH={110} /></Reveal>
-          <div className="htd-cta"><Link href="/?focus=1">Ab try karein</Link></div>
+          <div className="htd-ad"><AdFrame slotH={110} /></div>
+          <div className="htd-cta"><Link href="/?focus=1">Try it now</Link></div>
         </div>
       </main>
       <LegalFoot />
-      <style>{`
-        .htd { padding: 8px 0 24px; } .htd section { margin-top: 28px; } .htd h2 { font-size: clamp(1.2rem, 1rem + .8vw, 1.5rem); margin: 0 0 12px; }
-        .htd p, .htd li, .htd dd { color: var(--ink-2); line-height: 1.65; font-size: 15.5px; }
-        .htd-hero h1 { font-size: clamp(1.7rem, 1.2rem + 2.4vw, 2.6rem); line-height: 1.1; margin: 8px 0 16px; }
-        .htd-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .htd-steps li { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: 18px; background: var(--bg-surface); border: 1px solid var(--line-strong); font-weight: 700; color: var(--ink); text-align: center; font-size: 14px; }
-        .htd-steps b { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--on-accent); background: var(--color-primary); }
-        .htd-acc { border: 1px solid var(--line); border-radius: 16px; margin-bottom: 8px; background: var(--bg-surface); }
-        .htd-acc summary { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; cursor: pointer; font-weight: 700; color: var(--ink); }
-        .htd-acc ol { margin: 0; padding: 0 18px 14px 36px; }
-        .htd-tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
-        .htd-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
-        .htd-table th, .htd-table td { padding: 12px 14px; text-align: start; border-top: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
-        .htd-table thead th { border-top: 0; color: var(--ink-3); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
-        .htd-table tbody th a { color: var(--gold-ink); font-weight: 700; text-decoration: none; }
-        .htd-dl { margin: 0; display: grid; gap: 12px; } .htd-dl dt { font-weight: 700; color: var(--ink); } .htd-dl dd { margin: 2px 0 0; }
-        .htd-why { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .htd-why p { font-size: 14px; margin: 6px 0 0; }
-        .htd-guides { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-        .htd-guides a { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 16px; text-decoration: none; color: var(--ink); background: var(--bg-surface); border: 1px solid var(--line); }
-        .htd-guides span { font-size: 13.5px; color: var(--ink-3); }
-        .htd-disc { font-size: 12.5px !important; color: var(--ink-3) !important; margin-top: 24px; } .htd-disc a { color: var(--gold-ink); }
-        .htd-cta { position: sticky; bottom: calc(var(--sab) + 12px); display: flex; justify-content: center; margin-top: 20px; }
-        .htd-cta a { display: inline-flex; align-items: center; min-height: 52px; padding: 0 32px; border-radius: 999px; font-weight: 800; font-size: 16px; text-decoration: none; color: var(--on-accent); background: var(--gradient-button); box-shadow: var(--shadow-md); }
-      `}</style>
     </>
   );
 }

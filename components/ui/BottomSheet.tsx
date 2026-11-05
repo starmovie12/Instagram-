@@ -25,6 +25,8 @@ export default function BottomSheet({ open, onClose, title, children, id }: Prop
       trigger.current = document.activeElement;
       d.showModal();
       d.dataset.state = "open";
+      // Prefer the sheet's main action over the Close button for initial focus
+      requestAnimationFrame(() => d.querySelector<HTMLElement>("[data-autofocus]")?.focus());
       haptic("Light");
     } else if (!open && d.open) {
       d.dataset.state = "closing";

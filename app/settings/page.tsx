@@ -1,3 +1,4 @@
+import "./settings.css";
 import type { Metadata } from "next";
 import SettingsScreen from "@/components/SettingsScreen";
 

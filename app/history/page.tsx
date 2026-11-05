@@ -1,3 +1,4 @@
+import "./history.css";
 import type { Metadata } from "next";
 import HistoryScreen from "@/components/HistoryScreen";
 
