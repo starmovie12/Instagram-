@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Story Download Kaise Kare — स्टोरी डाउनलोडर (फ्री) | InstaGrab",
+  title: "Instagram Story Download Kaise Kare — स्टोरी डाउनलोडर (फ्री)",
   description:
     "Instagram story download karni hai bina dekhe? Username daalo — active stories anonymously dekho aur HD mein save karo. Free, bina login — hindi mein samjhaya gaya.",
   alternates: { canonical: "/story-downloader-hindi" },

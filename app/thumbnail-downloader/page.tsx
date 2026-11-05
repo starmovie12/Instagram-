@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Thumbnail Downloader — Save Reel & Video Covers in HD | InstaGrab",
+  title: "Instagram Thumbnail Downloader — Save Reel & Video Covers in HD",
   description:
     "Download the cover image (thumbnail) of any public Instagram reel, video or IGTV in full HD. Free, no login — perfect for competitor and thumbnail research.",
   alternates: { canonical: "/thumbnail-downloader" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GridArchitect from "@/components/GridArchitect";
 
 export const metadata: Metadata = {
-  title: "Grid Architect — Design a Colour-Cohesive Instagram Feed | InstaGrab",
+  title: "Grid Architect — Design a Colour-Cohesive Instagram Feed",
   description:
     "Upload your next posts and arrange a beautiful, colour-cohesive grid. Auto-sort by colour or brightness, drag to reorder, preview your 3×3 feed. On-device, free.",
   alternates: { canonical: "/grid-architect" },

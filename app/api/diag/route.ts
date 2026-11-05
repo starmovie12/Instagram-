@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited } from "@/lib/rate-limit";
+import { verifyToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 import { diagnoseInstagram, diagnoseProfile, parseInstagramUrl, normalizeUsername } from "@/lib/instagram-extractor";
 import { diagnoseFacebook } from "@/lib/facebook-extractor";
 
@@ -19,6 +20,11 @@ export const maxDuration = 60;
  * Koi cookie / key / session output me NAHI aata (sirf "set hai ya nahi"). Rate-limited.
  */
 export async function GET(req: NextRequest) {
+  // Owner-only in production (it fans out to several upstreams and reveals which
+  // env vars are configured). Log in at /admin first; dev/preview stays open.
+  if (process.env.VERCEL_ENV === "production" && !verifyToken(req.cookies.get(ADMIN_COOKIE)?.value)) {
+    return NextResponse.json({ error: "Not authorized." }, { status: 401, headers: { "Cache-Control": "no-store" } });
+  }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited("diag:" + ip, 5)) {
     return NextResponse.json({ error: "Too many checks — wait a minute." }, { status: 429 });

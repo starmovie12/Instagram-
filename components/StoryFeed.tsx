@@ -115,7 +115,7 @@ export default function StoryFeed() {
                     {item.type === "video"
                       ? <video src={dl(item.url, "preview")} poster={item.thumbnail ? dl(item.thumbnail, "thumb") : undefined} controls playsInline preload="none" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       : /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={dl(item.url, "photo")} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
+                        <img src={dl(item.url, "photo")} alt="Story photo" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
                   </div>
                   <a href={dl(item.qualities?.[0]?.url ?? item.url, `instagrab-${u.username}-story-${i + 1}.${item.type === "video" ? "mp4" : "jpg"}`)} download
                     className="btn btn-secondary" style={{ fontSize: 12, marginTop: 8, width: "100%", justifyContent: "center" }}>

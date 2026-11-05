@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import WheelSpinner from "@/components/WheelSpinner";
 
 export const metadata: Metadata = {
-  title: "Wheel Spinner — Random Name Picker for Giveaways | InstaGrab",
+  title: "Wheel Spinner — Random Name Picker for Giveaways",
   description:
     "Free spinning wheel name picker for Instagram giveaways: paste entrants, spin a beautiful gold wheel, get a provably random winner. Perfect for screen-recorded draws.",
   alternates: { canonical: "/wheel-spinner" },

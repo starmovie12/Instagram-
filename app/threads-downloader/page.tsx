@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Threads Downloader — Save Threads Videos & Photos Free | InstaGrab",
+  title: "Threads Downloader — Save Threads Videos & Photos Free",
   description:
     "Download videos and photos from Threads posts free: paste a threads.net link and save the media in original quality. No login, no watermark.",
   alternates: { canonical: "/threads-downloader" },

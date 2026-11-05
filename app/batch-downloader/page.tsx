@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import BatchDownloader from "@/components/BatchDownloader";
 
 export const metadata: Metadata = {
-  title: "Instagram Batch Downloader — Paste Many Links at Once | InstaGrab",
+  title: "Instagram Batch Downloader — Paste Many Links at Once",
   description:
     "Paste up to 20 Instagram reel/post links and download them all in one go. Free, no login, no watermark — built for creators and social media managers.",
   alternates: { canonical: "/batch-downloader" },

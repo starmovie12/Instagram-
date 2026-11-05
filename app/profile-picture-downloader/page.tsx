@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Profile Picture Downloader — Full HD DP | InstaGrab",
+  title: "Instagram Profile Picture Downloader — Full HD DP",
   description:
     "View and download any public Instagram profile picture (DP) in full HD. Enter a username, get the full-size photo instantly. Free, no login.",
   alternates: { canonical: "/profile-picture-downloader" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CommentsExporter from "@/components/CommentsExporter";
 
 export const metadata: Metadata = {
-  title: "Instagram Comments Exporter — Download Comments as CSV | InstaGrab",
+  title: "Instagram Comments Exporter — Download Comments as CSV",
   description:
     "Export any public Instagram post's recent comments to CSV/Excel free — usernames, comment text and likes, one click. No login, honest limits.",
   alternates: { canonical: "/comments-exporter" },

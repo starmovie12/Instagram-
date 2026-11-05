@@ -47,7 +47,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "cta", label: "Call-to-action (optional)", placeholder: "e.g. tag your trek buddy", type: "text", optional: true },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Caption Generator — English, Hindi & Hinglish | InstaGrab",
+    seoTitle: "AI Instagram Caption Generator — English, Hindi & Hinglish",
     seoDesc: "Free AI caption generator for Instagram. Pick a topic, tone and language — English, Hindi or Hinglish — and get 5 ready-to-post captions in seconds. No login.",
     faq: [
       { q: "Is the Hinglish really natural?", a: "Yes — that's our specialty. The AI writes the way young Indians actually text: Hindi in Latin script mixed with English, not stiff textbook translation." },
@@ -71,7 +71,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "topic", label: "Niche / topic / keywords", placeholder: "e.g. home workout for busy professionals", type: "text" },
     ],
     langAware: false,
-    seoTitle: "AI Instagram Hashtag Generator — 30 Tags in 3 Reach Tiers | InstaGrab",
+    seoTitle: "AI Instagram Hashtag Generator — 30 Tags in 3 Reach Tiers",
     seoDesc: "Free AI hashtag generator: enter your niche and get 30 relevant Instagram hashtags organised by reach tier (high / medium / niche) with one-click copy. No login.",
     faq: [
       { q: "Why three tiers?", a: "Mega-tags bury you in seconds; tiny tags cap your reach. A mix — ~10 high-reach, 10 medium, 10 niche — gives you both immediate visibility and long-tail discovery." },
@@ -97,7 +97,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "emoji", label: "Emojis", type: "select", options: [["yes", "Yes, tasteful"], ["no", "No emojis"]] },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Bio Generator — 10 Bios Under 150 Chars | InstaGrab",
+    seoTitle: "AI Instagram Bio Generator — 10 Bios Under 150 Chars",
     seoDesc: "Free AI bio generator for Instagram: describe yourself, pick a vibe and language (English/Hindi/Hinglish) — get 10 bios that fit the 150-character limit. No login.",
     faq: [
       { q: "Will the bios really fit the limit?", a: "The AI is instructed to stay within 150 characters. Paste your pick into our character counter (Bio mode) for a final check — line breaks count too." },
@@ -122,7 +122,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "duration", label: "Duration", type: "select", options: [["15", "15 seconds"], ["30", "30 seconds"], ["60", "60 seconds"], ["90", "90 seconds"]] },
     ],
     langAware: true,
-    seoTitle: "AI Reel Script Generator — Hook, Beats, CTA (Hindi/Hinglish) | InstaGrab",
+    seoTitle: "AI Reel Script Generator — Hook, Beats, CTA (Hindi/Hinglish)",
     seoDesc: "Free AI script generator for Instagram Reels: enter a topic and duration, get a complete script — hook, timed beats, on-screen text, CTA and B-roll ideas. Hinglish supported.",
     faq: [
       { q: "What exactly do I get?", a: "A scroll-stopping hook for the first 2 seconds, the spoken script broken into timed beats, short on-screen text overlays, a closing CTA, and 3 B-roll shot ideas." },
@@ -146,7 +146,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "topic", label: "Your topic / niche", placeholder: "e.g. saving money in your 20s", type: "text" },
     ],
     langAware: true,
-    seoTitle: "AI Hook Generator for Reels — 10 Scroll-Stopping Openers | InstaGrab",
+    seoTitle: "AI Hook Generator for Reels — 10 Scroll-Stopping Openers",
     seoDesc: "Free AI hook generator: get 10 scroll-stopping first lines for Instagram Reels using proven viral patterns. English, Hindi and Hinglish. No login.",
     faq: [
       { q: "What patterns does it use?", a: "The ones that keep working: bold claim, negative warning (\"Stop doing X\"), curiosity gap, specific numbers, POV setups, \"nobody tells you this\", and before/after contrasts." },
@@ -169,7 +169,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "topic", label: "Your niche", placeholder: "e.g. street food reviews in Delhi", type: "text" },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Content Ideas — 30 Reel & Post Ideas Free | InstaGrab",
+    seoTitle: "AI Instagram Content Ideas — 30 Reel & Post Ideas Free",
     seoDesc: "Free AI content idea generator: enter your niche and get 30 specific Instagram ideas — 15 reels, 10 posts, 5 stories — you could film today. Hinglish supported.",
     faq: [
       { q: "How specific are the ideas?", a: "Each idea is one concrete line you could film today — \"rate 3 ₹50 golgappa stalls blind\" — not vague themes like \"share tips\"." },
@@ -193,7 +193,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "topic", label: "Niche (optional)", placeholder: "e.g. baking", type: "text", optional: true },
     ],
     langAware: false,
-    seoTitle: "AI Instagram Username Generator — 20 Handle Ideas | InstaGrab",
+    seoTitle: "AI Instagram Username Generator — 20 Handle Ideas",
     seoDesc: "Free AI username generator for Instagram: enter your name and niche, get 20 clean handle ideas — then check availability instantly with our username checker.",
     faq: [
       { q: "Are the suggestions guaranteed available?", a: "No generator can promise that — but every suggestion follows Instagram's rules, and our username checker verifies any of them live in one tap." },
@@ -218,7 +218,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "deadline", label: "Deadline", placeholder: "e.g. Sunday 31st, 9 PM IST", type: "text" },
     ],
     langAware: true,
-    seoTitle: "AI Giveaway Caption Generator for Instagram — Free | InstaGrab",
+    seoTitle: "AI Giveaway Caption Generator for Instagram — Free",
     seoDesc: "Free AI giveaway caption generator: enter the prize, rules and deadline — get a complete, premium giveaway announcement caption with hashtags. Hinglish supported.",
     faq: [
       { q: "What structure does it use?", a: "The one that converts: exciting opener → prize details → numbered entry steps → deadline and announcement date → relevant hashtags. Clear steps = more valid entries." },
@@ -242,7 +242,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "vibe", label: "Reply vibe", type: "select", options: [["friendly", "Friendly"], ["witty", "Witty"], ["professional", "Professional"], ["hype", "Hype / supportive"]] },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Comment Reply Generator — 5 Replies Free | InstaGrab",
+    seoTitle: "AI Instagram Comment Reply Generator — 5 Replies Free",
     seoDesc: "Free AI reply generator for Instagram comments: paste a comment, pick a vibe (witty/professional/friendly) and get 5 human-sounding replies. Hinglish supported.",
     faq: [
       { q: "Why reply to comments at all?", a: "Replies double the comment count (yours count too), signal the algorithm that the post is generating conversation, and train commenters to come back. First-hour replies matter most." },
@@ -266,7 +266,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "target", label: "Translate to", type: "select", options: [["Hindi", "Hindi"], ["Hinglish (Hindi in Latin script)", "Hinglish"], ["English", "English"], ["Spanish", "Spanish"], ["Portuguese", "Portuguese"], ["Arabic", "Arabic"], ["French", "French"], ["German", "German"], ["Indonesian", "Indonesian"], ["Turkish", "Turkish"], ["Japanese", "Japanese"], ["Korean", "Korean"], ["Russian", "Russian"], ["Bengali", "Bengali"], ["Tamil", "Tamil"], ["Telugu", "Telugu"], ["Marathi", "Marathi"], ["Urdu", "Urdu"]] },
     ],
     langAware: false,
-    seoTitle: "AI Instagram Caption Translator — 18 Languages, Hashtags Kept | InstaGrab",
+    seoTitle: "AI Instagram Caption Translator — 18 Languages, Hashtags Kept",
     seoDesc: "Free AI caption translator for Instagram: natural, casual translation into 18 languages including Hindi and Hinglish — hashtags, emojis and mentions preserved exactly.",
     faq: [
       { q: "How is this better than Google Translate?", a: "It translates for Instagram: casual register, natural phrasing, and it never touches your hashtags, @mentions or emojis — those pass through exactly as written." },
@@ -291,7 +291,7 @@ export const AI_TOOLS: AiToolDef[] = [
       { id: "goal", label: "Goal", placeholder: "e.g. reach 5K followers and get first brand deal", type: "text" },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Growth Strategy — Free 30-Day Plan | InstaGrab",
+    seoTitle: "AI Instagram Growth Strategy — Free 30-Day Plan",
     seoDesc: "Free AI growth strategist: enter your followers, niche and goal — get a personalised 30-day Instagram plan with weekly actions and metrics to track. Hinglish supported.",
     faq: [
       { q: "How personalised is it really?", a: "The plan is built for your niche and current size — a 500-follower food page gets different actions than a 50K fitness page. The more specific your goal, the sharper the plan." },
@@ -317,7 +317,7 @@ AI_TOOLS.push(
       { id: "topic", label: "Your niche", placeholder: "e.g. fitness coaching", type: "text" },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Story Poll & Question Ideas — Free | InstaGrab",
+    seoTitle: "AI Instagram Story Poll & Question Ideas — Free",
     seoDesc: "Free AI generator for Instagram Story engagement: 15 poll, question-box and quiz ideas for your niche, ready to type into the sticker. Hinglish supported.",
     faq: [
       { q: "Why do Story stickers matter?", a: "Every tap on a poll or quiz is an engagement signal — accounts whose stories get interactions see their stories (and posts) ranked higher. Stickers are the cheapest engagement on Instagram." },
@@ -340,7 +340,7 @@ AI_TOOLS.push(
       { id: "topic", label: "Carousel topic", placeholder: "e.g. 5 money mistakes to avoid in your 20s", type: "textarea" },
     ],
     langAware: true,
-    seoTitle: "AI Instagram Carousel Outline Maker — 10 Slides Free | InstaGrab",
+    seoTitle: "AI Instagram Carousel Outline Maker — 10 Slides Free",
     seoDesc: "Free AI carousel generator: enter a topic and get a 10-slide outline — hook, one point per slide with visual suggestions, CTA, caption and hashtags. Hinglish supported.",
     faq: [
       { q: "Why carousels?", a: "Carousels get a second chance in the feed — if someone scrolls past, Instagram often re-shows slide 2. They earn the most saves of any format, and saves are the strongest ranking signal." },

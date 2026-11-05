@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import BestTimeTool from "@/components/BestTimeTool";
 
 export const metadata: Metadata = {
-  title: "Best Time to Post on Instagram — India & Global (Free Tool) | InstaGrab",
+  title: "Best Time to Post on Instagram — India & Global (Free Tool)",
   description:
     "Find the best time to post on Instagram for your niche and audience — India (IST), USA, Europe or global. Day-by-day golden windows, free, no login.",
   alternates: { canonical: "/best-time-to-post" },

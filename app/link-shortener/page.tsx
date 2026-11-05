@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import LinkShortener from "@/components/LinkShortener";
 
 export const metadata: Metadata = {
-  title: "Link Shortener for Instagram Bio — Free Short Links | InstaGrab",
+  title: "Link Shortener for Instagram Bio — Free Short Links",
   description:
     "Shorten long links for your Instagram bio, stories and DMs free — clean short URLs that redirect instantly and stay valid for a year.",
   alternates: { canonical: "/link-shortener" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import PhotoResizer from "@/components/PhotoResizer";
 
 export const metadata: Metadata = {
-  title: "Instagram Photo Resizer — All Post, Story & DP Sizes | InstaGrab",
+  title: "Instagram Photo Resizer — All Post, Story & DP Sizes",
   description:
     "Resize any photo to Instagram's exact sizes free: square 1:1, portrait 4:5, story 9:16, reel cover, profile picture — crop-to-fill or blur-pad fit. 100% on-device.",
   alternates: { canonical: "/photo-resizer" },

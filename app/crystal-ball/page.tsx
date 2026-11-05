@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CrystalBall from "@/components/CrystalBall";
 
 export const metadata: Metadata = {
-  title: "Crystal Ball — Predict a Post's Virality BEFORE You Post (AI) | InstaGrab",
+  title: "Crystal Ball — Predict a Post's Virality BEFORE You Post (AI)",
   description:
     "Upload your photo or reel frame before posting — AI gives a virality score, hook check, visual critique and a Post-it/Fix-it verdict. The pre-post checklist. Free.",
   alternates: { canonical: "/crystal-ball" },

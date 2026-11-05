@@ -39,8 +39,8 @@ export function kvConfigured(): boolean {
   return !!(KV_URL && KV_TOKEN);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function kvCmd(cmd: (string | number)[]): Promise<any> {
+/** Upstash REST command → its `result` (unknown: narrowed by callers). */
+async function kvCmd(cmd: (string | number)[]): Promise<unknown> {
   if (!KV_URL || !KV_TOKEN) return null;
   const res = await fetch(KV_URL, {
     method: "POST",
@@ -50,15 +50,15 @@ async function kvCmd(cmd: (string | number)[]): Promise<any> {
     signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) throw new Error("kv");
-  const json = await res.json();
+  const json = (await res.json()) as { result?: unknown } | null;
   return json?.result ?? null;
 }
 
 export async function getConfigOverride(): Promise<ConfigOverride> {
   if (!kvConfigured()) return {};
   try {
-    const raw = (await kvCmd(["GET", CONFIG_KEY])) as string | null;
-    return raw ? (JSON.parse(raw) as ConfigOverride) : {};
+    const raw = await kvCmd(["GET", CONFIG_KEY]);
+    return typeof raw === "string" && raw ? (JSON.parse(raw) as ConfigOverride) : {};
   } catch {
     return {};
   }

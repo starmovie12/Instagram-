@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ToolLanding from "@/components/ToolLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Hashtag Extractor — Grab Every Tag From Any Post | InstaGrab",
+  title: "Instagram Hashtag Extractor — Grab Every Tag From Any Post",
   description: "Extract every hashtag from any public Instagram post as tappable chips. Copy one tag or all of them, space-separated. Free.",
   alternates: {
     canonical: "/hashtag-extractor",

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import StoryFeed from "@/components/StoryFeed";
 
 export const metadata: Metadata = {
-  title: "Multi-Account Story Viewer — All Stories in One Feed | InstaGrab",
+  title: "Multi-Account Story Viewer — All Stories in One Feed",
   description:
     "Watch stories from all your favorite public Instagram accounts in one anonymous feed. Build a watchlist (saved on-device), load everything with one tap, download any story.",
   alternates: { canonical: "/story-feed" },

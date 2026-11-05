@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import PaletteExtractor from "@/components/PaletteExtractor";
 
 export const metadata: Metadata = {
-  title: "Color Palette Extractor — 5 Hex Codes from Any Photo | InstaGrab",
+  title: "Color Palette Extractor — 5 Hex Codes from Any Photo",
   description:
     "Upload a photo and get its 5 signature colors as hex codes, free. Build a consistent Instagram aesthetic — palette extraction runs entirely in your browser.",
   alternates: { canonical: "/color-palette" },

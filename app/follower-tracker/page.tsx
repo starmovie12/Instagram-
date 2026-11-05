@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import FollowerTracker from "@/components/FollowerTracker";
 
 export const metadata: Metadata = {
-  title: "Instagram Follower Tracker — Daily Growth Chart, Free | InstaGrab",
+  title: "Instagram Follower Tracker — Daily Growth Chart, Free",
   description:
     "Track any Instagram account's follower growth daily with a beautiful chart, growth delta and milestone countdown. Private (stored only in your browser), free, no login.",
   alternates: { canonical: "/follower-tracker" },
@@ -27,7 +27,7 @@ export default function Page() {
       <p>A follower count glanced at daily is noise; a chart over weeks is signal. Logging takes one tap, and the curve tells you what actually moved the needle — the reel that spiked you, the quiet week that flatlined you.</p>
       <h2>Milestones keep you posting</h2>
       <p>The tracker always shows the distance to your next milestone — 1K, 5K, 10K and beyond. Small visible progress is the strongest motivator a creator has on the hard days.</p>
-      <h2>Spy mode: track anyone</h2>
+      <h2>Benchmark any public profile</h2>
       <p>Add competitors and accounts you admire. When their curve jumps, check what they posted that day — that&apos;s free strategy research no analytics subscription gives you.</p>
     </SimpleToolLanding>
   );

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import VideoToGif from "@/components/VideoToGif";
 
 export const metadata: Metadata = {
-  title: "Video to GIF Converter — Free, In Your Browser | InstaGrab",
+  title: "Video to GIF Converter — Free, In Your Browser",
   description:
     "Convert any video clip to a GIF free: pick the start and length (up to 8s), encode on-device, download a WhatsApp-friendly GIF. No upload, no watermark.",
   alternates: { canonical: "/video-to-gif" },

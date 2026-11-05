@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Story Downloader — Save Before They Vanish | InstaGrab",
+  title: "Instagram Story Downloader — Save Before They Vanish",
   description: "Save public Instagram stories as video or photo before they disappear at 24 hours. Anonymous — no login, no view notification.",
   alternates: {
     canonical: "/story-downloader",

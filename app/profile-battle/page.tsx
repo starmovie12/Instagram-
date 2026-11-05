@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ProfileBattle from "@/components/ProfileBattle";
 
 export const metadata: Metadata = {
-  title: "Instagram Profile Battle — Compare Two Accounts (VS Mode) | InstaGrab",
+  title: "Instagram Profile Battle — Compare Two Accounts (VS Mode)",
   description:
     "Put two Instagram profiles head-to-head: followers, engagement, likes, ratios — with a battle score and a winner. Free VS comparison tool, no login.",
   alternates: { canonical: "/profile-battle" },

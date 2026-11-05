@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ReelToMp3 from "@/components/ReelToMp3";
 
 export const metadata: Metadata = {
-  title: "Instagram Reel to MP3 Converter — True MP3, Free | InstaGrab",
+  title: "Instagram Reel to MP3 Converter — True MP3, Free",
   description:
     "Convert any Instagram reel's audio to a true MP3 (192 kbps) free — decoded and re-encoded in your browser, not a renamed M4A. Works in every player and editor.",
   alternates: { canonical: "/reel-to-mp3" },

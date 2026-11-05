@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GoldenBar from "@/components/GoldenBar";
 
 export const metadata: Metadata = {
-  title: "Instagram Photo Download Kaise Kare — फोटो डाउनलोडर (HD, फ्री) | InstaGrab",
+  title: "Instagram Photo Download Kaise Kare — फोटो डाउनलोडर (HD, फ्री)",
   description:
     "Instagram se photo download karni hai full HD mein? Post ka link paste karo — original quality photo, carousel ki saari slides, caption ke saath. Free, bina login.",
   alternates: { canonical: "/photo-downloader-hindi" },

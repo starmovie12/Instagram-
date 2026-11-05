@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Bulk Downloader — Save a Profile's Posts in One ZIP | InstaGrab",
+  title: "Instagram Bulk Downloader — Save a Profile's Posts in One ZIP",
   description:
     "Enter a public username and download its recent posts together in a single ZIP file. Fast, anonymous, no login. Great for content research and archiving.",
   alternates: { canonical: "/bulk-downloader" },

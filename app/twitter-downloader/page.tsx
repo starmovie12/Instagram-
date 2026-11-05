@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Twitter / X Video Downloader — HD MP4, Free | InstaGrab",
+  title: "Twitter / X Video Downloader — HD MP4, Free",
   description:
     "Download Twitter (X) videos, GIFs and photos free: paste a tweet link, get the highest-bitrate MP4 and original-resolution images — plus the tweet text. No login.",
   alternates: { canonical: "/twitter-downloader" },

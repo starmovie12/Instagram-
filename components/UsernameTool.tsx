@@ -5,13 +5,19 @@ import {
 } from "lucide-react";
 import AdFrame from "./AdFrame";
 import ProfileFeedCard from "./ProfileFeedCard";
-import { dl, fmt } from "@/lib/media";
+import { dl, fmt, type ProfileFeed } from "@/lib/media";
 import { useI18n } from "@/lib/i18n";
 
 type Mode = "dp" | "stories" | "viewer" | "highlights" | "feed";
 type Quality = { label: string; url: string };
 type StoryItem = { type: "video" | "image"; url: string; thumbnail: string; takenAt: number; qualities?: Quality[]; audioUrl?: string };
 type HighlightAlbum = { id: string; title: string; cover: string };
+/** /api/profile reply — the shape depends on the requested mode (dp / feed / stories / highlights). */
+type ProfilePayload = Partial<ProfileFeed> & {
+  username?: string; fullName?: string; profilePicHd?: string; isVerified?: boolean; biography?: string;
+  followers?: number | null; following?: number | null; posts?: number | null;
+  items?: StoryItem[]; albums?: HighlightAlbum[];
+};
 
 const REQUEST_TYPE: Record<Mode, string> = { dp: "dp", stories: "stories", viewer: "stories", highlights: "highlights", feed: "feed" };
 
@@ -54,8 +60,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<ProfilePayload | null>(null);
   const [items, setItems] = useState<Record<string, StoryItem[]>>({});
   const [invalid, setInvalid] = useState(false);
 
@@ -126,7 +131,7 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
 
       {data && mode === "feed" && (
         <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 24 }}>
-          <ProfileFeedCard data={data} showBulk />
+          <ProfileFeedCard data={data as ProfileFeed} showBulk />
           <div style={{ maxWidth: 920, margin: "0 auto", width: "100%" }}><AdFrame slotH={280} /></div>
         </div>
       )}
@@ -155,17 +160,17 @@ export default function UsernameTool({ mode, placeholder }: { mode: Mode; placeh
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {data.followers != null && (
                   <div className="mono" style={{ display: "flex", gap: 24, fontSize: 13, color: "var(--ink-2)", flexWrap: "wrap" }}>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts)}</b> {t("posts")}</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers)}</b> {t("followers")}</span>
-                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following)}</b> {t("following")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.posts ?? 0)}</b> {t("posts")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.followers ?? 0)}</b> {t("followers")}</span>
+                    <span><b style={{ color: "var(--ink)" }}>{fmt(data.following ?? 0)}</b> {t("following")}</span>
                   </div>
                 )}
                 <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--line)", maxWidth: 360 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={dl(data.profilePicHd, "dp-preview")} alt={`@${data.username} full-size profile picture`} style={{ width: "100%", display: "block" }} />
+                  <img src={dl(data.profilePicHd ?? "", "dp-preview")} alt={`@${data.username} full-size profile picture`} style={{ width: "100%", display: "block" }} />
                 </div>
                 <div>
-                  <a className="btn btn-secondary gold" href={dl(data.profilePicHd, `instagrab-${data.username}-dp.jpg`)} download>
+                  <a className="btn btn-secondary gold" href={dl(data.profilePicHd ?? "", `instagrab-${data.username}-dp.jpg`)} download>
                     <ImageDown size={16} strokeWidth={1.5} /> {t("dpDownload")}
                   </a>
                 </div>

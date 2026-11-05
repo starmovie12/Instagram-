@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import TimeCapsule from "@/components/TimeCapsule";
 
 export const metadata: Metadata = {
-  title: "Instagram Time Capsule — Seal Your Stats, Open in 30 Days | InstaGrab",
+  title: "Instagram Time Capsule — Seal Your Stats, Open in 30 Days",
   description:
     "Snapshot your Instagram stats today, lock them for 30 days, then open the capsule to see exactly how much you grew. A growth ritual you'll come back for. Free.",
   alternates: { canonical: "/time-capsule" },

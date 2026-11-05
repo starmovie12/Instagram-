@@ -11,7 +11,7 @@ export function generateStaticParams() { return SOON_PLATFORMS.map((p) => ({ id:
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const p = soonById(id);
-  return { title: p ? `${p.name} support coming soon | InstaGrab` : "Coming soon", robots: { index: false, follow: false } };
+  return { title: p ? `${p.name} support coming soon` : "Coming soon", robots: { index: false, follow: false } };
 }
 
 /** PRD §7.6.9 — backend nahi wale apps ka link paste karne par: kabhi dead-end nahi. Link yahan save/show nahi hota. */

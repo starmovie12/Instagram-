@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ProfileRoaster from "@/components/ProfileRoaster";
 
 export const metadata: Metadata = {
-  title: "AI Instagram Profile Roaster — Get Roasted (Funny, Free) | InstaGrab",
+  title: "AI Instagram Profile Roaster — Get Roasted (Funny, Free)",
   description:
     "Enter any public Instagram username and let AI roast the profile — funny, PG-13 and shareable, in Hinglish, Hindi or English. The perfect group-chat weapon. Free.",
   alternates: { canonical: "/profile-roaster" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ShadowbanLab from "@/components/ShadowbanLab";
 
 export const metadata: Metadata = {
-  title: "Shadowban Lab — Honest Instagram Reach Checker | InstaGrab",
+  title: "Shadowban Lab — Honest Instagram Reach Checker",
   description:
     "Check any public account for shadowban signals — engagement drop, risky hashtags, reach health — with an honest, no-hype report of what you can actually fix. Free.",
   alternates: { canonical: "/shadowban-lab" },

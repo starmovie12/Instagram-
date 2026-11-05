@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Carousel Downloader — Save All Slides at Once | InstaGrab",
+  title: "Instagram Carousel Downloader — Save All Slides at Once",
   description:
     "Download every slide of an Instagram carousel post — photos and videos — in HD. Each slide gets its own download. Free, no login, plus caption + hashtags.",
   alternates: { canonical: "/carousel-downloader" },

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Profile Viewer — Bio, Stats & Posts Anonymously | InstaGrab",
+  title: "Instagram Profile Viewer — Bio, Stats & Posts Anonymously",
   description:
     "View any public Instagram profile anonymously — HD profile picture, bio, follower stats and a grid of recent posts, reels and carousels. No login, no trace.",
   alternates: { canonical: "/profile-viewer" },

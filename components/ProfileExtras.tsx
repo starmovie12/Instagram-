@@ -73,7 +73,7 @@ export default function ProfileExtras({ username }: { username: string }) {
                 {it.type === "video"
                   ? <video src={buildDownloadProxyUrl(it.url, name)} controls playsInline preload="metadata" />
                   // eslint-disable-next-line @next/next/no-img-element
-                  : <img src={buildDownloadProxyUrl(it.url, name)} alt="" loading="lazy" />}
+                  : <img src={buildDownloadProxyUrl(it.url, name)} alt={`Story ${i + 1} — photo`} loading="lazy" />}
                 <a href={buildDownloadProxyUrl(it.url, name)} download={name} onClick={(e) => celebrate(e.clientX, e.clientY)} className="gb-download-primary">
                   <span><Download size={15} strokeWidth={2.2} aria-hidden="true" style={{ verticalAlign: "-3px" }} /> Download</span>
                 </a>

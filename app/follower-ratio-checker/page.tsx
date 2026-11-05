@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import RatioChecker from "@/components/RatioChecker";
 
 export const metadata: Metadata = {
-  title: "Follower Ratio Checker — Is Your Instagram Ratio Healthy? | InstaGrab",
+  title: "Follower Ratio Checker — Is Your Instagram Ratio Healthy?",
   description:
     "Check your Instagram follower-to-following ratio and likes-to-followers ratio against healthy benchmarks — with an honest verdict on what your ratio signals. Free.",
   alternates: { canonical: "/follower-ratio-checker" },

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Pinterest Downloader — Save Pins, Images & Videos Free | InstaGrab",
+  title: "Pinterest Downloader — Save Pins, Images & Videos Free",
   description:
     "Download Pinterest images and videos in original quality free: paste any pin link (pinterest.com or pin.it) and save the media. No login, no watermark.",
   alternates: { canonical: "/pinterest-downloader" },

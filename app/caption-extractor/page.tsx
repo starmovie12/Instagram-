@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ToolLanding from "@/components/ToolLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Caption Extractor — Copy Any Caption Instantly | InstaGrab",
+  title: "Instagram Caption Extractor — Copy Any Caption Instantly",
   description: "Extract and copy the full caption from any public Instagram post or reel — line breaks preserved, one click to copy. Free.",
   alternates: {
     canonical: "/caption-extractor",

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import QuietPage from "@/components/QuietPage";
 
-export const metadata: Metadata = { title: "Terms of Service — InstaGrab" };
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "The rules for using InstaGrab: public content only, your responsibility for what you download, and our limits.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function Page() {
   return (

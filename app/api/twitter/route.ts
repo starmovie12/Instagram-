@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited } from "@/lib/rate-limit";
 
+/** Fields we read from cdn.syndication.twimg.com (everything optional — third-party JSON). */
+type SyndicationVariant = { content_type?: string; url?: string; bitrate?: number };
+type SyndicationMedia = { type?: string; media_url_https?: string; video_info?: { variants?: SyndicationVariant[] } };
+type SyndicationTweet = {
+  __typename?: string;
+  mediaDetails?: SyndicationMedia[];
+  photos?: { url?: string }[];
+  text?: string;
+  user?: { screen_name?: string; name?: string };
+};
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -49,8 +60,7 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const json: any = await res.json().catch(() => null);
+    const json = (await res.json().catch(() => null)) as SyndicationTweet | null;
     if (!json || json.__typename === "TweetTombstone") {
       return NextResponse.json({ error: "This tweet is unavailable (deleted or restricted)." }, { status: 404 });
     }
@@ -59,10 +69,10 @@ export async function POST(req: NextRequest) {
     for (const m of json?.mediaDetails ?? []) {
       if (m?.type === "video" || m?.type === "animated_gif") {
         const variants = (m?.video_info?.variants ?? [])
-          .filter((v: any) => v?.content_type === "video/mp4" && v?.url)
-          .sort((a: any, b: any) => (b?.bitrate ?? 0) - (a?.bitrate ?? 0));
+          .filter((v) => v?.content_type === "video/mp4" && v?.url)
+          .sort((a, b) => (b?.bitrate ?? 0) - (a?.bitrate ?? 0));
         if (variants[0]) {
-          media.push({ type: "video", url: variants[0].url, thumbnail: m?.media_url_https ?? "", label: m?.type === "animated_gif" ? "GIF (MP4)" : "Video" });
+          media.push({ type: "video", url: variants[0].url ?? "", thumbnail: m?.media_url_https ?? "", label: m?.type === "animated_gif" ? "GIF (MP4)" : "Video" });
         }
       } else if (m?.type === "photo" && m?.media_url_https) {
         media.push({ type: "image", url: `${m.media_url_https}?name=orig`, thumbnail: m.media_url_https });

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GridPlanner from "@/components/GridPlanner";
 
 export const metadata: Metadata = {
-  title: "Instagram Grid Planner — Preview Your 3×3 Feed, Free | InstaGrab",
+  title: "Instagram Grid Planner — Preview Your 3×3 Feed, Free",
   description:
     "Plan your Instagram feed free: add up to 9 upcoming posts, swap them around, and preview your 3×3 grid exactly as profile visitors will see it. On-device, no login.",
   alternates: { canonical: "/grid-planner" },

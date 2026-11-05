@@ -8,29 +8,8 @@
  */
 import { createContext, useContext, useEffect, useState } from "react";
 
-export const LANGS = [
-  { code: "en", name: "English" },
-  { code: "hi", name: "हिन्दी" },
-  { code: "es", name: "Español" },
-  { code: "pt", name: "Português" },
-  { code: "id", name: "Bahasa Indonesia" },
-  { code: "ar", name: "العربية" },
-  { code: "tr", name: "Türkçe" },
-  { code: "fr", name: "Français" },
-  { code: "de", name: "Deutsch" },
-  { code: "it", name: "Italiano" },
-  { code: "ru", name: "Русский" },
-  { code: "ja", name: "日本語" },
-  { code: "ko", name: "한국어" },
-  { code: "vi", name: "Tiếng Việt" },
-  { code: "th", name: "ไทย" },
-  { code: "bn", name: "বাংলা" },
-  { code: "ur", name: "اردو" },
-  { code: "fa", name: "فارسی" },
-  { code: "ms", name: "Bahasa Melayu" },
-  { code: "pl", name: "Polski" },
-  { code: "nl", name: "Nederlands" },
-] as const;
+import { LANGS, RTL_LANGS } from "./locales";
+export { LANGS, RTL_LANGS };
 
 export type Locale = (typeof LANGS)[number]["code"];
 
@@ -47,7 +26,8 @@ type Keys =
   | "activeStories" | "dpDownload" | "cover" | "loadStories" | "bio"
   | "highlights" | "language"
   | "posts" | "followers" | "following" | "recentPosts" | "pinned" | "noPosts"
-  | "smartPlaceholder" | "downloadAllZip" | "resolving" | "copyLink";
+  | "smartPlaceholder" | "downloadAllZip" | "resolving" | "copyLink"
+  | "boundary.title" | "boundary.body" | "boundary.retry" | "boundary.home" | "boundary.code" | "loading";
 
 type Dict = Partial<Record<Keys, string>>;
 
@@ -72,6 +52,12 @@ const EN: Record<Keys, string> = {
   recentPosts: "Recent posts", pinned: "Pinned", noPosts: "No public posts to show.",
   smartPlaceholder: "Paste a link or @username — reel, post, story, profile…",
   downloadAllZip: "Download all (ZIP)", resolving: "Reading…", copyLink: "Copy link",
+  "boundary.title": "This page didn't load",
+  "boundary.body": "A hiccup on our side or your connection. Your history and settings are safe.",
+  "boundary.retry": "Try again",
+  "boundary.home": "Go to Home",
+  "boundary.code": "Reference",
+  loading: "Loading",
 };
 
 const STRINGS: Record<Locale, Dict> = {
@@ -97,6 +83,12 @@ const STRINGS: Record<Locale, Dict> = {
     recentPosts: "हाल की पोस्ट्स", pinned: "पिन्ड", noPosts: "दिखाने के लिए कोई पब्लिक पोस्ट नहीं।",
     smartPlaceholder: "लिंक या @username पेस्ट करें — reel, post, story, profile…",
     downloadAllZip: "सभी डाउनलोड (ZIP)", resolving: "पढ़ रहे हैं…", copyLink: "लिंक कॉपी करें",
+    "boundary.title": "ये पेज लोड नहीं हुआ",
+    "boundary.body": "हमारी तरफ़ या कनेक्शन में रुकावट आई। आपकी हिस्ट्री और सेटिंग्स सुरक्षित हैं।",
+    "boundary.retry": "फिर से कोशिश करें",
+    "boundary.home": "होम पर जाएँ",
+    "boundary.code": "रेफ़रेंस",
+    loading: "लोड हो रहा है",
   },
   es: {
     linkPlaceholder: "Pega un enlace de Instagram — reel, post, historia…",
@@ -444,8 +436,22 @@ const STRINGS: Record<Locale, Dict> = {
 
 const CODES = new Set<string>(LANGS.map((l) => l.code));
 
-type I18n = { lang: Locale; setLang: (l: Locale) => void; t: (k: Keys) => string };
-const Ctx = createContext<I18n>({ lang: "en", setLang: () => {}, t: (k) => EN[k] });
+export type I18nKey = Keys;
+export type I18nParams = Record<string, string | number>;
+
+/**
+ * Translate outside React (e.g. app/global-error.tsx, which renders without providers).
+ * @param lang    locale code; unknown codes fall back to English
+ * @param k       message key
+ * @param params  `{name}` placeholders — never concatenate translated strings
+ */
+export function translate(lang: string, k: Keys, params?: I18nParams): string {
+  const raw = (CODES.has(lang) ? STRINGS[lang as Locale]?.[k] : undefined) ?? EN[k];
+  return params ? raw.replace(/\{(\w+)\}/g, (m, name: string) => (params[name] !== undefined ? String(params[name]) : m)) : raw;
+}
+
+type I18n = { lang: Locale; setLang: (l: Locale) => void; t: (k: Keys, params?: I18nParams) => string };
+const Ctx = createContext<I18n>({ lang: "en", setLang: () => {}, t: (k, p) => translate("en", k, p) });
 
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Locale>("en");
@@ -469,10 +475,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang;
-    document.documentElement.dir = ["ar", "ur", "fa"].includes(lang) ? "rtl" : "ltr"; // PRD A15
+    document.documentElement.dir = (RTL_LANGS as readonly string[]).includes(lang) ? "rtl" : "ltr"; // PRD A15
   }, [lang]);
 
-  const t = (k: Keys) => STRINGS[lang]?.[k] ?? EN[k];
+  const t = (k: Keys, params?: I18nParams) => translate(lang, k, params);
 
   return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
 }

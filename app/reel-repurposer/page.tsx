@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ReelRepurposer from "@/components/ReelRepurposer";
 
 export const metadata: Metadata = {
-  title: "Reel Repurposer — 1 Reel into 6 Content Pieces (AI) | InstaGrab",
+  title: "Reel Repurposer — 1 Reel into 6 Content Pieces (AI)",
   description:
     "Paste an Instagram reel and get 6 ready-to-post pieces: blog post, X thread, LinkedIn post, YouTube Shorts, WhatsApp status and newsletter snippet. Hinglish, free.",
   alternates: { canonical: "/reel-repurposer" },

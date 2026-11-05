@@ -3,9 +3,9 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GhostFeed from "@/components/GhostFeed";
 
 export const metadata: Metadata = {
-  title: "Ghost Feed — See Which Accounts Stopped Posting | InstaGrab",
+  title: "Ghost Feed — See Which Accounts Stopped Posting",
   description:
-    "Add the accounts you follow and see who's gone quiet. Ranks everyone by days since their last post — the ghosts rise to the top. Anonymous, on-device, free.",
+    "Add public accounts you care about and see who's gone quiet. Ranks everyone by days since their last post — the ghosts rise to the top. Anonymous, on-device, free.",
   alternates: { canonical: "/ghost-feed" },
 };
 

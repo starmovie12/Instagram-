@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import MediaKitMaker from "@/components/MediaKitMaker";
 
 export const metadata: Metadata = {
-  title: "Free Instagram Media Kit Generator — Gold Editorial Design | InstaGrab",
+  title: "Free Instagram Media Kit Generator — Gold Editorial Design",
   description:
     "Create a beautiful one-page Instagram media kit free: stats, audience, collab rates and contact — in a premium gold editorial design. Download as PNG, no login, no watermark fees.",
   alternates: { canonical: "/media-kit-generator" },

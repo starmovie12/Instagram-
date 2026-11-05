@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import QuickAction from "@/components/QuickAction";
 
 export const metadata: Metadata = {
-  title: "Quick Download — InstaGrab",
+  title: "Quick Download",
   description: "Instant Instagram download.",
   robots: { index: false, follow: false },
 };

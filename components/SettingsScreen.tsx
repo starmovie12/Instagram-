@@ -125,7 +125,7 @@ export default function SettingsScreen() {
                   <input id="sid" type={showSession ? "text" : "password"} value={session} onChange={(e) => setSession(e.target.value)} placeholder="e.g. 54321%3ABcD1234…" autoComplete="off" autoCapitalize="off" spellCheck={false} />
                   <button type="button" onClick={() => setShowSession((s) => !s)} aria-label={showSession ? "Hide session ID" : "Show session ID"}>{showSession ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                 </div>
-                <p className="stg-help">Saved in your browser. Lets you grab stories/posts from accounts you follow and bypasses public rate-limits.</p>
+                <p className="stg-help">Optional. Saved only for this tab unless you turn on Remember. Can improve reliability for public content. Never works for private accounts.</p>
                 <p className="stg-warn"><ShieldAlert size={16} aria-hidden="true" /> Ye aapke Instagram login jaisa hai — kisi ko na dein, aur ho sake to alag account use karein.</p>
                 {session && <button type="button" className="stg-link" onClick={() => { setSession(""); setAdvanced("", cobalt); flash("Session ID removed"); }}>Remove Session ID</button>}
 

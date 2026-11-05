@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ProfileStatsTool from "@/components/ProfileStatsTool";
 
 export const metadata: Metadata = {
-  title: "Instagram Profile Audit — Free Smart Report on Your Account | InstaGrab",
+  title: "Instagram Profile Audit — Free Smart Report on Your Account",
   description:
     "Get a free smart audit of any public Instagram profile — engagement, posting consistency, best time, hashtag use and caption strength, with clear tips. No login.",
   alternates: { canonical: "/profile-audit" },

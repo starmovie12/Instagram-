@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import QuietPage from "@/components/QuietPage";
 
-export const metadata: Metadata = { title: "Contact — InstaGrab" };
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Reach the InstaGrab team for support, feature requests, takedown questions or partnership enquiries.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function Page() {
   return (

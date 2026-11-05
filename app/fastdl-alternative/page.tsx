@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GoldenBar from "@/components/GoldenBar";
 
 export const metadata: Metadata = {
-  title: "FastDL Alternative — InstaGrab (HD + Captions + AI Tools) | InstaGrab",
+  title: { absolute: "FastDL Alternative — InstaGrab (HD + Captions + AI Tools)" },
   description:
     "Looking for a FastDL / iGram alternative? InstaGrab downloads Instagram media in HD with captions and hashtags included — plus true MP3, transcripts and 80+ free tools.",
   alternates: { canonical: "/fastdl-alternative" },

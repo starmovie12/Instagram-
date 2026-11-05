@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Reels Downloader — HD MP4, Free, No Login | InstaGrab",
+  title: "Instagram Reels Downloader — HD MP4, Free, No Login",
   description: "Download any public Instagram reel in HD MP4 with its caption and hashtags. Free, no watermark, no login required.",
   alternates: {
     canonical: "/reels-downloader",

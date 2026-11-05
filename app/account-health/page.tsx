@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import AccountHealth from "@/components/AccountHealth";
 
 export const metadata: Metadata = {
-  title: "Instagram Account Health Score — Free A+ to F Report Card | InstaGrab",
+  title: "Instagram Account Health Score — Free A+ to F Report Card",
   description:
     "Get a complete Instagram health report card free: engagement, consistency, audience quality and profile craft scored out of 100 with an A+ to F grade. Shareable.",
   alternates: { canonical: "/account-health" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ViralityScore from "@/components/ViralityScore";
 
 export const metadata: Metadata = {
-  title: "Reel Virality Score Calculator — Rate Your Reel /100 | InstaGrab",
+  title: "Reel Virality Score Calculator — Rate Your Reel /100",
   description:
     "Score any reel out of 100: enter views, likes, comments, shares and followers — get a virality score with specific tips on what to improve. Free, no login.",
   alternates: { canonical: "/virality-score" },

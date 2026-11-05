@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GridSplitter from "@/components/GridSplitter";
 
 export const metadata: Metadata = {
-  title: "Instagram 9-Grid Photo Splitter — Giant Square Maker | InstaGrab",
+  title: "Instagram 9-Grid Photo Splitter — Giant Square Maker",
   description:
     "Split one photo into a 3×3 grid for a giant Instagram profile layout. Upload, get 9 perfectly cut tiles in a ZIP, ready to post. Free, runs in your browser.",
   alternates: { canonical: "/grid-splitter" },

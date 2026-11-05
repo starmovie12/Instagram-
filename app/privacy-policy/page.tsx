@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import QuietPage from "@/components/QuietPage";
 
-export const metadata: Metadata = { title: "Privacy Policy — InstaGrab" };
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "What InstaGrab stores (almost nothing), how abuse protection works, cookies from ads and your rights.",
+  alternates: { canonical: "/privacy-policy" },
+};
 
 export default function Page() {
   return (

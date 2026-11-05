@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import FontGenerator from "@/components/FontGenerator";
 
 export const metadata: Metadata = {
-  title: "Instagram Fonts Generator — Stylish Bio Fonts, Copy & Paste | InstaGrab",
+  title: "Instagram Fonts Generator — Stylish Bio Fonts, Copy & Paste",
   description:
     "Turn any text into 15+ stylish fonts for your Instagram bio, name or captions — bold, italic, script, cursive and more. Copy with one tap. Free.",
   alternates: { canonical: "/font-generator" },

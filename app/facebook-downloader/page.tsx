@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Facebook Video Downloader — Videos & Reels, Free | InstaGrab",
+  title: "Facebook Video Downloader — Videos & Reels, Free",
   description:
     "Download public Facebook videos and reels free: paste a facebook.com or fb.watch link and save the video. Best-effort, honest errors, no login.",
   alternates: { canonical: "/facebook-downloader" },

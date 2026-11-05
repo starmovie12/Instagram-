@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import DmLinkGenerator from "@/components/DmLinkGenerator";
 
 export const metadata: Metadata = {
-  title: "Instagram DM Link Generator — ig.me Link + QR Code | InstaGrab",
+  title: "Instagram DM Link Generator — ig.me Link + QR Code",
   description:
     "Create your Instagram DM link (ig.me) with an optional pre-filled message, plus a scan-to-DM QR code you can download and print. Free, no login.",
   alternates: { canonical: "/dm-link-generator" },

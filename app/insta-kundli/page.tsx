@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import KundliTool from "@/components/KundliTool";
 
 export const metadata: Metadata = {
-  title: "Insta Kundli — AI Instagram Horoscope & Compatibility | InstaGrab",
+  title: "Insta Kundli — AI Instagram Horoscope & Compatibility",
   description:
     "Enter any Instagram @username and get a fun AI 'Insta Kundli' — your posting rashi, this week's bhavishya, lucky hashtag, plus couple compatibility %. Hinglish, free.",
   alternates: { canonical: "/insta-kundli" },

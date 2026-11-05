@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import EmvCalculator from "@/components/EmvCalculator";
 
 export const metadata: Metadata = {
-  title: "Instagram EMV Calculator — Earned Media Value (₹ / $) | InstaGrab",
+  title: "Instagram EMV Calculator — Earned Media Value (₹ / $)",
   description:
     "Calculate the earned media value (EMV) of your Instagram posts: impressions, likes, comments, shares and saves converted to ₹ or $ — the number brands understand. Free.",
   alternates: { canonical: "/emv-calculator" },

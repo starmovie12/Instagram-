@@ -134,3 +134,61 @@ sampled at 101 points — worst 5.11:1). `npm run contrast` runs
 | 2.6 | Removed `public/icon-blank-*` and old `icon-maskable-*` | Unreferenced leftovers from ail's splash experiment (PRD D10: no splash). New maskable icons live in `public/icons/`. |
 | 2.7 | HeroBanner keeps its layout/content (PRD "as-is"); only colours moved to `--hero-*` / `--device-*` tokens | — |
 | 2.8 | Canvas export palettes renamed in UI ("Porcelain & magenta", "Noir & pink"); others kept | Old names referenced removed colours. |
+
+## Phase 3 — Professional polish + PRD v2.4 implementation
+
+Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each with
+`tsc` + `npm test` + `npm run build` + route-inventory diff green.
+
+### 3.1 Cleanup, boundaries, language, types, content policy
+
+- **Dead components deleted** (zero imports verified with grep + `tsc`):
+  `Footer`, `HistoryList`, `Nav`, `OgDownloader`, `RecentTools`, `ResultCard`,
+  `SplashScreen` (+ `.css`, `splashConfig.ts`), `SupportedTools`,
+  `TwitterDownloader`, `YtThumbnail` — plus three more found by the same sweep:
+  `CopyButton`, `CreatorPack` (merged into `ResultPanel`, PRD A20), `SoundToggle`
+  (Settings owns the toggle). `lib/retention.ts` lost its deprecated v1 history
+  API. Raw colours outside `tokens.css` are now **0** (`scripts/check-colors.mjs`).
+- **`app/loading.tsx`, `app/error.tsx`, `app/global-error.tsx`**: content-matched
+  skeleton; friendly retry screen (`role="alert"`, focus to heading, one Retry
+  action + Home link, Next `digest` as reference) — all copy via i18n keys
+  `boundary.*` (English + Hindi; other 19 locales fall back to English).
+  `global-error` reads language/theme straight from storage (no providers there).
+- **`<html lang>`**: the pre-paint script now sets `lang` + `dir` (RTL for ar/ur/fa)
+  from `ig-lang` (or the browser language) before first paint, so static pages
+  carry the chosen language; `LangProvider` keeps it in sync. Language codes moved
+  to `lib/locales.ts` (server-safe). `t()` gained `{param}` interpolation and a
+  provider-free `translate()`.
+- **Types:** 16 explicit `any` → 0 (`api/twitter` typed syndication payload,
+  `UsernameTool` profile payload — which surfaced 4 real `undefined` bugs,
+  `InstallAppButton` iOS `standalone`, KV reply, extractor legacy callbacks +
+  options). One documented `type Any = any` remains *inside*
+  `lib/instagram-extractor.ts` for walking Instagram JSON — PRD §25.4 freezes the
+  extractor internals; nothing typed `any` crosses the module boundary.
+- **Images:** every `<img>` has `alt`; content images (stories, grid tiles) now
+  have descriptive alt, decorative ones next to visible text keep `alt=""`.
+- **Titles:** 131 of 135 pages rendered "… | InstaGrab · InstaGrab"; the page
+  strings no longer repeat the brand (template adds it once). Legal pages gained
+  `description` + canonical (they had neither on `main`).
+- **Heavy libs:** `jszip`, `@breezystack/lamejs`, `gifenc`, `qrcode` were already
+  `await import()`-ed inside the click handlers that need them — verified none is
+  in any route's first-load JS (bundle table in Phase 4).
+- **Content policy scan (PRD §1.4 / AC-44):** removed
+  - Settings copy promising "stories/posts from accounts you follow and bypasses
+    rate-limits" → PRD v2.2 copy ("…public content. Never works for private
+    accounts.");
+  - "Spy mode: track anyone" (follower-tracker), "accounts you follow" (ghost-feed),
+    registry "secretly … seen list" + keywords `stalk`, `secret`.
+  - **Added a server-side private-account guard** (AC-45): posts/reels whose owner
+    is private, stories, highlights, highlight items and profile feeds now throw
+    `PRIVATE` even when a Session ID could see them. Profile pictures stay
+    downloadable (Instagram shows them publicly). No feature, route or copy that
+    targets protected/private content remains.
+- **`/api/diag`** (Flag C): owner-only in production (admin cookie); open in
+  preview/dev.
+
+| # | Decision | Why |
+|---|---|---|
+| 3.1.a | Private-account DP still allowed | Public on Instagram itself; feed/stories/highlights blocked. |
+| 3.1.b | Story-viewer pages keep "anonymous" (= no login) wording | Public stories only; surveillance words removed. |
+| 3.1.c | This sandbox has `NEXT_PUBLIC_SITE_URL=https://TUMHARA-DOMAIN.com`, so local canonicals show that host | Vercel uses its own value — make sure it is the real domain (see Phase 4). |

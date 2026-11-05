@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CaptionFixer from "@/components/CaptionFixer";
 
 export const metadata: Metadata = {
-  title: "Instagram Caption Line Break Generator — Fix Spacing | InstaGrab",
+  title: "Instagram Caption Line Break Generator — Fix Spacing",
   description:
     "Add clean line breaks and spacing to your Instagram captions and bio. Instagram collapses blank lines — this locks them so your caption pastes perfectly. Free.",
   alternates: { canonical: "/caption-fixer" },

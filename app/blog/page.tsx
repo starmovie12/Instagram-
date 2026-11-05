@@ -5,7 +5,7 @@ import Reveal from "@/components/Reveal";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
-  title: "Blog — Instagram Growth, Reels & Hashtag Guides | InstaGrab",
+  title: "Blog — Instagram Growth, Reels & Hashtag Guides",
   description:
     "Practical guides on Instagram reels, hashtags, captions, and content strategy for creators and social media managers.",
   alternates: { canonical: "/blog" },

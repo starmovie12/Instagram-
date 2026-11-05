@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Video Downloader — Save Videos & IGTV in HD | InstaGrab",
+  title: "Instagram Video Downloader — Save Videos & IGTV in HD",
   description:
     "Download any Instagram video, reel or IGTV in HD MP4 for free. Fast, anonymous, no watermark, no login — plus the caption and every hashtag.",
   alternates: { canonical: "/video-downloader" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import BlurTool from "@/components/BlurTool";
 
 export const metadata: Metadata = {
-  title: "Blur / Pixelate Tool — Hide Faces & Info in Screenshots | InstaGrab",
+  title: "Blur / Pixelate Tool — Hide Faces & Info in Screenshots",
   description:
     "Blur or pixelate parts of any image free: rub over faces, names, numbers or chats to hide them before sharing. Runs entirely in your browser — nothing is uploaded.",
   alternates: { canonical: "/blur-tool" },

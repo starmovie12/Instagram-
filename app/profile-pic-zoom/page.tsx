@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Instagram Profile Picture Zoom — View Any DP in Full HD | InstaGrab",
+  title: "Instagram Profile Picture Zoom — View Any DP in Full HD",
   description:
     "Zoom any Instagram profile picture to full size free — see the HD original instead of the tiny circle, and download it if you want. No login, anonymous.",
   alternates: { canonical: "/profile-pic-zoom" },

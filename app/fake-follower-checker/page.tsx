@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import FakeFollowerChecker from "@/components/FakeFollowerChecker";
 
 export const metadata: Metadata = {
-  title: "Fake Follower Checker for Instagram — Free Audience Audit | InstaGrab",
+  title: "Fake Follower Checker for Instagram — Free Audience Audit",
   description:
     "Check any Instagram account for fake or bought followers, free. Enter a @username and get an audience quality grade (A+ to F) from public engagement signals. No login.",
   alternates: { canonical: "/fake-follower-checker" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CharCounter from "@/components/CharCounter";
 
 export const metadata: Metadata = {
-  title: "Instagram Character Counter — Caption, Bio & Hashtag Limits | InstaGrab",
+  title: "Instagram Character Counter — Caption, Bio & Hashtag Limits",
   description:
     "Live character counter for Instagram: caption (2,200), bio (150), username (30) and the 30-hashtag limit — with a “… more” fold preview. Free, no login.",
   alternates: { canonical: "/character-counter" },

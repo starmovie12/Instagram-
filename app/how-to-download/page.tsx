@@ -13,7 +13,7 @@ import { BLOG_POSTS } from "@/lib/blog-posts";
 import { DEFAULT_FAQ, faqJsonLd, howToJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "How to Download Instagram, Facebook, TikTok & More — Step by Step | InstaGrab",
+  title: "How to Download Instagram, Facebook, TikTok & More — Step by Step",
   description: "Learn how to copy a link and download public Instagram, Facebook, TikTok, YouTube thumbnails, Pinterest, X and Threads media in HD — no login, nothing stored.",
   alternates: { canonical: "/how-to-download" },
 };

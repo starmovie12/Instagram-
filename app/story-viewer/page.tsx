@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import UsernameLanding from "@/components/UsernameLanding";
 
 export const metadata: Metadata = {
-  title: "Anonymous Instagram Story Viewer — No Trace, No Login | InstaGrab",
+  title: "Anonymous Instagram Story Viewer — No Trace, No Login",
   description:
     "Watch public Instagram stories anonymously — no login, no trace, the account owner never knows. View and optionally download in HD. Free.",
   alternates: { canonical: "/story-viewer" },

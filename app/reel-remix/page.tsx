@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ReelTranscript from "@/components/ReelTranscript";
 
 export const metadata: Metadata = {
-  title: "Reel Remix Studio — Copy a Viral Reel's Formula for Your Niche | InstaGrab",
+  title: "Reel Remix Studio — Copy a Viral Reel's Formula for Your Niche",
   description:
     "Paste a viral Instagram reel — get its transcript, why it went viral, and a fully rewritten script for YOUR niche with hooks, caption and hashtags. Hinglish supported. Free.",
   alternates: { canonical: "/reel-remix" },

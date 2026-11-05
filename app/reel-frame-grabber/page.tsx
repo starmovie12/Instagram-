@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import FrameGrabber from "@/components/FrameGrabber";
 
 export const metadata: Metadata = {
-  title: "Reel Frame Grabber — Capture Any Second as HD Image | InstaGrab",
+  title: "Reel Frame Grabber — Capture Any Second as HD Image",
   description:
     "Grab a full-resolution frame from any second of an Instagram reel or video, free. Scrub to the exact moment, capture, download as PNG — sharper than any screenshot.",
   alternates: { canonical: "/reel-frame-grabber" },

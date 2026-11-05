@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import TrendingIndia from "@/components/TrendingIndia";
 
 export const metadata: Metadata = {
-  title: "Trend Radar India — Trending Hashtags, Audio & Reel Formats | InstaGrab",
+  title: "Trend Radar India — Trending Hashtags, Audio & Reel Formats",
   description:
     "What's working on Instagram India right now: copy-ready hashtag sets by category, audio strategy and the reel formats getting reach — curated and updated regularly.",
   alternates: { canonical: "/trending-india" },

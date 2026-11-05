@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import WrappedTool from "@/components/WrappedTool";
 
 export const metadata: Metadata = {
-  title: "Insta Wrapped — Your Instagram Year in Review (Free) | InstaGrab",
+  title: "Insta Wrapped — Your Instagram Year in Review (Free)",
   description:
     "Spotify-Wrapped for Instagram. Enter any @username → get a shareable card with followers, top post, engagement, posting personality and a fun title. Free, no login.",
   alternates: { canonical: "/insta-wrapped" },

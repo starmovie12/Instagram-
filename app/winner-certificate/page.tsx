@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import WinnerCertificate from "@/components/WinnerCertificate";
 
 export const metadata: Metadata = {
-  title: "Giveaway Winner Certificate Generator — Free, Verifiable | InstaGrab",
+  title: "Giveaway Winner Certificate Generator — Free, Verifiable",
   description:
     "Create an official-looking giveaway winner certificate free: winner's name, prize, date and a unique certificate ID on a gold-framed PNG — ready for your story.",
   alternates: { canonical: "/winner-certificate" },

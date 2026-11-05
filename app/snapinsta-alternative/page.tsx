@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GoldenBar from "@/components/GoldenBar";
 
 export const metadata: Metadata = {
-  title: "SnapInsta Alternative — InstaGrab (Free, No Ads Maze) | InstaGrab",
+  title: { absolute: "SnapInsta Alternative — InstaGrab (Free, No Ads Maze)" },
   description:
     "Looking for a SnapInsta alternative? InstaGrab downloads reels, photos and stories in HD — plus captions, hashtags, 80+ creator tools and Hinglish AI. Free, no login.",
   alternates: { canonical: "/snapinsta-alternative" },

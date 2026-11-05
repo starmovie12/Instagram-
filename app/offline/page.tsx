@@ -4,7 +4,7 @@ import Link from "next/link";
 import { WifiOff, History, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "You're offline | InstaGrab",
+  title: "You're offline",
   description: "No connection right now — your saved history is still here.",
   robots: { index: false, follow: false },
 };

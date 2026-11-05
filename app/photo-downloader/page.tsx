@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Photo Downloader — Original Quality, Carousels Too | InstaGrab",
+  title: "Instagram Photo Downloader — Original Quality, Carousels Too",
   description: "Download Instagram photos in original resolution — single posts and full carousels, every slide. Free, no login.",
   alternates: {
     canonical: "/photo-downloader",

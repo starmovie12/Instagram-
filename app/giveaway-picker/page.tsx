@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GiveawayPicker from "@/components/GiveawayPicker";
 
 export const metadata: Metadata = {
-  title: "Instagram Giveaway Comment Picker — Random Winner, Free | InstaGrab",
+  title: "Instagram Giveaway Comment Picker — Random Winner, Free",
   description:
     "Pick a random giveaway winner from your Instagram post's comments free: entry filters (tag requirements, keywords), multiple winners, backup winners and a certificate.",
   alternates: { canonical: "/giveaway-picker" },

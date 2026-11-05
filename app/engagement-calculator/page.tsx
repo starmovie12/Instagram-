@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ProfileStatsTool from "@/components/ProfileStatsTool";
 
 export const metadata: Metadata = {
-  title: "Instagram Engagement Rate Calculator — Free, No Login | InstaGrab",
+  title: "Instagram Engagement Rate Calculator — Free, No Login",
   description:
     "Calculate any public Instagram account's engagement rate — likes + comments ÷ followers — from its recent posts. Free, instant, no login. Great for sponsorships.",
   alternates: { canonical: "/engagement-calculator" },

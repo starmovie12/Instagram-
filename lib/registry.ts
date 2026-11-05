@@ -154,12 +154,12 @@ export const ALL_SUPPORTED_TOOLS: ToolItem[] = [
   {
     name: "Anonymous Story Viewer",
     href: "/story-viewer",
-    description: "Watch Instagram Stories secretly without appearing in the seen list.",
+    description: "View public Instagram Stories without logging in.",
     category: "downloaders",
     icon: "🕵️",
     badge: "Hot",
     featured: true,
-    keywords: ["stalk", "secret", "anonymous", "watch"],
+    keywords: ["anonymous", "story viewer", "watch", "public"],
   },
   {
     name: "Profile Viewer",

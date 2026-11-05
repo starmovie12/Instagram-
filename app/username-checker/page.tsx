@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import UsernameChecker from "@/components/UsernameChecker";
 
 export const metadata: Metadata = {
-  title: "Instagram Username Checker — Is It Available? | InstaGrab",
+  title: "Instagram Username Checker — Is It Available?",
   description:
     "Check if an Instagram username is available in seconds, free. Get instant availability plus smart alternative handle suggestions if it's taken. No login needed.",
   alternates: { canonical: "/username-checker" },

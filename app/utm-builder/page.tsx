@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import UtmBuilder from "@/components/UtmBuilder";
 
 export const metadata: Metadata = {
-  title: "UTM Link Builder for Instagram — Track Your Bio Link | InstaGrab",
+  title: "UTM Link Builder for Instagram — Track Your Bio Link",
   description:
     "Build UTM tracking links for Instagram free: tag your bio, story and reel links so Google Analytics shows exactly which placement drives traffic and sales.",
   alternates: { canonical: "/utm-builder" },

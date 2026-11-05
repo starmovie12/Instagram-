@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import InvisibleChar from "@/components/InvisibleChar";
 
 export const metadata: Metadata = {
-  title: "Invisible Character for Instagram — Blank Name & Line Breaks | InstaGrab",
+  title: "Invisible Character for Instagram — Blank Name & Line Breaks",
   description:
     "Copy invisible characters (Braille blank, zero-width space and more) for blank Instagram names, clean line breaks and spacing tricks. One-tap copy, free.",
   alternates: { canonical: "/invisible-character" },

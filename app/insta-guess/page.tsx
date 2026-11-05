@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import InstaGuess from "@/components/InstaGuess";
 
 export const metadata: Metadata = {
-  title: "InstaGuess — Daily Blurred DP Guessing Game | InstaGrab",
+  title: "InstaGuess — Daily Blurred DP Guessing Game",
   description:
     "Guess the celebrity from their blurred Instagram profile picture. A new mystery every day, build your streak — the daily Instagram game. Free, no login.",
   alternates: { canonical: "/insta-guess" },

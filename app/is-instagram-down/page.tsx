@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import IgDownChecker from "@/components/IgDownChecker";
 
 export const metadata: Metadata = {
-  title: "Is Instagram Down Right Now? — Live Status Check | InstaGrab",
+  title: "Is Instagram Down Right Now? — Live Status Check",
   description:
     "Check if Instagram is down right now. Live server status check with response time — find out in seconds whether it's an outage or just your connection.",
   alternates: { canonical: "/is-instagram-down" },

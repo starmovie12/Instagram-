@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import HashtagChecker from "@/components/HashtagChecker";
 
 export const metadata: Metadata = {
-  title: "Banned Hashtag Checker — Spot Shadowbanned Tags | InstaGrab",
+  title: "Banned Hashtag Checker — Spot Shadowbanned Tags",
   description:
     "Paste your Instagram hashtags and instantly see which ones are banned, blocked or risky — before you post. Avoid shadowbans. Free, runs in your browser.",
   alternates: { canonical: "/hashtag-checker" },

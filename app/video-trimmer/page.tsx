@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import VideoTrimmer from "@/components/VideoTrimmer";
 
 export const metadata: Metadata = {
-  title: "Video Trimmer Online — Cut Clips in Your Browser, Free | InstaGrab",
+  title: "Video Trimmer Online — Cut Clips in Your Browser, Free",
   description:
     "Trim any video in your browser free: set start and end, get your clip — no upload, no watermark, no install. Great for cutting reels and stories to length.",
   alternates: { canonical: "/video-trimmer" },

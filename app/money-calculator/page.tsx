@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import MoneyCalculator from "@/components/MoneyCalculator";
 
 export const metadata: Metadata = {
-  title: "Instagram Money Calculator — Earnings per Post (₹ / $) | InstaGrab",
+  title: "Instagram Money Calculator — Earnings per Post (₹ / $)",
   description:
     "Free Instagram money calculator: enter followers, engagement rate and niche to estimate earnings per sponsored post, story and reel — with Indian ₹ and global $ rates. No login.",
   alternates: { canonical: "/money-calculator" },

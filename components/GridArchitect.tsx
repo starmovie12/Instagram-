@@ -99,7 +99,7 @@ export default function GridArchitect() {
                 onDrop={() => onDrop(t.id)}
                 style={{ position: "relative", aspectRatio: "1", cursor: "grab", outline: overId === t.id ? "2px solid var(--gold-400)" : "none", outlineOffset: -2 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={t.url} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
+                <img src={t.url} alt="Grid tile (drag to reorder)" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
                 <span aria-hidden style={{ position: "absolute", top: 4, left: 4, color: "var(--white)", opacity: 0.7, filter: "drop-shadow(0 1px 2px rgb(var(--black-rgb) / .6))" }}>
                   <GripVertical size={14} strokeWidth={2} />
                 </span>

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import QuietPage from "@/components/QuietPage";
 
-export const metadata: Metadata = { title: "DMCA — InstaGrab" };
+export const metadata: Metadata = {
+  title: "DMCA",
+  description: "How to report copyright infringement to InstaGrab and how takedown notices are handled.",
+  alternates: { canonical: "/dmca" },
+};
 
 export default function Page() {
   return (

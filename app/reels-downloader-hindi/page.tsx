@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import GoldenBar from "@/components/GoldenBar";
 
 export const metadata: Metadata = {
-  title: "Instagram Reels Download Kaise Kare — रील्स डाउनलोडर (फ्री) | InstaGrab",
+  title: "Instagram Reels Download Kaise Kare — रील्स डाउनलोडर (फ्री)",
   description:
     "Instagram reels download karna hai? Link paste karo, HD MP4 video + poora caption + saare hashtags ek click mein. Free, bina login, bina watermark — hindi mein samjhaya gaya.",
   alternates: { canonical: "/reels-downloader-hindi" },

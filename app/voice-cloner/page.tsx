@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import VoiceCloner from "@/components/VoiceCloner";
 
 export const metadata: Metadata = {
-  title: "Caption Voice Cloner — Write in Any Creator's Style (AI) | InstaGrab",
+  title: "Caption Voice Cloner — Write in Any Creator's Style (AI)",
   description:
     "AI learns any public creator's caption style — tone, emojis, structure — then writes YOUR caption in that exact voice. The only style-transfer caption tool. Free.",
   alternates: { canonical: "/voice-cloner" },

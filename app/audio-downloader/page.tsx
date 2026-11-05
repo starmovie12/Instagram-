@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Reel Audio Downloader — Save the Sound as MP3/M4A | InstaGrab",
+  title: "Instagram Reel Audio Downloader — Save the Sound as MP3/M4A",
   description:
     "Download the trending audio from any public Instagram reel on its own — the music/sound as an M4A file, no video. Free, no login, no watermark.",
   alternates: { canonical: "/audio-downloader" },

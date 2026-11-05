@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ReelTranscript from "@/components/ReelTranscript";
 
 export const metadata: Metadata = {
-  title: "Instagram Reel Transcript Extractor — Reel to Text, Free | InstaGrab",
+  title: "Instagram Reel Transcript Extractor — Reel to Text, Free",
   description:
     "Paste any Instagram reel link and get the full spoken script as text — Hindi, English and Hinglish supported, with romanized Hindi included. The only free reel-to-text tool.",
   alternates: { canonical: "/reel-transcript" },

@@ -3,6 +3,10 @@ import Script from "next/script";
 import { Instrument_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
+import { LANGS, RTL_LANGS } from "@/lib/locales";
+
+const LANG_CODES = LANGS.map((l) => l.code);
+const RTL = [...RTL_LANGS];
 import { SITE_URL } from "@/lib/site-url";
 import { DESIGN_TOKENS } from "@/lib/design-tokens.generated";
 import PwaRegister from "@/components/PwaRegister";
@@ -58,7 +62,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* FOUC-proof theme — runs before paint */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('ig-theme')||'light';document.documentElement.dataset.theme=t;}catch(e){}})();`,
+            // Theme + language before first paint: no flash, and <html lang/dir> matches the chosen
+            // language even on statically prerendered pages (server default stays "en").
+            __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('ig-theme');d.dataset.theme=t==='dark'?'dark':'light';var l=localStorage.getItem('ig-lang')||(navigator.language||'en').slice(0,2).toLowerCase();if(${JSON.stringify(LANG_CODES)}.indexOf(l)>-1){d.lang=l;d.dir=${JSON.stringify(RTL)}.indexOf(l)>-1?'rtl':'ltr';}}catch(e){}})();`,
           }}
         />
       </head>

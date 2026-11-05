@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import DpRingMaker from "@/components/DpRingMaker";
 
 export const metadata: Metadata = {
-  title: "Instagram Story Ring Maker — Add a Gradient Ring to Your DP | InstaGrab",
+  title: "Instagram Story Ring Maker — Add a Gradient Ring to Your DP",
   description:
     "Add the colourful Instagram story-style gradient ring around your profile picture. Upload your DP, pick a ring, download the PNG. Free, in your browser.",
   alternates: { canonical: "/dp-ring-maker" },

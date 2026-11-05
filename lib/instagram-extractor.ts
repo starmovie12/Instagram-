@@ -19,6 +19,12 @@ function getMetaContent(html: string, attrValue: string): string | null {
   return m ? decodeEscaped(m[1]) : null;
 }
 
+/* Minimal shapes of third-party JSON consumed by the legacy engines (fields are all optional on purpose). */
+type IgCarouselChild = { media_type?: number; original_width?: number; original_height?: number; video_versions?: { url: string }[]; image_versions2?: { candidates?: { url: string }[] } };
+type IgSidecarEdge = { node: { is_video?: boolean; video_url?: string; display_url?: string } };
+type ResolverItem = { url?: string; type?: string; thumbnail?: string; thumb?: string };
+type LegacyOptions = { sessionId?: string | null; cobaltInstance?: string | null; cobaltApiKey?: string | null };
+
 export function shortcodeToPk(shortcode: string): string {
   let cleanCode = shortcode;
   if (cleanCode.length > 28) {
@@ -167,7 +173,7 @@ async function fetchViaInstagramSession(shortcode: string, sessionId?: string | 
         const caption = item.caption?.text || '';
 
         if (item.carousel_media && Array.isArray(item.carousel_media) && item.carousel_media.length > 0) {
-          const media = item.carousel_media.map((child: any, idx: number) => {
+          const media = item.carousel_media.map((child: IgCarouselChild, idx: number) => {
             const isVideo = child.media_type === 2 || !!child.video_versions;
             const downloadUrl =
               isVideo && child.video_versions?.[0]
@@ -254,7 +260,7 @@ async function fetchViaInstagramSession(shortcode: string, sessionId?: string | 
         const caption = mediaData.edge_media_to_caption?.edges?.[0]?.node?.text || '';
 
         if (mediaData.edge_sidecar_to_children?.edges?.length > 0) {
-          const media = mediaData.edge_sidecar_to_children.edges.map((edge: any, idx: number) => {
+          const media = mediaData.edge_sidecar_to_children.edges.map((edge: IgSidecarEdge, idx: number) => {
             const node = edge.node;
             const isVideo = node.is_video || !!node.video_url;
             const downloadUrl = isVideo ? node.video_url : node.display_url;
@@ -615,9 +621,9 @@ export async function fetchViaPublicResolver(url: string, shortcode: string, pla
 
       if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
         const media = data.data
-          .filter((item: any) => item.url)
-          .map((item: any, idx: number) => {
-            const isVid = item.type === 'video' || item.url.includes('.mp4');
+          .filter((item: ResolverItem) => item.url)
+          .map((item: ResolverItem, idx: number) => {
+            const isVid = item.type === 'video' || (item.url ?? '').includes('.mp4');
             return {
               type: isVid ? ('video' as const) : ('image' as const),
               url: item.url,
@@ -643,9 +649,9 @@ export async function fetchViaPublicResolver(url: string, shortcode: string, pla
 
       if (data?.result && Array.isArray(data.result) && data.result.length > 0) {
         const media = data.result
-          .filter((item: any) => item.url && item.url.length > 5)
-          .map((item: any, idx: number) => {
-            const isVid = item.url.includes('.mp4');
+          .filter((item: ResolverItem) => item.url && item.url.length > 5)
+          .map((item: ResolverItem, idx: number) => {
+            const isVid = (item.url ?? '').includes('.mp4');
             return {
               type: isVid ? ('video' as const) : ('image' as const),
               url: item.url,
@@ -966,8 +972,8 @@ export async function fetchViaCobalt(
     }
 
     if (data.status === 'picker' && Array.isArray(data.picker)) {
-      const media = data.picker.map((item: any, idx: number) => {
-        const isVid = item.type === 'video' || item.url.includes('.mp4');
+      const media = data.picker.map((item: ResolverItem, idx: number) => {
+        const isVid = item.type === 'video' || (item.url ?? '').includes('.mp4');
         return {
           type: isVid ? ('video' as const) : ('image' as const),
           url: item.url,
@@ -994,7 +1000,7 @@ export async function fetchViaCobalt(
   }
 }
 
-export async function extractInstagramMedia(inputUrl: string, options: any = {}) {
+export async function extractInstagramMedia(inputUrl: string, options: LegacyOptions = {}) {
   const parsed = parseInstagramUrl(inputUrl);
   if (!parsed) {
     throw new Error('Please provide a valid Instagram post, reel, or video link.');
@@ -1034,7 +1040,7 @@ export async function extractInstagramMedia(inputUrl: string, options: any = {})
   throw new Error('Unable to fetch media from this Instagram link right now.');
 }
 
-export async function extractFacebookMedia(inputUrl: string, options: any = {}) {
+export async function extractFacebookMedia(inputUrl: string, options: LegacyOptions = {}) {
   const resolvedUrl = await resolveFacebookShortlink(inputUrl);
   const parsed = parseFacebookUrl(resolvedUrl) || parseFacebookUrl(inputUrl);
   if (!parsed) {
@@ -1067,7 +1073,7 @@ export async function extractFacebookMedia(inputUrl: string, options: any = {}) 
   throw new Error('Unable to fetch media from this Facebook link. Make sure the video or post is public.');
 }
 
-export async function extractSocialMedia(inputUrl: string, options: any = {}) {
+export async function extractSocialMedia(inputUrl: string, options: LegacyOptions = {}) {
   const platform = detectPlatform(inputUrl);
   if (platform === 'facebook') {
     return extractFacebookMedia(inputUrl, options);
@@ -1129,6 +1135,8 @@ export type ExtractResult = {
   durationSeconds?: number;
   comments?: PostComment[];
   engine?: string;
+  /** Content-policy guard (PRD §1.4 / AC-45): owner account is private. Never returned to clients. */
+  ownerPrivate?: boolean;
 };
 
 export type StoryItem = {
@@ -1174,6 +1182,9 @@ export type ProfileFeedResult = ProfileResult & { postsList: FeedPost[]; hasMore
 /* ───────────────────────── small helpers ───────────────────────── */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// Escape hatch for the deeply-nested Instagram JSON walked by the engines below (PRD §25.4 freezes
+// extractor internals). Confined to this file; no `any` crosses the module boundary.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Any = any;
 
 const HASHTAG_RE = /#[\p{L}\p{N}_]+/gu;
@@ -1319,6 +1330,7 @@ function buildResult(
     durationSeconds: extra.durationSeconds,
     comments: extra.comments,
     engine,
+    ownerPrivate: extra.ownerPrivate,
   };
 }
 
@@ -1349,6 +1361,7 @@ function graphNodeToResult(node: Any, shortcode: string, engine: string): Extrac
     takenAt: node?.taken_at_timestamp,
     durationSeconds: node?.video_duration,
     comments: comments.length ? comments : undefined,
+    ownerPrivate: node?.owner?.is_private === true,
   });
 }
 
@@ -1365,6 +1378,7 @@ function mobileItemToResult(item: Any, shortcode: string, engine: string): Extra
     views: item?.play_count ?? item?.view_count,
     takenAt: item?.taken_at,
     durationSeconds: item?.video_duration,
+    ownerPrivate: item?.user?.is_private === true,
   });
 }
 
@@ -1649,6 +1663,22 @@ async function viaFallbackApi(canonicalUrl: string, shortcode: string, cfg: Cfg)
  */
 export type RequestOptions = { sessionId?: string | null; cobaltInstance?: string | null };
 
+/**
+ * PRD §1.4 / AC-45 — public content only. Even when a Session ID can see a
+ * private account (the user follows it), we refuse instead of returning media.
+ * @throws ExtractError('PRIVATE')
+ */
+const PRIVATE_MSG = "This account is private — InstaGrab only downloads public content.";
+function assertPublic(isPrivate: boolean | undefined): void {
+  if (isPrivate) throw new ExtractError(PRIVATE_MSG, 'PRIVATE');
+}
+/** Drop the internal flag before results leave the server. */
+function publicOnly(r: ExtractResult): ExtractResult {
+  assertPublic(r.ownerPrivate);
+  const { ownerPrivate: _omit, ...rest } = r;
+  return rest;
+}
+
 export async function extract(inputUrl: string, opts: RequestOptions = {}): Promise<ExtractResult> {
   const parsed = parseInstagramUrl(inputUrl);
   if (!parsed) {
@@ -1677,7 +1707,7 @@ export async function extract(inputUrl: string, opts: RequestOptions = {}): Prom
 
   for (const stage of cfg.useFallbackApi ? [fallback, direct] : [direct, fallback]) {
     const r = await stage();
-    if (r) return r;
+    if (r) return publicOnly(r);
   }
 
   // Stage 3 (last resort): third-party engines — link sirf yahin bahar jata hai.
@@ -1694,7 +1724,7 @@ export async function extract(inputUrl: string, opts: RequestOptions = {}): Prom
     ]),
     10000
   );
-  if (last) return last;
+  if (last) return publicOnly(last);
 
   throw new ExtractError(
     "We couldn't fetch this post right now. It may be private, or Instagram is blocking our server — please try again in a minute.",
@@ -1983,6 +2013,7 @@ export async function extractProfileFeed(usernameInput: string, opts: RequestOpt
   const cfg = await getLiveConfig();
   const user = await fetchProfileUser(username, cfg, opts.sessionId);
   const profile = userToProfile(user, username);
+  assertPublic(profile.isPrivate);
 
   const tl = user?.edge_owner_to_timeline_media;
   const postsList: FeedPost[] = (tl?.edges ?? [])
@@ -2062,10 +2093,13 @@ function mobileItemToStory(it: Any): StoryItem | null {
 export async function extractStories(usernameInput: string, opts: RequestOptions = {}): Promise<StoriesResult> {
   const username = normalizeUsername(usernameInput);
   const profile = await extractProfile(username, opts);
+  assertPublic(profile.isPrivate);
   if (!profile.userId) {
     throw new ExtractError("Couldn't look up this account's id. Please try again.", 'EXTRACTOR_DOWN');
   }
-  const items = (await reelItems(profile.userId, opts.sessionId)).map(mobileItemToStory).filter(Boolean) as StoryItem[];
+  const raw = await reelItems(profile.userId, opts.sessionId);
+  assertPublic(raw.some((i: Any) => i?.user?.is_private === true));
+  const items = raw.map(mobileItemToStory).filter(Boolean) as StoryItem[];
   if (!items.length) {
     throw new ExtractError('No active stories right now (stories disappear after 24 hours).', 'NO_STORIES');
   }
@@ -2078,6 +2112,7 @@ export async function extractHighlights(usernameInput: string, opts: RequestOpti
   const username = normalizeUsername(usernameInput);
   const cfg = await getLiveConfig();
   const profile = await extractProfile(username, opts);
+  assertPublic(profile.isPrivate);
   if (!profile.userId) {
     throw new ExtractError("Couldn't look up this account's id. Please try again.", 'EXTRACTOR_DOWN');
   }
@@ -2108,7 +2143,9 @@ export async function extractHighlightItems(highlightId: string, opts: RequestOp
   const raw = String(highlightId ?? '').trim();
   const id = /^highlight:\d+$/.test(raw) ? raw : /^\d+$/.test(raw) ? `highlight:${raw}` : '';
   if (!id) throw new ExtractError('Invalid highlight id.', 'INVALID_URL');
-  const items = (await reelItems(id, opts.sessionId)).map(mobileItemToStory).filter(Boolean) as StoryItem[];
+  const reel = await reelItems(id, opts.sessionId);
+  assertPublic(reel.some((i: Any) => i?.user?.is_private === true));
+  const items = reel.map(mobileItemToStory).filter(Boolean) as StoryItem[];
   if (!items.length) throw new ExtractError('This highlight is empty.', 'NO_STORIES');
   return items;
 }

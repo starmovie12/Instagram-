@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import AltTextTool from "@/components/AltTextTool";
 
 export const metadata: Metadata = {
-  title: "AI Alt Text Generator for Instagram — Free Image Descriptions | InstaGrab",
+  title: "AI Alt Text Generator for Instagram — Free Image Descriptions",
   description:
     "Upload a photo and get 3 AI-written alt text options — concise, descriptive and keyword-rich — for Instagram accessibility and SEO reach. Free, image never stored.",
   alternates: { canonical: "/ai-alt-text" },

@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CollageMaker from "@/components/CollageMaker";
 
 export const metadata: Metadata = {
-  title: "Photo Collage Maker — 2-9 Photos, Gold Borders, Free | InstaGrab",
+  title: "Photo Collage Maker — 2-9 Photos, Gold Borders, Free",
   description:
     "Make a photo collage for Instagram free: 6 layouts for 2-9 photos, adjustable borders (gold gradient optional), live preview, 1080px download. 100% on-device.",
   alternates: { canonical: "/collage-maker" },

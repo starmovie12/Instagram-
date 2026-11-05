@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import PhotoFilters from "@/components/PhotoFilters";
 
 export const metadata: Metadata = {
-  title: "Photo Filters Online — 15 Instagram-Style Presets, Free | InstaGrab",
+  title: "Photo Filters Online — 15 Instagram-Style Presets, Free",
   description:
     "Apply 15 Instagram-style filters to any photo free: golden hour, noir, vintage, vivid and more — live thumbnail previews, full-resolution download, 100% on-device.",
   alternates: { canonical: "/photo-filters" },

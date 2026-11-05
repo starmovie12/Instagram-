@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import CaseConverter from "@/components/CaseConverter";
 
 export const metadata: Metadata = {
-  title: "Case Converter — UPPERCASE, Title Case, Small Caps & More | InstaGrab",
+  title: "Case Converter — UPPERCASE, Title Case, Small Caps & More",
   description:
     "Free text case converter for Instagram captions and bios: UPPERCASE, lowercase, Title Case, Sentence case, aLtErNaTiNg and Unicode small caps — with one-tap copy.",
   alternates: { canonical: "/case-converter" },

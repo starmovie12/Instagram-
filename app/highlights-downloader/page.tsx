@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "Instagram Highlights Downloader — Covers & Stories | InstaGrab",
+  title: "Instagram Highlights Downloader — Covers & Stories",
   description:
     "Download Instagram story highlights from any public profile — save highlight covers and the stories inside them in HD. Free, no login, username-based.",
   alternates: { canonical: "/highlights-downloader" },

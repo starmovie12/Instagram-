@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "YouTube Thumbnail Downloader — Full HD, Free | InstaGrab",
+  title: "YouTube Thumbnail Downloader — Full HD, Free",
   description:
     "Download any YouTube video's thumbnail in Full HD (1280×720), free. Works with normal videos, Shorts and youtu.be links — paste the URL, save the image. No login.",
   alternates: { canonical: "/youtube-thumbnail-downloader" },

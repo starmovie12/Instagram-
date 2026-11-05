@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import HashtagCounter from "@/components/HashtagCounter";
 
 export const metadata: Metadata = {
-  title: "Instagram Hashtag Counter & Cleaner — Dedupe + 30-Tag Limit | InstaGrab",
+  title: "Instagram Hashtag Counter & Cleaner — Dedupe + 30-Tag Limit",
   description:
     "Count your Instagram hashtags, remove duplicates, drop banned tags and trim to the 30-tag limit in one click. Free hashtag cleaner, no login.",
   alternates: { canonical: "/hashtag-counter" },

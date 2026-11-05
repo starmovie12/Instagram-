@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import ImageCompressor from "@/components/ImageCompressor";
 
 export const metadata: Metadata = {
-  title: "Image Compressor — Shrink Photos Without Visible Loss | InstaGrab",
+  title: "Image Compressor — Shrink Photos Without Visible Loss",
   description:
     "Compress images in your browser free: quality slider, live before/after size comparison, instant download. 100% on-device — photos are never uploaded.",
   alternates: { canonical: "/image-compressor" },

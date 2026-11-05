@@ -3,7 +3,7 @@ import SimpleToolLanding from "@/components/SimpleToolLanding";
 import QuoteMaker from "@/components/QuoteMaker";
 
 export const metadata: Metadata = {
-  title: "Quote Post Maker — Aesthetic Quote Images for Instagram | InstaGrab",
+  title: "Quote Post Maker — Aesthetic Quote Images for Instagram",
   description:
     "Turn any text into a beautiful quote image for Instagram free: 5 editorial themes, post/story sizes, live preview, PNG download. No watermark, no login, on-device.",
   alternates: { canonical: "/quote-maker" },

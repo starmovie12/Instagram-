@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PlatformPage from "@/components/PlatformPage";
 
 export const metadata: Metadata = {
-  title: "TikTok Downloader — Save TikTok Videos Free | InstaGrab",
+  title: "TikTok Downloader — Save TikTok Videos Free",
   description:
     "Download TikTok videos free: paste a tiktok.com or vm.tiktok.com link and save the video. Works with the share links from the app. No login.",
   alternates: { canonical: "/tiktok-downloader" },
