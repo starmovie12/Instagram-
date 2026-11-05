@@ -7,8 +7,8 @@ export function LogoMark() {
     <svg
       width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true"
       style={{
-        width: "clamp(34px, 20px + 3vw, 40px)", height: "clamp(34px, 20px + 3vw, 40px)",
-        borderRadius: "clamp(10px, 6px + 1vw, 12px)", boxShadow: "var(--shadow-button-primary)", flexShrink: 0,
+        width: 32, height: 32,
+        borderRadius: 9, flexShrink: 0,
       }}
     >
       <defs>

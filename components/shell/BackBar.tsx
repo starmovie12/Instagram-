@@ -7,6 +7,8 @@ import ToolIcon from "@/components/ToolIcon";
 import { REGISTRY, titleForPath } from "@/lib/registry";
 import { PLATFORMS } from "@/lib/platforms";
 import { navDepth } from "./nav-depth";
+import { useI18n } from "@/lib/i18n";
+import { haptic } from "@/lib/feedback";
 
 const STATIC_TITLES: Record<string, string> = {
   "/how-to-download": "How to Download", "/blog": "Blog", "/about": "About Us", "/contact": "Contact",
@@ -19,6 +21,7 @@ export default function BackBar() {
   const path = (usePathname() || "/").replace(/\/+$/, "") || "/";
   const router = useRouter();
   const [fallbackTitle, setFallbackTitle] = useState("");
+  const { t } = useI18n();
 
   const staticTitle = STATIC_TITLES[path] ?? (path.startsWith("/blog/") ? "Blog" : path.startsWith("/coming-soon/") ? "Coming Soon" : undefined);
   const title = staticTitle ?? titleForPath(path) ?? fallbackTitle;
@@ -38,21 +41,28 @@ export default function BackBar() {
   const isToolish = Boolean(platform || tool || path.startsWith("/ai/"));
 
   function goBack() {
+    haptic("Light");
     if (navDepth.value > 0) { navDepth.value -= 1; router.back(); return; }
     router.push(isToolish ? "/tools" : "/"); // direct link se aaye to fallback
   }
+  // Alt+← = Back (PRD D.3)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); goBack(); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   return (
-    <header className="bb" role="banner">
+    <header className="bb">
       <div className="bb__in">
-        <button type="button" className="bb__back" onClick={goBack} aria-label="Back">
-          <ChevronLeft size={24} strokeWidth={2.2} aria-hidden="true" />
+        <button type="button" className="bb__back icon-btn" onClick={goBack} aria-label={t("nav.back")}>
+          <ChevronLeft size={24} strokeWidth={2} aria-hidden="true" />
         </button>
         <div className="bb__id">
           {platform ? (
-            <PlatformTile name={platform.iconKey} size={34} showLabel={false} />
+            <PlatformTile name={platform.iconKey} size={28} showLabel={false} />
           ) : tool ? (
-            <ToolIcon category={tool.category} size={34} />
+            <ToolIcon category={tool.category} size={28} />
           ) : null}
           {title && <span className="bb__title">{title}</span>}
         </div>

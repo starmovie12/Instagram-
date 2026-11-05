@@ -17,7 +17,7 @@ import { grab, type GrabErr } from "@/lib/api";
 import { resolveRoute } from "@/lib/router";
 import { KIND_LABEL } from "@/lib/detect";
 import { platformById, type PlatformId } from "@/lib/platforms";
-import { addHistory, getPrefs, setHandoff, takeHandoff, type GrabKind, type GrabPlatform } from "@/lib/storage";
+import { addHistory, getPrefs, setHandoff, takeHandoff, toHandoffKind, type GrabKind, type GrabPlatform } from "@/lib/storage";
 import type { ExtractedResult } from "@/lib/normalize";
 import { buildDownloadProxyUrl } from "@/lib/normalize";
 import { isIosSafari } from "@/lib/feedback";
@@ -124,7 +124,7 @@ export default function PlatformDownloader({
     if (route.platform !== platform) {
       const target = platformById(route.platform)!;
       if (pill === "auto" && !o.redirected) {
-        setHandoff({ url: route.url, kind: route.kind, src: "home" });
+        setHandoff({ url: route.url, kind: toHandoffKind(route.kind), src: "home" });
         showToast(`${target.name} link mila — ${target.name} page par le ja rahe hain`);
         const qs = new URLSearchParams({ src: "home", r: "1" });
         if (route.kind) qs.set("kind", route.kind);

@@ -64,18 +64,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{
             // Theme + language before first paint: no flash, and <html lang/dir> matches the chosen
             // language even on statically prerendered pages (server default stays "en").
-            __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('ig-theme');d.dataset.theme=t==='dark'?'dark':'light';var l=localStorage.getItem('ig-lang')||(navigator.language||'en').slice(0,2).toLowerCase();if(${JSON.stringify(LANG_CODES)}.indexOf(l)>-1){d.lang=l;d.dir=${JSON.stringify(RTL)}.indexOf(l)>-1?'rtl':'ltr';}}catch(e){}})();`,
+            __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('ig-theme');d.dataset.theme=t==='dark'?'dark':'light';var l=localStorage.getItem('ig-lang')||(navigator.language||'en').slice(0,2).toLowerCase();if(${JSON.stringify(LANG_CODES)}.indexOf(l)>-1){d.lang=l;d.dir=${JSON.stringify(RTL)}.indexOf(l)>-1?'rtl':'ltr';}var p={};try{p=JSON.parse(localStorage.getItem('ig.prefs.v1')||'{}')||{};}catch(e){}var m=navigator.deviceMemory;d.dataset.surface=(p.solidSurfaces===true||(p.solidSurfaces===undefined&&m&&m<=2))?'solid':'glass';d.dataset.ambient=p.ambientGlow===false?'off':'on';}catch(e){}})();`,
           }}
         />
       </head>
       <body>
-        {/* Slow banner-style colour flow — fixed, behind everything, decorative only */}
-        <div className="ambient-glow" aria-hidden="true">
-          <span className="ambient-glow__blob ambient-glow__blob--a" />
-          <span className="ambient-glow__blob ambient-glow__blob--b" />
-          <span className="ambient-glow__blob ambient-glow__blob--c" />
-          <span className="ambient-glow__blob ambient-glow__blob--d" />
-        </div>
         <LangProvider><AppShell>{children}</AppShell></LangProvider>
         <PwaRegister />
         <InstallPrompt />

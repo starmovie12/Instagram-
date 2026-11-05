@@ -192,3 +192,51 @@ Phase 3 is large, so it lands as several commits (`phase-3.1 … 3.n`), each wit
 | 3.1.a | Private-account DP still allowed | Public on Instagram itself; feed/stories/highlights blocked. |
 | 3.1.b | Story-viewer pages keep "anonymous" (= no login) wording | Public stories only; surveillance words removed. |
 | 3.1.c | This sandbox has `NEXT_PUBLIC_SITE_URL=https://TUMHARA-DOMAIN.com`, so local canonicals show that host | Vercel uses its own value — make sure it is the real domain (see Phase 4). |
+
+### 3.2 App shell, storage hardening, haptics (PRD §4–6, §14.7, §15, §3.5–3.6)
+
+- **Navigation:** one `ShellNav` renders the bottom **Glass Island** (≤ 1023 px)
+  and the left **Glass Rail** (≥ 1024 px; 88 px, 232 px ≥ 1440 px) from the same
+  4 items; the visible one is chosen by CSS only (no hydration mismatch, CLS 0 on
+  resize, only one focusable landmark — AC-65). Active state is one sliding pill
+  (`transform`, 350 ms `--ease-glass`, M5) with a 24×3 / 3×24 indicator. Rail has
+  ArrowUp/Down roving focus. Island hides when the on-screen keyboard opens.
+- **Quick Return** on `/tools` and `/history` (hide after 24 px down, show after
+  12 px up) for header + island. Header is 64/72 px with a scroll hairline driven
+  by an IntersectionObserver sentinel (M11). Back Bar 56 px, 48×48 Back with RTL
+  mirror, `Alt+←`.
+- **Keyboard:** `G` then `H/T/R/S` go-to chords (1 s window, never while typing —
+  `lib/shortcuts.ts`, unit-tested), `⌘/Ctrl+K` and `/` open the Command Palette,
+  whose footer now lists the shortcuts; skip-link; focus moves to the new page's
+  `<h1>` after navigation; `scroll-padding` keeps focus clear of sticky bars (AC-54).
+- **Glass budget:** header/back bar + island/rail = 2 blurred surfaces; solid
+  fallback for `prefers-reduced-transparency`, `forced-colors`, no
+  `backdrop-filter`, or Settings → Solid surfaces (`html[data-surface]`, set before
+  paint; defaults ON when `deviceMemory ≤ 2`). The palette scrim lost its blur.
+- **Motion budget:** the old full-page `ambient-glow` (4 infinite animations) and
+  grain layer were removed; `AuroraBackdrop` (Home + Tools only) is a single
+  drifting layer of three pre-rendered glows, paused when hidden, off-screen,
+  reduced-motion, Data Saver, low memory, Solid surfaces or Ambient glow OFF.
+  CSS route transition (M4 fallback) on page content only — chrome never fades.
+- **New primitives:** `BottomSheet` (`<dialog>`: phone sheet / ≥ 600 px modal,
+  swipe-down > 80 px, 48 px Close, Esc, scrim, focus return — AC-75), `Toaster`
+  (M12, Undo 6 s), `OfflinePill` (info tone, auto-dismiss 3 s after reconnect).
+- **Storage (`lib/storage.ts`, PRD §15.5):** Zod `.strict()` validation on every
+  read (corrupt JSON → empty list, bad records dropped), v1 records upgraded with a
+  canonical `platform:kind:id` key (tracking params never duplicate), Web Locks
+  writes + `BroadcastChannel("ig-storage")` + `storage` event sync, quota →
+  drop-oldest retry → silent memory fallback, https/CDN-only thumbnails, strict
+  read-once handoff (`HandoffSchema`, 60 s TTL, 5 s skew), batch prefill,
+  offline queue, Session ID in `sessionStorage` unless "Remember" (D17), MGF-1
+  correction counter (no URLs). **Bug fixed while testing:** the old memory
+  fallback could resurrect history that another tab had cleared.
+- **Haptics (`lib/feedback.ts`):** PRD pattern table (Selection…Error), OFF by
+  default under reduced motion unless the user turned it on; `celebrate()` = M9
+  (24 spectrum particles, transform/opacity only).
+- **Tests:** `npm test` → 52/52 (storage 11, shortcuts 2, contrast 3, existing 36).
+
+| # | Decision | Why |
+|---|---|---|
+| 3.2.a | Aurora = one animation for three glows (PRD lists three drifts) | Keeps the ≤ 3 infinite-animations budget (AC-69) with Story-Ring + shimmer. |
+| 3.2.b | Route transition is the CSS fallback, not the View Transitions API | Next 15 stable has no router hook for it; PRD M4/K24 allow the 200 ms fade. |
+| 3.2.c | Island/Rail indicator is solid `--color-primary` (PRD: spectrum) | Brief rule: gradient only on CTA + logo. |

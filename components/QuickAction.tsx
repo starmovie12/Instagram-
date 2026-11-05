@@ -7,18 +7,18 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Link2, ArrowRight } from "lucide-react";
 import { resolveRoute, type Route } from "@/lib/router";
-import { setHandoff } from "@/lib/storage";
+import { setBatchPrefill, setHandoff, toHandoffKind } from "@/lib/storage";
 
 function openRoute(route: Route, router: ReturnType<typeof useRouter>): boolean {
   if (route.type === "app") {
     const qs = new URLSearchParams({ src: "home" });
     if (route.kind) qs.set("kind", route.kind);
-    if (!setHandoff({ url: route.url, kind: route.kind, src: "home" })) qs.set("url", route.url);
+    if (!setHandoff({ url: route.url, kind: toHandoffKind(route.kind), src: "home" })) qs.set("url", route.url);
     router.replace(`${route.path}?${qs.toString()}`);
     return true;
   }
   if (route.type === "batch") {
-    const ok = setHandoff({ url: route.urls.join("\n"), kind: "batch", src: "home" });
+    const ok = setBatchPrefill(route.urls);
     router.replace(ok ? "/batch-downloader?src=home" : `/batch-downloader?src=home&url=${encodeURIComponent(route.urls.join("\n"))}`);
     return true;
   }

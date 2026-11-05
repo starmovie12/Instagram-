@@ -27,7 +27,9 @@ type Keys =
   | "highlights" | "language"
   | "posts" | "followers" | "following" | "recentPosts" | "pinned" | "noPosts"
   | "smartPlaceholder" | "downloadAllZip" | "resolving" | "copyLink"
-  | "boundary.title" | "boundary.body" | "boundary.retry" | "boundary.home" | "boundary.code" | "loading";
+  | "boundary.title" | "boundary.body" | "boundary.retry" | "boundary.home" | "boundary.code" | "loading"
+  | "nav.primary" | "nav.home" | "nav.tools" | "nav.history" | "nav.settings" | "nav.back" | "theme.toggle" | "theme.dark" | "theme.light" | "offline.pill" | "offline.back" | "sheet.close" | "toast.dismiss" | "shortcuts.title" | "shortcuts.search" | "shortcuts.goto"
+  | "skip.content";
 
 type Dict = Partial<Record<Keys, string>>;
 
@@ -58,6 +60,23 @@ const EN: Record<Keys, string> = {
   "boundary.home": "Go to Home",
   "boundary.code": "Reference",
   loading: "Loading",
+  "nav.primary": "Primary",
+  "nav.home": "Home",
+  "nav.tools": "Tools",
+  "nav.history": "History",
+  "nav.settings": "Settings",
+  "nav.back": "Back",
+  "theme.toggle": "Toggle theme",
+  "theme.dark": "Dark mode",
+  "theme.light": "Light mode",
+  "offline.pill": "Offline",
+  "offline.back": "Back online",
+  "sheet.close": "Close",
+  "toast.dismiss": "Dismiss",
+  "shortcuts.title": "Keyboard shortcuts",
+  "shortcuts.search": "Search tools",
+  "shortcuts.goto": "Go to Home / Tools / History / Settings",
+  "skip.content": "Skip to content",
 };
 
 const STRINGS: Record<Locale, Dict> = {
@@ -89,6 +108,23 @@ const STRINGS: Record<Locale, Dict> = {
     "boundary.home": "होम पर जाएँ",
     "boundary.code": "रेफ़रेंस",
     loading: "लोड हो रहा है",
+    "nav.primary": "मुख्य",
+    "nav.home": "होम",
+    "nav.tools": "टूल्स",
+    "nav.history": "हिस्ट्री",
+    "nav.settings": "सेटिंग्स",
+    "nav.back": "वापस",
+    "theme.toggle": "थीम बदलें",
+    "theme.dark": "डार्क मोड",
+    "theme.light": "लाइट मोड",
+    "offline.pill": "ऑफ़लाइन",
+    "offline.back": "फिर से ऑनलाइन",
+    "sheet.close": "बंद करें",
+    "toast.dismiss": "हटाएँ",
+    "shortcuts.title": "कीबोर्ड शॉर्टकट",
+    "shortcuts.search": "टूल खोजें",
+    "shortcuts.goto": "होम / टूल्स / हिस्ट्री / सेटिंग्स पर जाएँ",
+    "skip.content": "सामग्री पर जाएँ",
   },
   es: {
     linkPlaceholder: "Pega un enlace de Instagram — reel, post, historia…",

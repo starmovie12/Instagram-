@@ -3,11 +3,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Flame, RotateCw, Trash2, History as HistoryIcon, Lock } from "lucide-react";
+import { RotateCw, Trash2, History as HistoryIcon, Lock , CheckCircle2 } from "lucide-react";
 import { PlatformTile } from "@/components/PlatformIcons";
 import { platformById } from "@/lib/platforms";
 import { EV, on } from "@/lib/events";
-import { clearHistory, getHistory, removeHistory, restoreHistory, setHandoff, streakDays, type GrabRecord } from "@/lib/storage";
+import { clearHistory, getHistory, removeHistory, restoreHistory, setHandoff, savedCount, toHandoffKind, type GrabRecord } from "@/lib/storage";
 import { dl } from "@/lib/media";
 
 const KIND_PARAM: Record<string, string> = { reel: "reel", story: "story", video: "video", photo: "photo", carousel: "photo", profile: "profile", thumbnail: "thumbnail" };
@@ -45,7 +45,7 @@ export default function HistoryScreen() {
 
   const platforms = useMemo(() => Array.from(new Set((items ?? []).map((i) => i.platform))), [items]);
   const shown = (items ?? []).filter((i) => filter === "all" || i.platform === filter);
-  const streak = streakDays(items ?? []);
+  const saved = savedCount(items ?? []);
 
   function regrab(rec: GrabRecord) {
     const def = platformById(rec.platform);
@@ -53,7 +53,7 @@ export default function HistoryScreen() {
     const kind = KIND_PARAM[rec.kind];
     const qs = new URLSearchParams({ src: "history" });
     if (kind) qs.set("kind", kind);
-    const ok = setHandoff({ url: rec.url, kind, src: "history" });
+    const ok = setHandoff({ url: rec.url, kind: toHandoffKind(kind), src: "history" });
     if (!ok) qs.set("url", rec.url);
     router.push(`${def.route}?${qs.toString()}`);
   }
@@ -77,7 +77,7 @@ export default function HistoryScreen() {
       <div className="container" style={{ maxWidth: 1120 }}>
         <div className="hs-title">
           <h1>Recent Grabs <span>({items.length})</span></h1>
-          {streak >= 2 && <span className="hs-streak" title={`${streak}-day streak`}><Flame size={14} strokeWidth={2.4} aria-hidden="true" /> {streak}-day streak</span>}
+          {saved > 0 && <span className="hs-saved"><CheckCircle2 size={16} strokeWidth={2} aria-hidden="true" /> {saved} grabs saved locally</span>}
           {items.length > 0 && <button type="button" className="hs-clear hs-clear--top" onClick={clearAll}>{confirm ? "Tap again to confirm" : "Clear All"}</button>}
         </div>
 

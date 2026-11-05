@@ -5,6 +5,7 @@ import { Search, CornerDownLeft, History } from "lucide-react";
 import { visibleTools } from "@/lib/registry";
 import { CATEGORY_ICON } from "@/components/ToolIcon";
 import { recordToolVisit, getRecentTools } from "@/lib/retention";
+import { useI18n } from "@/lib/i18n";
 
 /** Registry se (PRD A17) — copy.ts ki 12-tool list nahi. */
 const TOOLS = visibleTools.map((t) => ({ title: t.name, desc: t.description, href: t.href, Icon: CATEGORY_ICON[t.category] }));
@@ -16,6 +17,8 @@ const TOOLS = visibleTools.map((t) => ({ title: t.name, desc: t.description, hre
 export default function CommandPalette() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useI18n();
+  const trigger = useRef<Element | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -54,7 +57,8 @@ export default function CommandPalette() {
   }, []);
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 20);
+    if (open) { trigger.current = document.activeElement; setTimeout(() => inputRef.current?.focus(), 20); }
+    else (trigger.current as HTMLElement | null)?.focus?.();
   }, [open]);
 
   const results = useMemo(() => {
@@ -98,8 +102,8 @@ export default function CommandPalette() {
   return (
     <div
       onClick={() => setOpen(false)}
-      role="dialog" aria-modal="true" aria-label="Tool search"
-      style={{ position: "fixed", inset: 0, zIndex: 130, background: "var(--overlay-scrim)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
+      role="dialog" aria-modal="true" aria-label={t("shortcuts.search")}
+      style={{ position: "fixed", inset: 0, zIndex: "var(--z-command)", background: "var(--overlay-scrim)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
       <div onClick={(e) => e.stopPropagation()} className="card intro-rise"
         style={{ width: "100%", maxWidth: 560, padding: 0, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
@@ -108,9 +112,9 @@ export default function CommandPalette() {
             ref={inputRef} value={query}
             onChange={(e) => { setQuery(e.target.value); setActive(0); }}
             onKeyDown={onInputKey}
-            placeholder="Search 80+ tools…"
-            aria-label="Search tools"
-            style={{ flex: 1, background: "none", border: "none", fontSize: 15, color: "var(--ink)", outline: "none" }}
+            placeholder={`${t("shortcuts.search")} (${TOOLS.length})…`}
+            aria-label={t("shortcuts.search")}
+            style={{ flex: 1, minHeight: 48, background: "none", border: "none", fontSize: 16, color: "var(--ink)", outline: "none" }}
           />
           <span className="mono" style={{ fontSize: 11, color: "var(--ink-3)", border: "1px solid var(--line)", borderRadius: 6, padding: "2px 6px" }}>esc</span>
         </div>
@@ -156,6 +160,11 @@ export default function CommandPalette() {
             );
           })}
         </div>
+        <footer className="cp-foot" aria-label={t("shortcuts.title")}>
+          <span><kbd>⌘</kbd><kbd>K</kbd> / <kbd>/</kbd> {t("shortcuts.search")}</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd> <kbd>↵</kbd></span>
+          <span><kbd>G</kbd> <kbd>H</kbd>·<kbd>T</kbd>·<kbd>R</kbd>·<kbd>S</kbd> {t("shortcuts.goto")}</span>
+        </footer>
       </div>
     </div>
   );

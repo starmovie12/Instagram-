@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Download, Loader2, Check, X, ListChecks } from "lucide-react";
 import type { ExtractResult } from "@/lib/extract-ui";
 import { dl } from "@/lib/media";
-import { takeHandoff } from "@/lib/storage";
+import { takeBatchPrefill } from "@/lib/storage";
 
 const URL_RE = /instagram\.com\/(?:[\w.]+\/)?(?:p|reel|reels|tv|stories)\/[\w-]+/gi;
 const MAX = 20;
@@ -20,8 +20,7 @@ export default function BatchDownloader() {
     try {
       const sp = new URLSearchParams(window.location.search);
       if (sp.get("src") !== "home") return;
-      const h = takeHandoff();
-      const urls = h?.url || sp.get("url") || "";
+      const urls = takeBatchPrefill()?.join("\n") || sp.get("url") || "";
       if (urls) setText(urls);
       window.history.replaceState(window.history.state, "", window.location.pathname);
     } catch { /* ignore */ }

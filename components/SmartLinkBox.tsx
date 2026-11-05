@@ -12,7 +12,7 @@ import { track } from "@vercel/analytics";
 import { GOLDEN_BAR_STYLES } from "@/components/GoldenBar";
 import { resolveRoute, type Route } from "@/lib/router";
 import { PLATFORMS, soonById } from "@/lib/platforms";
-import { getPrefs, setHandoff } from "@/lib/storage";
+import { getPrefs, setBatchPrefill, setHandoff, toHandoffKind } from "@/lib/storage";
 
 type Trigger = "paste_btn" | "grab" | "paste_event" | "drop";
 type Status =
@@ -85,7 +85,7 @@ export default function SmartLinkBox({ footer }: { footer?: React.ReactNode }) {
         qs.set("src", "home");
         if (route.extraLinks) qs.set("more", String(route.extraLinks));
         // Link URL me nahi — sessionStorage handoff (sessionStorage block ho to ?url= fallback)
-        const ok = setHandoff({ url: route.url, kind: route.kind, src: "home" });
+        const ok = setHandoff({ url: route.url, kind: toHandoffKind(route.kind), src: "home" });
         if (!ok) qs.set("url", route.url);
         const path = `${route.path}?${qs.toString()}`;
         router.prefetch(route.path);
@@ -95,7 +95,7 @@ export default function SmartLinkBox({ footer }: { footer?: React.ReactNode }) {
         return;
       }
       case "batch": {
-        const ok = setHandoff({ url: route.urls.join("\n"), kind: "batch", src: "home" });
+        const ok = setBatchPrefill(route.urls);
         setStatus({ kind: "routing", label: `${route.urls.length} Instagram links pehchane · Batch page khol rahe hain…`, cancellable: false });
         evt("routed", "instagram", "batch");
         router.push(ok ? "/batch-downloader?src=home" : `/batch-downloader?src=home&url=${encodeURIComponent(route.urls.join("\n"))}`);
