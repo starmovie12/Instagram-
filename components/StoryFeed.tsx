@@ -108,7 +108,7 @@ export default function StoryFeed() {
             {u.state === "ok" && <span className="mono" style={{ fontSize: 11 }}>· {u.items.length} stories</span>}
           </span>
           {u.state === "ok" && (
-            <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 6, WebkitMaskImage: "linear-gradient(90deg,#000 94%,transparent)" }}>
+            <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 6, WebkitMaskImage: "linear-gradient(90deg,var(--black) 94%,transparent)" }}>
               {u.items.map((item, i) => (
                 <div key={i} style={{ flexShrink: 0, width: 150 }}>
                   <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--line)", aspectRatio: "9/16", background: "var(--surface-2)" }}>

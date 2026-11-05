@@ -312,7 +312,7 @@ const PD_STYLES = `
   .pd-pills::-webkit-scrollbar { display: none; }
   .pd-pill { flex: 0 0 auto; min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--ink-2); background: var(--bg-surface); border: 1px solid var(--border-color); white-space: nowrap; }
   .pd-pill small { font-weight: 600; opacity: .8; }
-  .pd-pill.is-on { color: var(--on-accent); background: var(--gradient-button); border-color: transparent; }
+  .pd-pill.is-on { color: var(--text-brand); background: var(--color-primary-subtle); border-color: var(--text-brand); }
   .pd-pill:focus-visible { outline: 0; box-shadow: var(--focus-ring); }
   .pd-note { margin: 8px 4px 0; font-size: 14px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
   .pd-note a, .pd-banner a, .pd-link { color: var(--gold-ink); font-weight: 700; }

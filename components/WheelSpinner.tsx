@@ -1,8 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { RotateCw, Trash2, Trophy } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
-const COLORS = ["#22E4FF", "#7C3AED", "#38BDF8", "#4F46E5", "#D946EF", "#6366F1"];
+/** Segment fill + label colour as token names (label contrast ≥ 4.5:1 on every fill). */
+const SEGMENTS: { fill: string; ink: string }[] = [
+  { fill: "--ig-pink", ink: "--art-paper" },
+  { fill: "--ig-purple", ink: "--art-paper" },
+  { fill: "--ig-orange", ink: "--art-ink" },
+  { fill: "--ig-blue", ink: "--art-paper" },
+  { fill: "--cta-start", ink: "--art-paper" },
+  { fill: "--cta-end", ink: "--art-paper" },
+];
 
 function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
   const ctx = canvas.getContext("2d")!;
@@ -17,9 +26,10 @@ function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
     ctx.moveTo(c, c);
     ctx.arc(c, c, r, start, start + seg);
     ctx.closePath();
-    ctx.fillStyle = COLORS[i % COLORS.length];
+    const segment = SEGMENTS[i % SEGMENTS.length] ?? SEGMENTS[0]!;
+    ctx.fillStyle = cssToken(segment.fill);
     ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,.12)";
+    ctx.strokeStyle = `rgb(${cssToken("--black-rgb")} / .12)`;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -28,7 +38,7 @@ function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
     ctx.translate(c, c);
     ctx.rotate(start + seg / 2);
     ctx.textAlign = "right";
-    ctx.fillStyle = i % COLORS.length === 0 || i % COLORS.length === 2 ? "#050B24" : "#FFFFFF";
+    ctx.fillStyle = cssToken(segment.ink);
     ctx.font = `600 ${Math.max(11, Math.min(18, 320 / names.length))}px system-ui, sans-serif`;
     const label = name.length > 16 ? name.slice(0, 15) + "…" : name;
     ctx.fillText(label, r - 14, 5);
@@ -38,9 +48,9 @@ function drawWheel(canvas: HTMLCanvasElement, names: string[], angle: number) {
   // Hub
   ctx.beginPath();
   ctx.arc(c, c, 26, 0, Math.PI * 2);
-  ctx.fillStyle = "#F4F6FF";
+  ctx.fillStyle = cssToken("--art-paper");
   ctx.fill();
-  ctx.strokeStyle = "#4F46E5";
+  ctx.strokeStyle = cssToken("--art-accent");
   ctx.lineWidth = 3;
   ctx.stroke();
 }
@@ -139,7 +149,7 @@ export default function WheelSpinner() {
             <span aria-hidden="true" style={{
               position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)",
               width: 0, height: 0, borderTop: "12px solid transparent", borderBottom: "12px solid transparent",
-              borderRight: "22px solid var(--molten)", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.3))",
+              borderRight: "22px solid var(--color-primary)", filter: "drop-shadow(0 1px 2px rgb(var(--black-rgb) / .3))",
             }} />
           )}
           {names.length < 2 && (

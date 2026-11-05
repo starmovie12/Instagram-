@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Instrument_Sans, Noto_Sans_Devanagari } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LangProvider } from "@/lib/i18n";
 import { SITE_URL } from "@/lib/site-url";
+import { DESIGN_TOKENS } from "@/lib/design-tokens.generated";
 import PwaRegister from "@/components/PwaRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import CommandPalette from "@/components/CommandPalette";
@@ -12,12 +13,10 @@ import AppShell from "@/components/shell/AppShell";
 import "./globals.css";
 import "./shell.css";
 
-const display = Fraunces({
-  subsets: ["latin"], style: ["normal", "italic"],
-  axes: ["opsz", "SOFT", "WONK"], variable: "--font-display", display: "swap",
-});
+// PRD §3.3 / C2: Instrument Sans (Latin) + Noto Sans Devanagari companion (unicode-range subset,
+// only downloaded when Devanagari text is on screen). Fraunces + JetBrains Mono dropped (§14.6).
 const sans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
+const deva = Noto_Sans_Devanagari({ subsets: ["devanagari"], variable: "--font-deva", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -47,19 +46,19 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F4F6FF" },
-    { media: "(prefers-color-scheme: dark)", color: "#050B24" },
+    { media: "(prefers-color-scheme: light)", color: DESIGN_TOKENS.light["bg-base"] },
+    { media: "(prefers-color-scheme: dark)", color: DESIGN_TOKENS.dark["bg-base"] },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${deva.variable}`} suppressHydrationWarning>
       <head>
         {/* FOUC-proof theme — runs before paint */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('ig-theme')||'dark';document.documentElement.dataset.theme=t;}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('ig-theme')||'light';document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
       </head>

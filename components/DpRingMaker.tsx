@@ -1,12 +1,14 @@
 "use client";
 import { useRef, useState } from "react";
 import { Upload, Download, RefreshCw } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
+/** Ring stops are token names (app/tokens.css), resolved when drawing. */
 const RINGS: { name: string; stops: string[] }[] = [
-  { name: "Story", stops: ["#feda75", "#fa7e1e", "#d62976", "#962fbf", "#4f5bd5"] },
-  { name: "Brand", stops: ["#22E4FF", "#6366F1", "#D946EF", "#22E4FF"] },
-  { name: "Sunset", stops: ["#ff9a9e", "#fad0c4", "#fbc2eb", "#a18cd1"] },
-  { name: "Ocean", stops: ["#43e97b", "#38f9d7", "#38a1f9", "#5b6bf9"] },
+  { name: "Story", stops: ["--ig-yellow", "--ig-orange", "--ig-pink", "--ig-purple", "--ig-blue"] },
+  { name: "Brand", stops: ["--cta-start", "--cta-mid", "--cta-end", "--accent"] },
+  { name: "Sunset", stops: ["--art-sunset-1", "--art-sunset-2", "--art-sunset-3", "--art-sunset-4"] },
+  { name: "Ocean", stops: ["--art-ocean-1", "--art-ocean-2", "--art-ocean-3", "--art-ocean-4"] },
 ];
 
 export default function DpRingMaker() {
@@ -25,7 +27,7 @@ export default function DpRingMaker() {
     // Gradient ring
     const g = ctx.createLinearGradient(0, 0, S, S);
     const stops = RINGS[ringIdx].stops;
-    stops.forEach((c, i) => g.addColorStop(i / (stops.length - 1), c));
+    stops.forEach((c, i) => g.addColorStop(i / (stops.length - 1), cssToken(c)));
     ctx.beginPath();
     ctx.arc(cx, cy, S / 2 - pad / 2, 0, Math.PI * 2);
     ctx.lineWidth = pad;

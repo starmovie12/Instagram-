@@ -100,11 +100,11 @@ export default function ProfileFeedCard({ data, showBulk = false }: { data: Prof
                 <div style={{ position: "relative", aspectRatio: "1/1", background: "var(--surface-2)" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={dl(p.thumbnail, "post")} alt={p.caption ? p.caption.slice(0, 60) : `@${name} post`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                  <span style={{ position: "absolute", top: 8, right: 8, color: "#fff", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }}>
+                  <span style={{ position: "absolute", top: 8, right: 8, color: "var(--white)", filter: "drop-shadow(0 1px 2px rgb(var(--black-rgb) / .6))", display: "inline-flex" }}>
                     <PIcon size={16} strokeWidth={1.75} />
                   </span>
                   {p.isPinned && (
-                    <span style={{ position: "absolute", top: 8, left: 8, color: "var(--gold-200)", filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))", display: "inline-flex" }} aria-label={t("pinned")}>
+                    <span style={{ position: "absolute", top: 8, left: 8, color: "var(--gold-200)", filter: "drop-shadow(0 1px 2px rgb(var(--black-rgb) / .6))", display: "inline-flex" }} aria-label={t("pinned")}>
                       <Pin size={14} strokeWidth={1.75} />
                     </span>
                   )}

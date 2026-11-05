@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AtSign, QrCode, Copy, Check, Download, Link2 } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
 const CLEAN_RE = /[^a-z0-9._]/g;
 
@@ -23,7 +24,7 @@ export default function DmLinkGenerator() {
         const QRCode = (await import("qrcode")).default;
         const url = await QRCode.toDataURL(link, {
           width: 480, margin: 2,
-          color: { dark: "#1E1B4B", light: "#F4F6FF" },
+          color: { dark: cssToken("--art-ink") || "#000000", light: cssToken("--art-paper") || "#ffffff" }, // tokens; QR lib needs hex, fallback = plain black/white
         });
         if (!cancelled) setQr(url);
       } catch { if (!cancelled) setQr(null); }

@@ -1,14 +1,16 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Download, Quote } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
+/** Colours are token NAMES (app/tokens.css → --art-*), resolved at draw time. */
 type Theme = { id: string; label: string; bg: [string, string]; ink: string; accent: string };
 const THEMES: Theme[] = [
-  { id: "ivory", label: "Ivory & indigo", bg: ["#F4F6FF", "#E1E6FB"], ink: "#0B1030", accent: "#4F46E5" },
-  { id: "noir", label: "Noir & cyan", bg: ["#050B24", "#101842"], ink: "#F1F5FF", accent: "#22E4FF" },
-  { id: "blush", label: "Blush", bg: ["#FCEEF0", "#F8D8DD"], ink: "#4A2B33", accent: "#B0566B" },
-  { id: "sage", label: "Sage", bg: ["#EEF3EA", "#D7E3D0"], ink: "#2C3B28", accent: "#5E7A52" },
-  { id: "ocean", label: "Midnight", bg: ["#0E1B2C", "#16283E"], ink: "#E8EEF5", accent: "#7FA8D0" },
+  { id: "ivory", label: "Porcelain & magenta", bg: ["--art-paper", "--art-paper-2"], ink: "--art-ink", accent: "--art-accent" },
+  { id: "noir", label: "Noir & pink", bg: ["--art-noir-1", "--art-noir-2"], ink: "--art-noir-ink", accent: "--art-noir-accent" },
+  { id: "blush", label: "Blush", bg: ["--art-blush-1", "--art-blush-2"], ink: "--art-blush-ink", accent: "--art-blush-accent" },
+  { id: "sage", label: "Sage", bg: ["--art-sage-1", "--art-sage-2"], ink: "--art-sage-ink", accent: "--art-sage-accent" },
+  { id: "ocean", label: "Midnight", bg: ["--art-night-1", "--art-night-2"], ink: "--art-night-ink", accent: "--art-night-accent" },
 ];
 
 type Size = { id: string; label: string; w: number; h: number };
@@ -39,16 +41,16 @@ function draw(canvas: HTMLCanvasElement, quote: string, author: string, theme: T
   const ctx = canvas.getContext("2d")!;
 
   const g = ctx.createLinearGradient(0, 0, size.w, size.h);
-  g.addColorStop(0, theme.bg[0]); g.addColorStop(1, theme.bg[1]);
+  g.addColorStop(0, cssToken(theme.bg[0])); g.addColorStop(1, cssToken(theme.bg[1]));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size.w, size.h);
 
   // Thin accent frame
-  ctx.strokeStyle = theme.accent; ctx.lineWidth = 3;
+  ctx.strokeStyle = cssToken(theme.accent); ctx.lineWidth = 3;
   ctx.strokeRect(48, 48, size.w - 96, size.h - 96);
 
   // Decorative quotation mark
-  ctx.fillStyle = theme.accent;
+  ctx.fillStyle = cssToken(theme.accent);
   ctx.font = "700 220px Georgia, serif";
   ctx.textAlign = "center";
   ctx.fillText("“", size.w / 2, size.h * 0.24);
@@ -66,12 +68,12 @@ function draw(canvas: HTMLCanvasElement, quote: string, author: string, theme: T
 
   const lh = fontSize * 1.4;
   const startY = size.h / 2 - ((lines.length - 1) * lh) / 2;
-  ctx.fillStyle = theme.ink;
+  ctx.fillStyle = cssToken(theme.ink);
   lines.forEach((line, i) => ctx.fillText(line, size.w / 2, startY + i * lh));
 
   // Author
   if (author.trim()) {
-    ctx.fillStyle = theme.accent;
+    ctx.fillStyle = cssToken(theme.accent);
     ctx.font = "500 34px Georgia, serif";
     ctx.fillText("— " + author.trim(), size.w / 2, startY + lines.length * lh + 40);
   }
@@ -120,7 +122,7 @@ export default function QuoteMaker() {
             {THEMES.map((t) => (
               <button key={t.id} className="chip" onClick={() => setThemeId(t.id)}
                 style={{ cursor: "pointer", borderColor: themeId === t.id ? "var(--gold-400)" : undefined, fontWeight: themeId === t.id ? 600 : 400 }}>
-                <span aria-hidden="true" style={{ width: 12, height: 12, borderRadius: 99, background: `linear-gradient(135deg, ${t.bg[0]}, ${t.bg[1]})`, border: `1.5px solid ${t.accent}`, display: "inline-block" }} />
+                <span aria-hidden="true" style={{ width: 12, height: 12, borderRadius: 99, background: `linear-gradient(135deg, var(${t.bg[0]}), var(${t.bg[1]}))`, border: `1.5px solid var(${t.accent})`, display: "inline-block" }} />
                 {t.label}
               </button>
             ))}

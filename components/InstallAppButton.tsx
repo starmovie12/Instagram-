@@ -55,17 +55,16 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
         margin: "clamp(10px, 6px + 1.2vw, 16px) 0 0",
         padding: "clamp(9px, 5px + 1vw, 14px)",
         borderRadius: "clamp(16px, 11px + 1.2vw, 20px)",
-        border: "1px solid rgb(var(--c-violet-2-rgb) / 0.42)",
-        background:
-          "linear-gradient(135deg, rgb(var(--c-cyan-rgb) / 0.10) 0%, rgb(var(--c-violet-rgb) / 0.14) 55%, rgb(var(--c-magenta-rgb) / 0.10) 100%), var(--surface)",
-        boxShadow: "0 0 34px -14px rgb(var(--c-violet-2-rgb) / 0.55)",
+        border: "1px solid var(--border-default)",
+        background: "var(--bg-surface)",
+        boxShadow: "var(--shadow-card)",
       }}
     >
       <svg width="34" height="40" viewBox="6 0 28 40" fill="none" aria-hidden="true" style={{ flexShrink: 0, width: "clamp(24px, 14px + 2.4vw, 34px)", height: "auto", aspectRatio: "34 / 40" }}>
         <defs>
           <linearGradient id="iab_phone" x1="6" y1="36" x2="34" y2="4" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#22E4FF" />
-            <stop offset="1" stopColor="#D946EF" />
+            <stop style={{ stopColor: "var(--cta-start)" }} />
+            <stop offset="1" style={{ stopColor: "var(--cta-end)" }} />
           </linearGradient>
         </defs>
         <rect x="9" y="3" width="22" height="34" rx="5" stroke="url(#iab_phone)" strokeWidth="2.4" />
@@ -130,7 +129,7 @@ export default function InstallAppButton({ variant = "pill" }: { variant?: "pill
 
       {showHelp && (
         <div onClick={() => setShowHelp(false)} role="dialog" aria-modal="true" aria-label="How to install"
-          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(5,11,36,.62)", backdropFilter: "blur(8px)" }}>
+          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "var(--overlay-scrim)", backdropFilter: "blur(8px)" }}>
           <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: 380, width: "100%", padding: 26, position: "relative" }}>
             <button onClick={() => setShowHelp(false)} aria-label="Close" className="btn-icon" style={{ position: "absolute", top: 12, right: 12 }}>
               <X size={18} strokeWidth={1.5} />

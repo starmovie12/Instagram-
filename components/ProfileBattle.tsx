@@ -39,7 +39,7 @@ function Avatar({ f, winner }: { f: Fighter; winner: boolean }) {
   return (
     <div style={{ textAlign: "center", flex: 1, minWidth: 0 }}>
       <div style={{ position: "relative", display: "inline-block" }}>
-        <span style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", display: "inline-block", border: winner ? "3px solid var(--molten)" : "2px solid var(--line)", background: "var(--surface-2)" }}>
+        <span style={{ width: 72, height: 72, borderRadius: "50%", overflow: "hidden", display: "inline-block", border: winner ? "3px solid var(--color-primary)" : "2px solid var(--line)", background: "var(--surface-2)" }}>
           {f.feed.profilePicHd && /* eslint-disable-next-line @next/next/no-img-element */
             <img src={dl(f.feed.profilePicHd, "avatar")} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
         </span>

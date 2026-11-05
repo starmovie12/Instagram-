@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Upload, Download, LayoutGrid, Trash2 } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
 type Layout = { id: string; label: string; cells: [number, number, number, number][] }; // x,y,w,h in fractions
 const LAYOUTS: Layout[] = [
@@ -19,10 +20,10 @@ function drawCollage(canvas: HTMLCanvasElement, imgs: HTMLImageElement[], layout
   const ctx = canvas.getContext("2d")!;
   if (gold) {
     const g = ctx.createLinearGradient(0, 0, SIZE, SIZE);
-    g.addColorStop(0, "#22E4FF"); g.addColorStop(0.5, "#6366F1"); g.addColorStop(1, "#D946EF");
+    g.addColorStop(0, cssToken("--art-accent")); g.addColorStop(0.5, cssToken("--art-accent-2")); g.addColorStop(1, cssToken("--art-accent-3"));
     ctx.fillStyle = g;
   } else {
-    ctx.fillStyle = "#FFFFFF";
+    ctx.fillStyle = cssToken("--art-paper");
   }
   ctx.fillRect(0, 0, SIZE, SIZE);
 

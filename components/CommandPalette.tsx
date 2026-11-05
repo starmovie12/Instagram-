@@ -99,9 +99,9 @@ export default function CommandPalette() {
     <div
       onClick={() => setOpen(false)}
       role="dialog" aria-modal="true" aria-label="Tool search"
-      style={{ position: "fixed", inset: 0, zIndex: 130, background: "rgba(5,11,36,.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
+      style={{ position: "fixed", inset: 0, zIndex: 130, background: "var(--overlay-scrim)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "12vh 16px 16px" }}>
       <div onClick={(e) => e.stopPropagation()} className="card intro-rise"
-        style={{ width: "100%", maxWidth: 560, padding: 0, overflow: "hidden", boxShadow: "0 20px 60px rgba(5,11,36,.45)" }}>
+        style={{ width: "100%", maxWidth: 560, padding: 0, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid var(--line)" }}>
           <Search size={17} strokeWidth={1.5} style={{ color: "var(--gold-ink)", flexShrink: 0 }} />
           <input

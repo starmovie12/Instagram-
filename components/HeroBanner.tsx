@@ -29,9 +29,8 @@ export default function HeroBanner() {
           <span className="hb-spark-wrap" aria-hidden="true">
             <Sparkle
               strokeWidth={1.5}
-              fill="#22E4FF"
-              color="#22E4FF"
               className="hb-spark"
+              style={{ fill: "var(--ig-pink)", color: "var(--ig-pink)" }}
             />
             <i className="hb-dot d1" />
             <i className="hb-dot d2" />
@@ -81,10 +80,10 @@ export default function HeroBanner() {
                 y2="140"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0" stopColor="#A855F7" stopOpacity="0.85" />
-                <stop offset="0.35" stopColor="#22E4FF" />
-                <stop offset="0.75" stopColor="#38BDF8" />
-                <stop offset="1" stopColor="#D946EF" stopOpacity="0.9" />
+                <stop offset="0" stopOpacity="0.85" style={{ stopColor: "var(--ig-purple)" }} />
+                <stop offset="0.35" style={{ stopColor: "var(--ig-pink)" }} />
+                <stop offset="0.75" style={{ stopColor: "var(--ig-orange)" }} />
+                <stop offset="1" stopOpacity="0.9" style={{ stopColor: "var(--ig-purple)" }} />
               </linearGradient>
 
               <linearGradient
@@ -95,10 +94,10 @@ export default function HeroBanner() {
                 y2="90"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0" stopColor="#EC4899" />
-                <stop offset="0.45" stopColor="#A855F7" />
-                <stop offset="0.8" stopColor="#22E4FF" />
-                <stop offset="1" stopColor="#22E4FF" stopOpacity="0.2" />
+                <stop offset="0" style={{ stopColor: "var(--ig-pink)" }} />
+                <stop offset="0.45" style={{ stopColor: "var(--ig-purple)" }} />
+                <stop offset="0.8" style={{ stopColor: "var(--ig-pink)" }} />
+                <stop offset="1" stopOpacity="0.2" style={{ stopColor: "var(--ig-pink)" }} />
               </linearGradient>
 
               <linearGradient
@@ -109,23 +108,23 @@ export default function HeroBanner() {
                 y2="260"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0" stopColor="#38BDF8" />
-                <stop offset="0.3" stopColor="#8B5CF6" />
-                <stop offset="0.7" stopColor="#D946EF" />
-                <stop offset="1" stopColor="#22E4FF" />
+                <stop offset="0" style={{ stopColor: "var(--ig-orange)" }} />
+                <stop offset="0.3" style={{ stopColor: "var(--ig-pink)" }} />
+                <stop offset="0.7" style={{ stopColor: "var(--ig-purple)" }} />
+                <stop offset="1" style={{ stopColor: "var(--ig-pink)" }} />
               </linearGradient>
 
               <linearGradient id="hb_screen" x1="0" y1="0" x2="0.2" y2="1">
-                <stop offset="0" stopColor="#161D58" />
-                <stop offset="0.55" stopColor="#080C2C" />
-                <stop offset="0.85" stopColor="#071B46" />
-                <stop offset="1" stopColor="#0EA5E9" stopOpacity="0.7" />
+                <stop offset="0" style={{ stopColor: "var(--device-screen-1)" }} />
+                <stop offset="0.55" style={{ stopColor: "var(--device-screen-2)" }} />
+                <stop offset="0.85" style={{ stopColor: "var(--device-screen-3)" }} />
+                <stop offset="1" stopOpacity="0.7" style={{ stopColor: "var(--ig-purple)" }} />
               </linearGradient>
 
               <linearGradient id="hb_sheen" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.13" />
-                <stop offset="0.5" stopColor="#FFFFFF" stopOpacity="0.03" />
-                <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+                <stop offset="0" stopOpacity="0.13" style={{ stopColor: "var(--white)" }} />
+                <stop offset="0.5" stopOpacity="0.03" style={{ stopColor: "var(--white)" }} />
+                <stop offset="1" stopOpacity="0" style={{ stopColor: "var(--white)" }} />
               </linearGradient>
 
               <radialGradient
@@ -135,9 +134,9 @@ export default function HeroBanner() {
                 r="145"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0" stopColor="#7C3AED" stopOpacity="0.6" />
-                <stop offset="0.55" stopColor="#4F46E5" stopOpacity="0.26" />
-                <stop offset="1" stopColor="#7C3AED" stopOpacity="0" />
+                <stop offset="0" stopOpacity="0.6" style={{ stopColor: "var(--ig-purple)" }} />
+                <stop offset="0.55" stopOpacity="0.26" style={{ stopColor: "var(--ig-blue)" }} />
+                <stop offset="1" stopOpacity="0" style={{ stopColor: "var(--ig-purple)" }} />
               </radialGradient>
 
               <radialGradient
@@ -147,9 +146,9 @@ export default function HeroBanner() {
                 r="74"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0" stopColor="#22E4FF" stopOpacity="0.85" />
-                <stop offset="0.5" stopColor="#3B82F6" stopOpacity="0.35" />
-                <stop offset="1" stopColor="#22E4FF" stopOpacity="0" />
+                <stop offset="0" stopOpacity="0.85" style={{ stopColor: "var(--ig-pink)" }} />
+                <stop offset="0.5" stopOpacity="0.35" style={{ stopColor: "var(--ig-purple)" }} />
+                <stop offset="1" stopOpacity="0" style={{ stopColor: "var(--ig-pink)" }} />
               </radialGradient>
 
               <filter id="hb_blur" x="-30%" y="-30%" width="160%" height="160%">
@@ -175,10 +174,9 @@ export default function HeroBanner() {
               rx="45"
               ry="16"
               transform="rotate(14 232 34)"
-              fill="#22E4FF"
+             
               opacity="0.42"
-              filter="url(#hb_blur)"
-            />
+              filter="url(#hb_blur)" style={{ fill: "var(--ig-pink)" }} />
 
             {/* Rear orbital ring */}
             <ellipse
@@ -200,31 +198,28 @@ export default function HeroBanner() {
                 width="124"
                 height="234"
                 rx="24"
-                fill="#04071A"
-                stroke="#6366F1"
+               
+               
                 strokeWidth="1.4"
-                opacity="0.85"
-              />
+                opacity="0.85" style={{ fill: "var(--device-body)", stroke: "var(--ig-blue)" }} />
               <rect
                 x="101"
                 y="18"
                 width="124"
                 height="234"
                 rx="24"
-                fill="#38BDF8"
+               
                 opacity="0.3"
-                filter="url(#hb_blur)"
-              />
+                filter="url(#hb_blur)" style={{ fill: "var(--ig-orange)" }} />
               <rect
                 x="101"
                 y="18"
                 width="124"
                 height="234"
                 rx="24"
-                fill="#070A24"
+               
                 stroke="url(#hb_rim)"
-                strokeWidth="3.2"
-              />
+                strokeWidth="3.2" style={{ fill: "var(--device-frame)" }} />
               <rect
                 x="108"
                 y="25"
@@ -234,8 +229,8 @@ export default function HeroBanner() {
                 fill="url(#hb_screen)"
               />
               <path d="M112 28 H184 L128 240 H112 Z" fill="url(#hb_sheen)" />
-              <rect x="147" y="31" width="30" height="5" rx="2.5" fill="#040617" />
-              <circle cx="184" cy="33.5" r="2.3" fill="#0F172A" />
+              <rect x="147" y="31" width="30" height="5" rx="2.5" style={{ fill: "var(--device-notch)" }} />
+              <circle cx="184" cy="33.5" r="2.3" style={{ fill: "var(--device-cam)" }} />
 
               {/* Bottom Screen Cyan Glow */}
               <ellipse
@@ -243,19 +238,17 @@ export default function HeroBanner() {
                 cy="234"
                 rx="45"
                 ry="14"
-                fill="#22E4FF"
+               
                 opacity="0.5"
-                filter="url(#hb_blur)"
-              />
+                filter="url(#hb_blur)" style={{ fill: "var(--ig-pink)" }} />
               <rect
                 x="143"
                 y="237"
                 width="40"
                 height="3.5"
                 rx="1.75"
-                fill="#E0F2FE"
-                opacity="0.7"
-              />
+               
+                opacity="0.7" style={{ fill: "var(--white)" }} />
             </g>
 
             {/* Floor glow under phone */}
@@ -289,11 +282,11 @@ export default function HeroBanner() {
             />
 
             {/* Sparkle particles */}
-            <circle cx="48" cy="78" r="2" fill="#22E4FF" opacity="0.8" />
-            <circle cx="288" cy="108" r="2.4" fill="#22E4FF" opacity="0.9" />
-            <circle cx="296" cy="142" r="1.8" fill="#F472B6" opacity="0.85" />
-            <circle cx="272" cy="208" r="2.2" fill="#38BDF8" opacity="0.75" />
-            <circle cx="62" cy="236" r="2" fill="#E879F9" opacity="0.85" />
+            <circle cx="48" cy="78" r="2" opacity="0.8" style={{ fill: "var(--ig-pink)" }} />
+            <circle cx="288" cy="108" r="2.4" opacity="0.9" style={{ fill: "var(--ig-pink)" }} />
+            <circle cx="296" cy="142" r="1.8" opacity="0.85" style={{ fill: "var(--ig-orange)" }} />
+            <circle cx="272" cy="208" r="2.2" opacity="0.75" style={{ fill: "var(--ig-orange)" }} />
+            <circle cx="62" cy="236" r="2" opacity="0.85" style={{ fill: "var(--ig-purple)" }} />
           </svg>
 
           {TILES.map((t) => (
@@ -333,16 +326,14 @@ export default function HeroBanner() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          border: 1.5px solid rgb(var(--c-cyan-rgb) / 0.55);
+          border: 1px solid var(--hero-border);
           background:
-            radial-gradient(55% 85% at 80% 54%, rgb(var(--c-violet-rgb) / 0.48), transparent 70%),
-            radial-gradient(35% 45% at 60% 98%, rgb(var(--c-magenta-rgb) / 0.3), transparent 70%),
-            radial-gradient(45% 60% at 8% 12%, rgb(var(--c-cyan-rgb) / 0.12), transparent 70%),
-            linear-gradient(135deg, #050B24 0%, #080E2E 52%, #120B38 100%);
+            radial-gradient(55% 85% at 80% 54%, var(--hero-glow-a), transparent 70%),
+            radial-gradient(35% 45% at 60% 98%, var(--hero-glow-b), transparent 70%),
+            radial-gradient(45% 60% at 8% 12%, var(--hero-glow-c), transparent 70%),
+            var(--hero-bg);
           box-shadow:
-            0 0 0 1px rgb(var(--c-violet-rgb) / 0.22),
-            0 10px 36px -10px rgba(0, 0, 0, 0.78),
-            0 0 34px -12px rgb(var(--c-cyan-rgb) / 0.5);
+            var(--shadow-card);
           box-sizing: border-box;
         }
 
@@ -352,7 +343,7 @@ export default function HeroBanner() {
           left: 46%;
           width: 34%;
           height: 20%;
-          background: radial-gradient(ellipse at center, rgb(var(--c-pink-rgb) / 0.55), transparent 70%);
+          background: radial-gradient(ellipse at center, var(--hero-glow-b), transparent 70%);
           filter: blur(10px);
           pointer-events: none;
           z-index: 1;
@@ -384,7 +375,7 @@ export default function HeroBanner() {
         .hb-spark {
           width: 100%;
           height: 100%;
-          filter: drop-shadow(0 0 8px rgb(var(--c-cyan-rgb) / 0.95));
+          filter: none;
         }
 
         .hb-dot {
@@ -394,8 +385,7 @@ export default function HeroBanner() {
           min-width: 2px;
           min-height: 2px;
           border-radius: 50%;
-          background: #67E8F9;
-          box-shadow: 0 0 4px #22E4FF;
+          background: var(--ig-pink);
         }
         .hb-dot.d1 { top: 0; left: 1px; }
         .hb-dot.d2 { top: 1px; right: 0; }
@@ -409,7 +399,7 @@ export default function HeroBanner() {
           min-width: 0;
           font-size: clamp(7.5px, 2.05cqw, 14px);
           font-weight: 700;
-          color: #F1F5F9;
+          color: var(--hero-ink);
           line-height: 1.15;
           white-space: nowrap;
         }
@@ -419,9 +409,8 @@ export default function HeroBanner() {
           text-overflow: ellipsis;
           padding: 0.95cqw 2.2cqw;
           border-radius: 999px;
-          border: 1px solid rgba(139, 92, 246, 0.6);
-          background: linear-gradient(90deg, rgba(16, 24, 68, 0.88) 0%, rgba(44, 24, 92, 0.8) 100%);
-          box-shadow: inset 0 0 12px rgba(139, 92, 246, 0.25);
+          border: 1px solid var(--hero-pill-border);
+          background: var(--hero-pill-bg);
         }
 
         /* Left Copy Block — strictly contained within 59% width */
@@ -444,26 +433,22 @@ export default function HeroBanner() {
 
         .hb-title {
           margin: 0;
-          color: #FFFFFF;
+          color: var(--hero-ink);
           font-weight: 800;
           letter-spacing: -0.03em;
           line-height: 1.07;
           font-size: clamp(14px, 5.45cqw, 37px);
           font-family: var(--font-sans), system-ui, sans-serif;
           font-style: normal;
-          text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+          text-shadow: var(--hero-text-shadow);
         }
 
         .hb-in {
-          color: #1CE5FF;
-          text-shadow: 0 0 16px rgba(28, 229, 255, 0.45);
+          color: var(--text-brand);
         }
 
         .hb-hd {
-          background: linear-gradient(135deg, #38BDF8 0%, #8B5CF6 45%, #C084FC 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: var(--text-brand);
         }
 
         .hb-lead {
@@ -474,11 +459,11 @@ export default function HeroBanner() {
         }
 
         .hb-cy {
-          color: #47E5FF;
+          color: var(--text-brand);
         }
 
         .hb-wh {
-          color: #EEF2FF;
+          color: var(--hero-ink-2);
         }
 
         /* Right Phone Artwork — locked inside the right 41% of the card */
@@ -507,8 +492,7 @@ export default function HeroBanner() {
           z-index: 2;
           border-radius: 24%;
           filter:
-            drop-shadow(0 6px 12px rgba(2, 4, 18, 0.78))
-            drop-shadow(0 0 10px rgb(var(--c-sky-rgb) / 0.42));
+            drop-shadow(0 6px 12px rgb(var(--shadow-rgb) / 0.28));
           animation: hb-float 5.5s ease-in-out infinite;
         }
 

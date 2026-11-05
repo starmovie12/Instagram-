@@ -100,14 +100,14 @@ export default function GridArchitect() {
                 style={{ position: "relative", aspectRatio: "1", cursor: "grab", outline: overId === t.id ? "2px solid var(--gold-400)" : "none", outlineOffset: -2 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={t.url} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
-                <span aria-hidden style={{ position: "absolute", top: 4, left: 4, color: "#fff", opacity: 0.7, filter: "drop-shadow(0 1px 2px rgba(0,0,0,.6))" }}>
+                <span aria-hidden style={{ position: "absolute", top: 4, left: 4, color: "var(--white)", opacity: 0.7, filter: "drop-shadow(0 1px 2px rgb(var(--black-rgb) / .6))" }}>
                   <GripVertical size={14} strokeWidth={2} />
                 </span>
                 <button onClick={() => removeTile(t.id)} aria-label="Remove"
-                  style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,.5)", border: "none", borderRadius: 6, padding: 3, cursor: "pointer", color: "#fff", display: "inline-flex" }}>
+                  style={{ position: "absolute", top: 4, right: 4, background: "rgb(var(--black-rgb) / .5)", border: "none", borderRadius: 6, padding: 3, cursor: "pointer", color: "var(--white)", display: "inline-flex" }}>
                   <Trash2 size={12} strokeWidth={2} />
                 </button>
-                <span aria-hidden style={{ position: "absolute", bottom: 5, left: 5, width: 12, height: 12, borderRadius: 3, border: "1.5px solid rgba(255,255,255,.85)", background: `hsl(${t.hue} ${Math.round(t.sat * 100)}% ${Math.round(t.light * 100)}%)` }} />
+                <span aria-hidden style={{ position: "absolute", bottom: 5, left: 5, width: 12, height: 12, borderRadius: 3, border: "1.5px solid rgb(var(--white-rgb) / .85)", background: `hsl(${t.hue} ${Math.round(t.sat * 100)}% ${Math.round(t.light * 100)}%)` }} />
               </div>
             ))}
           </div>

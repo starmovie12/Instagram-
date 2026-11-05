@@ -81,41 +81,41 @@ const HISTORY_STORAGE_KEY = "ig_goldenbar_recent_v1";
 function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
   const val = raw.trim();
   if (!val) {
-    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "var(--ig-pink)" };
   }
 
   const lower = val.toLowerCase();
 
   if (lower.includes("instagram.com") || lower.includes("instagr.am")) {
     if (lower.includes("/reel/") || lower.includes("/reels/")) {
-      return { id: "ig-reel", label: "IG Reel", icon: "🎬", color: "#ec4899" };
+      return { id: "ig-reel", label: "IG Reel", icon: "🎬", color: "var(--ig-pink)" };
     }
     if (lower.includes("/stories/")) {
-      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "#22E4FF" };
+      return { id: "ig-story", label: "IG Story", icon: "⭕", color: "var(--ig-orange)" };
     }
     if (lower.includes("/p/") || lower.includes("/tv/")) {
-      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "#7C3AED" };
+      return { id: "ig-post", label: "IG Post", icon: "🖼️", color: "var(--ig-purple)" };
     }
-    return { id: "instagram", label: "Instagram", icon: "📸", color: "#ec4899" };
+    return { id: "instagram", label: "Instagram", icon: "📸", color: "var(--ig-pink)" };
   }
 
   if (lower.includes("tiktok.com")) {
-    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "#22E4FF" };
+    return { id: "tiktok", label: "TikTok", icon: "🎵", color: "var(--brand-tiktok)" };
   }
   if (lower.includes("twitter.com") || lower.includes("x.com")) {
-    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "#38BDF8" };
+    return { id: "twitter", label: "X / Twitter", icon: "🐦", color: "var(--text-primary)" };
   }
   if (lower.includes("facebook.com") || lower.includes("fb.watch")) {
-    return { id: "facebook", label: "Facebook", icon: "📘", color: "#2563eb" };
+    return { id: "facebook", label: "Facebook", icon: "📘", color: "var(--brand-facebook)" };
   }
   if (lower.includes("pinterest.") || lower.includes("pin.it")) {
-    return { id: "pinterest", label: "Pinterest", icon: "📌", color: "#ef4444" };
+    return { id: "pinterest", label: "Pinterest", icon: "📌", color: "var(--brand-pinterest)" };
   }
   if (lower.includes("threads.net") || lower.includes("threads.com")) {
-    return { id: "threads", label: "Threads", icon: "🧵", color: "#D946EF" };
+    return { id: "threads", label: "Threads", icon: "🧵", color: "var(--text-primary)" };
   }
   if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
-    return { id: "youtube", label: "YouTube", icon: "▶️", color: "#ef4444" };
+    return { id: "youtube", label: "YouTube", icon: "▶️", color: "var(--brand-youtube)" };
   }
 
   const cleanHandle = val.replace(/^@/, "");
@@ -130,12 +130,12 @@ function detectInputType(raw: string, fallbackMode: string): DetectedPlatform {
       id: "username",
       label: `@${cleanHandle || "username"}`,
       icon: "👤",
-      color: "#22E4FF",
+      color: "var(--ig-pink)",
       isUsername: true,
     };
   }
 
-  return { id: "url", label: "Web Link", icon: "🔗", color: "#7C3AED" };
+  return { id: "url", label: "Web Link", icon: "🔗", color: "var(--accent)" };
 }
 
 export const GOLDEN_BAR_STYLES = `
@@ -163,7 +163,7 @@ export const GOLDEN_BAR_STYLES = `
     font-size: 0.8rem;
     font-weight: 600;
     border: 1px solid rgb(var(--c-cyan-rgb) / 0.30);
-    background: rgba(15, 23, 42, 0.04);
+    background: rgb(var(--tint-rgb) / 0.04);
     color: inherit;
     cursor: pointer;
     transition: all 0.18s ease;
@@ -173,10 +173,9 @@ export const GOLDEN_BAR_STYLES = `
     transform: translateY(-1px);
   }
   .gb-mode-active {
-    background: var(--gradient-button);
-    color: var(--on-accent);
-    border-color: transparent;
-    box-shadow: 0 4px 14px rgb(var(--c-violet-2-rgb) / 0.32);
+    background: var(--color-primary-subtle);
+    color: var(--text-brand);
+    border-color: var(--text-brand);
   }
   .gb-form {
     width: 100%;
@@ -184,8 +183,8 @@ export const GOLDEN_BAR_STYLES = `
   .gb-bar-outer {
     padding: 3px;
     border-radius: 20px;
-    background: var(--gradient-brand);
-    box-shadow: 0 14px 35px -10px rgb(var(--c-violet-2-rgb) / 0.34), 0 0 0 1px rgb(var(--c-cyan-rgb) / 0.25);
+    background: var(--border-default);
+    box-shadow: var(--shadow-card);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .gb-bar-outer:focus-within {
@@ -238,8 +237,8 @@ export const GOLDEN_BAR_STYLES = `
     gap: 0.3rem;
     padding: 0.55rem 0.85rem;
     border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.28);
-    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgb(var(--tint-rgb) / 0.28);
+    background: rgb(var(--tint-rgb) / 0.1);
     color: inherit;
     font-size: 0.82rem;
     font-weight: 600;
@@ -247,14 +246,14 @@ export const GOLDEN_BAR_STYLES = `
     transition: background 0.15s ease;
   }
   .gb-paste-btn:hover {
-    background: rgba(148, 163, 184, 0.2);
+    background: rgb(var(--tint-rgb) / 0.2);
   }
   .gb-clear-btn {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     border: none;
-    background: rgba(148, 163, 184, 0.18);
+    background: rgb(var(--tint-rgb) / 0.18);
     color: inherit;
     cursor: pointer;
     font-size: 0.8rem;
@@ -294,7 +293,7 @@ export const GOLDEN_BAR_STYLES = `
   .gb-spinner {
     width: 15px;
     height: 15px;
-    border: 2px solid rgb(5 11 36 / 0.30);
+    border: 2px solid rgb(var(--shadow-rgb) / 0.30);
     border-top-color: var(--on-accent);
     border-radius: 50%;
     animation: gbSpin 0.7s linear infinite;
@@ -326,8 +325,8 @@ export const GOLDEN_BAR_STYLES = `
     margin-top: 0.85rem;
     padding: 0.55rem 0.85rem;
     border-radius: 12px;
-    background: rgba(148, 163, 184, 0.06);
-    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgb(var(--tint-rgb) / 0.06);
+    border: 1px solid rgb(var(--tint-rgb) / 0.16);
     font-size: 0.78rem;
   }
   .gb-history-left {
@@ -348,7 +347,7 @@ export const GOLDEN_BAR_STYLES = `
   .gb-history-chip {
     padding: 0.2rem 0.55rem;
     border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    border: 1px solid rgb(var(--tint-rgb) / 0.25);
     background: transparent;
     color: inherit;
     font-size: 0.74rem;
@@ -380,8 +379,8 @@ export const GOLDEN_BAR_STYLES = `
     margin-top: 1.1rem;
     padding: 1rem 1.15rem;
     border-radius: 16px;
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgb(var(--destructive-rgb) / 0.35);
+    background: rgb(var(--destructive-rgb) / 0.08);
     text-align: left;
   }
   .gb-error-header {
@@ -396,7 +395,7 @@ export const GOLDEN_BAR_STYLES = `
     margin: 0 0 0.2rem;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #f87171;
+    color: var(--color-destructive);
   }
   .gb-error-desc {
     margin: 0;
@@ -409,7 +408,7 @@ export const GOLDEN_BAR_STYLES = `
     gap: 0.35rem;
     margin-top: 0.65rem;
     padding-top: 0.6rem;
-    border-top: 1px dashed rgba(239, 68, 68, 0.25);
+    border-top: 1px dashed rgb(var(--destructive-rgb) / 0.25);
     font-size: 0.78rem;
     opacity: 0.85;
   }
@@ -423,7 +422,7 @@ export const GOLDEN_BAR_STYLES = `
     padding: 1.25rem;
     border-radius: 20px;
     border: 1px solid rgb(var(--c-violet-2-rgb) / 0.30);
-    background: rgba(15, 23, 42, 0.04);
+    background: rgb(var(--tint-rgb) / 0.04);
     text-align: left;
   }
   .gb-result-header {
@@ -434,7 +433,7 @@ export const GOLDEN_BAR_STYLES = `
     gap: 0.85rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    border-bottom: 1px solid rgb(var(--tint-rgb) / 0.18);
   }
   .gb-author-box {
     display: flex;
@@ -465,7 +464,7 @@ export const GOLDEN_BAR_STYLES = `
     height: 16px;
     border-radius: 50%;
     background: var(--c-violet-2);
-    color: #fff;
+    color: var(--white);
     font-size: 0.65rem;
     font-weight: 800;
   }
@@ -503,14 +502,14 @@ export const GOLDEN_BAR_STYLES = `
     flex-direction: column;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgb(var(--tint-rgb) / 0.2);
+    background: rgb(var(--black-rgb) / 0.15);
   }
   .gb-media-preview {
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 5;
-    background: #000;
+    background: var(--black);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -527,8 +526,8 @@ export const GOLDEN_BAR_STYLES = `
     right: 0.6rem;
     padding: 0.2rem 0.55rem;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.72);
-    color: #fff;
+    background: rgb(var(--black-rgb) / 0.72);
+    color: var(--white);
     font-size: 0.7rem;
     font-weight: 700;
   }
@@ -557,7 +556,7 @@ export const GOLDEN_BAR_STYLES = `
     justify-content: center;
     padding: 0.5rem 0.85rem;
     border-radius: 10px;
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    border: 1px solid rgb(var(--tint-rgb) / 0.25);
     color: inherit;
     text-decoration: none;
     font-size: 0.78rem;
@@ -567,8 +566,8 @@ export const GOLDEN_BAR_STYLES = `
     margin-top: 1rem;
     padding: 0.85rem 1rem;
     border-radius: 12px;
-    background: rgba(148, 163, 184, 0.06);
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgb(var(--tint-rgb) / 0.06);
+    border: 1px solid rgb(var(--tint-rgb) / 0.18);
   }
   .gb-caption-top {
     display: flex;
@@ -1154,8 +1153,8 @@ export function GoldenBar({
             <div
               className="gb-platform-chip"
               style={{
-                borderColor: `${detected.color}40`,
-                backgroundColor: `${detected.color}18`,
+                borderColor: `color-mix(in srgb, ${detected.color} 25%, transparent)`,
+                backgroundColor: `color-mix(in srgb, ${detected.color} 9%, transparent)`,
                 color: detected.color,
               }}
               title={`Detected: ${detected.label}`}

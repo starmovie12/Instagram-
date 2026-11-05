@@ -101,7 +101,7 @@ export default function KundliTool() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16 }}>
             {[result.a, result.b].filter(Boolean).map((u, i) => (
               <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                {i === 1 && <Heart size={18} strokeWidth={1.5} style={{ color: "var(--molten)" }} />}
+                {i === 1 && <Heart size={18} strokeWidth={1.5} style={{ color: "var(--color-primary)" }} />}
                 <span style={{ width: 40, height: 40, borderRadius: "50%", overflow: "hidden", border: "2px solid var(--gold-300)", background: "var(--surface-2)" }}>
                   {u!.profilePicHd && /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={dl(u!.profilePicHd, "avatar")} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}

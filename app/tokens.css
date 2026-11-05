@@ -1,157 +1,385 @@
 /* ==========================================================================
-   INSTAGRAB — SINGLE SOURCE OF TRUTH FOR COLOR
-   Palette is taken from the hero banner (components/HeroBanner.tsx):
-   cyan → sky → violet → magenta (+ rare pink) on a deep navy/indigo base.
-   Nothing else in the app should hard-code an accent color — use these tokens.
-   Legacy names (--gold-*, --molten, --brand-*, --text-*, --bg-card …) are kept
-   as ALIASES so the ~98 inner pages keep working. They are no longer gold.
+   INSTAGRAB — DESIGN TOKENS · SINGLE SOURCE OF TRUTH
+   --------------------------------------------------------------------------
+   Palette: "Instagram Sunset" — professional, LIGHT by default (user brief
+   Palette A + PRD v2.4 §3.1.1 Instagram Spectrum, Appendix C token names).
+     · Neutral base (≈90%), solid magenta for selection/toggles (≈8%),
+       full spectrum only on the logo + Story-Ring (≈2%) — the 90/8/2 rule.
+     · Gradient ONLY on the primary CTA (--cta-gradient) and the logo.
+   Raw colour values live in THIS FILE ONLY (PRD Law 2 / AC-62). Everything
+   else uses var(--token) or rgb(var(--x-rgb) / alpha).
+   Contrast: every text/surface pair is verified by `npm test`
+   (lib/contrast.test.ts) and scripts/contrast_check.py — see
+   docs/design/contrast-report.md.
    ========================================================================== */
+
+/* ── Theme-independent: spectrum, brand, scales ─────────────────────────── */
 :root {
-  /* ── Core palette (theme independent) ── */
-  --c-cyan:     #22E4FF;
-  --c-sky:      #38BDF8;
-  --c-violet:   #7C3AED;
-  --c-violet-2: #6366F1;   /* lighter violet step: gradient mid / text-safe */
-  --c-magenta:  #D946EF;
-  --c-pink:     #EC4899;   /* use sparingly */
+  /* Instagram Spectrum — DECORATIVE ONLY (logo, Story-Ring, aurora, tiles). Never behind text. */
+  --ig-yellow: #FEDA75;
+  --ig-orange: #FA7E1E;
+  --ig-pink:   #D62976;
+  --ig-purple: #962FBF;
+  --ig-blue:   #4F5BD5;
 
-  /* Channel triplets → rgb(var(--c-cyan-rgb) / .3) for translucent tints */
-  --c-cyan-rgb:     34 228 255;
-  --c-sky-rgb:      56 189 248;
-  --c-violet-rgb:   124 58 237;
-  --c-violet-2-rgb: 99 102 241;
-  --c-magenta-rgb:  217 70 239;
-  --c-pink-rgb:     236 72 153;
+  /* Brand / CTA (white label ≥ 5.11:1 across the whole gradient) */
+  --cta-start: #C13584;
+  --cta-mid:   #A2379C;
+  --cta-end:   #833AB4;
+  --color-primary:        #C13584;
+  --color-primary-hover:  #A92C72;
+  --color-primary-dark:   #8F255F;
+  --color-primary-muted:  #B97A9C;
+  --accent:               #515BD4;   /* Palette A accent — focus ring, info, "selected" outlines */
 
-  /* Brand gradients (same 135° direction as before) */
-  --gradient-brand:   linear-gradient(135deg, var(--c-cyan) 0%, var(--c-violet-2) 55%, var(--c-magenta) 100%);
-  /* Button fill: lighter mid-stops so dark label text keeps AA contrast */
-  --gradient-button:  linear-gradient(135deg, var(--c-cyan) 0%, var(--c-sky) 34%, #818CF8 68%, #C77DF7 100%);
-  --gradient-button-hover: linear-gradient(135deg, #5CEBFF 0%, #6FCBFA 34%, #9AA3FA 68%, #D69AF9 100%);
-  --gradient-glow:    linear-gradient(135deg,
-    rgb(var(--c-cyan-rgb) / .20) 0%, rgb(var(--c-violet-2-rgb) / .22) 55%, rgb(var(--c-magenta-rgb) / .20) 100%);
-  --molten: var(--gradient-button);
-  --on-accent: #050B24;   /* dark label colour on cyan/violet gradient fills (both themes) */
+  /* Channel triplets → rgb(var(--x-rgb) / .3) for tints */
+  --color-primary-rgb: 193 53 132;
+  --cta-end-rgb:       131 58 180;
+  --accent-rgb:        81 91 212;
+  --ig-pink-rgb:       214 41 118;
+  --ig-orange-rgb:     250 126 30;
+  --ink-rgb:           20 22 31;     /* neutral ink for shadows / hairlines */
+  --white-rgb:         255 255 255;
+  --black-rgb:         0 0 0;
 
-  /* Type scale */
-  --t-hero:  clamp(2.85rem, 1.1rem + 6.6vw, 5.5rem);
-  --t-h2:    clamp(1.95rem, 1.2rem + 2.6vw, 3.15rem);
-  --t-h3:    clamp(1.3rem, 1.15rem + .8vw, 1.65rem);
-  --t-lead:  clamp(1.06rem, 1rem + .45vw, 1.2rem);
-  --t-body:  1.03rem;
-  --t-small: .9rem;
-  --t-label: .72rem;
+  --text-on-primary: #FFFFFF;
+  --white: #FFFFFF;
+  --black: #000000;
+
+  /* Third-party brand colours (semantic labels only; logos live in PlatformIcons.tsx) */
+  --brand-facebook: #1877F2;  --brand-facebook-rgb: 24 119 242;
+  --brand-pinterest: #E60023;
+  --brand-youtube: #FF0000;
+  --brand-tiktok: #FE2C55;
+
+  /* Device illustration (HeroBanner phone) — always a dark handset in both themes */
+  --device-body: #121218;
+  --device-frame: #17171D;
+  --device-notch: #08080B;
+  --device-cam: #23232B;
+  --device-screen-1: #2A1630;
+  --device-screen-2: #120D18;
+  --device-screen-3: #1B1030;
+
+  /* ART palettes — colours that end up INSIDE exported images (canvas tools).
+     Theme-independent on purpose: a downloaded certificate must not change with the UI theme. */
+  --art-paper: #FFFFFF;
+  --art-paper-2: #FAF3F7;
+  --art-ink: #14161F;
+  --art-ink-2: #4F535E;
+  --art-muted: #8A8C96;
+  --art-accent: #C13584;
+  --art-accent-2: #833AB4;
+  --art-accent-3: #515BD4;
+  --art-noir-1: #0B0B0E;   --art-noir-2: #1C1220;   --art-noir-ink: #F5F5F5;  --art-noir-accent: #F27AB4;
+  --art-blush-1: #FCEEF0;  --art-blush-2: #F8D8DD;  --art-blush-ink: #4A2B33; --art-blush-accent: #B0566B;
+  --art-sage-1: #EEF3EA;   --art-sage-2: #D7E3D0;   --art-sage-ink: #2C3B28;  --art-sage-accent: #5E7A52;
+  --art-night-1: #0E1B2C;  --art-night-2: #16283E;  --art-night-ink: #E8EEF5; --art-night-accent: #7FA8D0;
+  --art-sunset-1: #FF9A9E; --art-sunset-2: #FAD0C4; --art-sunset-3: #FBC2EB; --art-sunset-4: #A18CD1;
+  --art-ocean-1: #43E97B;  --art-ocean-2: #38F9D7;  --art-ocean-3: #38A1F9;  --art-ocean-4: #5B6BF9;
+
+  /* Composite gradients (built only from the tokens above) */
+  --cta-gradient:     linear-gradient(135deg, var(--cta-start) 0%, var(--cta-mid) 50%, var(--cta-end) 100%);
+  --cta-gradient-hover: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--cta-end) 100%);
+  --brand-gradient:   linear-gradient(45deg, var(--ig-yellow) 0%, var(--ig-orange) 25%, var(--ig-pink) 50%, var(--ig-purple) 75%, var(--ig-blue) 100%);
+  --brand-gradient-v: linear-gradient(0deg, var(--ig-yellow) 0%, var(--ig-orange) 25%, var(--ig-pink) 50%, var(--ig-purple) 75%, var(--ig-blue) 100%);
+  --story-ring:       conic-gradient(from 0deg, var(--ig-yellow), var(--ig-orange), var(--ig-pink), var(--ig-purple), var(--ig-blue), var(--ig-yellow));
+  --tile-downloaders: linear-gradient(135deg, var(--ig-pink), var(--cta-start));
+  --tile-ai:          linear-gradient(135deg, var(--ig-purple), var(--ig-blue));
+  --tile-analytics:   linear-gradient(135deg, var(--ig-blue), var(--ig-purple));
+  --tile-visual:      linear-gradient(135deg, var(--cta-start), var(--ig-purple));
+  --tile-utilities:   linear-gradient(135deg, var(--ig-blue), var(--ig-pink));
+  --tile-fun:         linear-gradient(135deg, var(--ig-pink), var(--ig-purple));
+
+  /* Typography (PRD §3.3) — Instrument Sans + Noto Sans Devanagari companion */
+  --font-stack: var(--font-sans), var(--font-deva), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-stack);
+  --font-heading: var(--font-stack);
+  --font-body:    var(--font-stack);
+  --font-numeric: var(--font-stack);
+  --lh-devanagari-body: 1.55;
+  --lh-devanagari-display: 1.35;
+  --fs-page-title: 28px;  --lh-page-title: 34px;
+  --fs-section:    20px;  --lh-section:    26px;
+  --fs-body:       16px;  --lh-body:       24px;
+  --fs-small:      14px;  --lh-small:      20px;
+  --fs-tab:        12px;  --lh-tab:        16px;
+  --fs-tile:       13px;  --lh-tile:       16px;
+  /* legacy fluid scale (inner tool pages) */
+  --t-hero:  clamp(2.1rem, 1.2rem + 3.6vw, 3.4rem);
+  --t-h2:    clamp(1.5rem, 1.15rem + 1.4vw, 2.1rem);
+  --t-h3:    clamp(1.2rem, 1.1rem + .5vw, 1.4rem);
+  --t-lead:  clamp(1.02rem, 1rem + .3vw, 1.12rem);
+  --t-body:  1rem;
+  --t-small: .875rem;
+  --t-label: .75rem;
+
+  /* Shape (PRD §3.3) */
+  --radius-sm: 8px;  --radius-base: 14px;  --radius-tile: 16px;  --radius-card: 20px;
+  --radius-lg: 16px;  --radius-island: 28px;  --radius-full: 9999px;
+  --radius-md: 14px;
+
+  /* Spacing — 4px grid (PRD §3.7) */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;  --sp-4: 16px;  --sp-5: 20px;  --sp-6: 24px;
+  --sp-8: 32px; --sp-10: 40px; --sp-11: 44px; --sp-12: 48px; --sp-14: 56px; --sp-16: 64px;
+  --hit-target-min: 48px;
+  --gutter: var(--sp-4);
+
+  /* Z-index (PRD §3.7) */
+  --z-below: -1;  --z-base: 0;  --z-raised: 10;  --z-glass-island: 50;  --z-dropdown: 100;
+  --z-sticky: 200;  --z-overlay: 300;  --z-modal: 400;  --z-notification: 500;  --z-tooltip: 600;
+  --z-command: 700;  --z-banned-banner: 800;  --z-max: 9999;
+  --z-header: var(--z-sticky);  --z-bar: var(--z-glass-island);  --z-toast: var(--z-notification);
+
+  /* Motion (PRD §3.5) */
+  --motion-instant: 0ms;  --motion-fast: 100ms;  --motion-base: 200ms;  --motion-slow: 350ms;  --motion-glacial: 600ms;
+  --ease-standard:   cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --ease-sharp:      cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-glass:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spinner:    cubic-bezier(0, 0, 1, 1);
+  --ease-spring-glass:  linear(0, 0.046, 0.153, 0.285, 0.42, 0.545, 0.655, 0.746, 0.819, 0.876, 0.919, 0.95, 0.972, 0.986, 0.996, 1.002, 1.005, 1.006, 1.006, 1.006, 1.005, 1.004, 1.004, 1.003, 1.002, 1);
+  --ease-spring-bouncy: linear(0, 0.108, 0.355, 0.642, 0.897, 1.08, 1.18, 1.208, 1.184, 1.132, 1.072, 1.02, 0.982, 0.962, 0.957, 0.962, 0.973, 0.985, 0.996, 1.004, 1.008, 1.009, 1.008, 1.006, 1.003, 1);
+  --ease-spring-rigid:  linear(0, 0.047, 0.157, 0.294, 0.435, 0.567, 0.681, 0.775, 0.85, 0.906, 0.947, 0.976, 0.995, 1.006, 1.012, 1.015, 1.015, 1.014, 1.012, 1.01, 1.008, 1.006, 1.004, 1.003, 1.002, 1);
+  /* legacy easing names still used by tool pages */
+  --ease-silk: var(--ease-standard);
+  --ease-velvet: var(--ease-decelerate);
+  --ease-hinge: var(--ease-glass);
+  --ease-coin: var(--ease-glass);
+}
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring-glass: var(--ease-glass);
+    --ease-spring-bouncy: var(--ease-glass);
+    --ease-spring-rigid: var(--ease-glass);
+  }
 }
 
-/* ── DARK (default): deep navy / indigo with a hint of violet ── */
+/* ── LIGHT (default) ─────────────────────────────────────────────────────── */
 :root,
-[data-theme="dark"] {
-  --bg:        #050B24;
-  --bg-dark:   #050B24;
-  --surface:   #0B1230;
-  --surface-2: #101842;
-  --surface-3: #1A2254;
-  --bg-card:        #0B1230;
-  --bg-card-hover:  #111A42;
-  --bg-surface: rgba(11, 18, 48, .78);
-  --bg-glass:   rgba(16, 24, 66, .62);
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-base:             #FAFAFB;
+  --bg-surface:          #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-sunken:   #F1F1F4;
+  --bg-surface-2:        #F5F5F8;   /* hover / subtle fill */
+  --bg-surface-3:        #E9E9EF;   /* pressed / track */
+  --bg-blur-layer:          rgb(250 250 251 / .92);
+  --bg-glass-island:        rgb(var(--white-rgb) / .92);
+  --bg-glass-island-active: rgb(var(--ink-rgb) / .06);
 
-  --ink:   #F1F5FF;
-  --ink-2: #A9B4D6;
-  --ink-3: #7F8CB6;
-  --text-main:  var(--ink);
-  --text-muted: var(--ink-2);
-  --text-dim:   var(--ink-3);
+  --text-primary:   #14161F;
+  --text-secondary: #4F535E;
+  --text-disabled:  #9A9CA6;
+  --text-brand:     #A8286F;
+  --accent-ink:     #4752C4;   /* accent used as TEXT */
 
-  --line:         rgba(190, 205, 255, .10);
-  --line-strong:  rgb(var(--c-cyan-rgb) / .30);
-  --border-color: rgba(190, 205, 255, .11);
-  --border-focus: rgb(var(--c-cyan-rgb) / .60);
-  --border-glow:  rgb(var(--c-violet-2-rgb) / .45);
+  --border-default:      rgb(var(--ink-rgb) / .12);
+  --border-subtle:       rgb(var(--ink-rgb) / .07);
+  --border-strong:       var(--accent);          /* focus ring (≥ 3:1) */
+  --border-glass-island: rgb(var(--ink-rgb) / .10);
 
-  /* Legacy "gold" names → palette (they read as: 400 = primary accent) */
-  --gold-100: #E0F7FF;
-  --gold-200: #A5F3FC;
-  --gold-300: var(--c-sky);
-  --gold-400: var(--c-cyan);
-  --gold-500: var(--c-violet-2);
-  --gold-600: #4F46E5;
-  --gold-700: #3730A3;
-  --gold-ink: var(--c-cyan);          /* accent TEXT on dark surfaces */
+  --color-primary-subtle: rgb(var(--color-primary-rgb) / .08);
+  --accent-subtle:        rgb(var(--accent-rgb) / .08);
+  --color-accent:         var(--accent);
+  --color-destructive:  #C62828;  --color-destructive-subtle: rgb(198 40 40 / .08);
+  --color-success:      #177A3C;  --color-success-subtle:     rgb(23 122 60 / .10);
+  --color-warning:      #9A5B00;  --color-warning-subtle:     rgb(154 91 0 / .10);
+  --color-info:         #0B5FBF;  --color-info-subtle:        rgb(11 95 191 / .08);
 
-  --brand-cyan:   var(--c-cyan);
-  --brand-violet: var(--c-violet-2);
-  --brand-purple: var(--c-magenta);
-  --brand-pink:   var(--c-pink);
-  --brand-grab:   var(--c-sky);
-  --brand-amber:  var(--warn);        /* semantic only */
+  --overlay-scrim:         rgb(var(--black-rgb) / .40);
+  --overlay-shimmer-base:  rgb(var(--ink-rgb) / .05);
+  --overlay-shimmer-peak:  rgb(var(--ink-rgb) / .10);
 
-  --ok: #34D399;  --err: #F87171;  --warn: #FBBF24;
-  --grain: .025;
-  --focus-ring: 0 0 0 3px rgb(var(--c-cyan-rgb) / .38);
+  --shadow-card:           0 1px 2px rgb(var(--ink-rgb) / .05), 0 4px 16px rgb(var(--ink-rgb) / .07);
+  --shadow-glass-island:   0 12px 32px rgb(var(--ink-rgb) / .14);
+  --shadow-button-primary: 0 4px 14px rgb(var(--color-primary-rgb) / .28);
+  --shadow-modal:          0 24px 64px rgb(var(--ink-rgb) / .22);
+  --glow-neon:             var(--shadow-card);
 
-  --shadow-1: 0 0 0 1px var(--line-strong), 0 16px 48px -16px rgba(0,0,0,.6);
-  --shadow-2: 0 0 0 1px var(--line-strong), 0 16px 48px -16px rgba(0,0,0,.6);
-  --shadow-sm: 0 4px 14px rgba(0, 0, 0, .35);
-  --shadow-md: 0 12px 36px rgba(0, 0, 0, .55);
-  --shadow-glow: 0 0 35px rgb(var(--c-cyan-rgb) / .18), 0 0 70px rgb(var(--c-violet-2-rgb) / .20);
+  --aurora-a: rgb(var(--color-primary-rgb) / .10);
+  --aurora-b: rgb(var(--cta-end-rgb) / .09);
+  --aurora-c: rgb(var(--ig-orange-rgb) / .07);
 
-  /* Ambient background layer */
-  --amb-a: rgb(var(--c-cyan-rgb) / .20);
-  --amb-b: rgb(var(--c-violet-rgb) / .32);
-  --amb-c: rgb(var(--c-magenta-rgb) / .20);
-  --amb-d: rgb(var(--c-sky-rgb) / .16);
+  /* theme-aware channels: "tint" = foreground wash (ink on light, white on dark) */
+  --tint-rgb: var(--ink-rgb);
+  --shadow-rgb: var(--ink-rgb);
+  --destructive-rgb: 198 40 40;
+  --success-rgb: 23 122 60;
+  --warning-rgb: 154 91 0;
+  --info-rgb: 11 95 191;
+
+  /* Hero banner (PRD §7: content as-is, colours from tokens) */
+  --hero-bg: linear-gradient(135deg, #FFFFFF 0%, #FFF4F9 52%, #F5F0FF 100%);
+  --hero-ink: var(--text-primary);
+  --hero-ink-2: var(--text-secondary);
+  --hero-border: rgb(var(--color-primary-rgb) / .16);
+  --hero-pill-bg: rgb(var(--color-primary-rgb) / .06);
+  --hero-pill-border: rgb(var(--cta-end-rgb) / .24);
+  --hero-glow-a: rgb(var(--cta-end-rgb) / .14);
+  --hero-glow-b: rgb(var(--color-primary-rgb) / .14);
+  --hero-glow-c: rgb(var(--ig-orange-rgb) / .10);
+  --hero-text-shadow: none;
+  --logo-gradient: var(--cta-gradient);
 }
 
-/* ── LIGHT: cool white / lavender surfaces, indigo accent text ── */
-[data-theme="light"] {
-  --bg:        #F4F6FF;
-  --bg-dark:   #F4F6FF;
-  --surface:   #FFFFFF;
-  --surface-2: #EEF1FF;
-  --surface-3: #E1E6FB;
-  --bg-card:        #FFFFFF;
-  --bg-card-hover:  #EEF1FF;
-  --bg-surface: rgba(255, 255, 255, .90);
-  --bg-glass:   rgba(255, 255, 255, .85);
+/* ── DARK (opt-in) — PRD Appendix C dark values, same brand ─────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-base:             #000000;
+  --bg-surface:          #121212;
+  --bg-surface-elevated: #1C1C1C;
+  --bg-surface-sunken:   #0A0A0A;
+  --bg-surface-2:        #181818;
+  --bg-surface-3:        #262626;
+  --bg-blur-layer:          rgb(var(--black-rgb) / .90);
+  --bg-glass-island:        rgb(18 18 18 / .90);
+  --bg-glass-island-active: rgb(var(--white-rgb) / .10);
 
-  --ink:   #0B1030;
-  --ink-2: #414C78;
-  --ink-3: #5A6591;
-  --text-main:  var(--ink);
-  --text-muted: var(--ink-2);
-  --text-dim:   var(--ink-3);
+  --text-primary:   #F5F5F5;
+  --text-secondary: #A8A8A8;
+  --text-disabled:  #6B6B6B;
+  --text-brand:     #F27AB4;
+  --accent-ink:     #9AA2FF;
 
-  --line:         rgba(40, 50, 130, .12);
-  --line-strong:  rgb(var(--c-violet-2-rgb) / .32);
-  --border-color: rgba(40, 50, 130, .13);
-  --border-focus: rgb(var(--c-violet-2-rgb) / .60);
-  --border-glow:  rgb(var(--c-violet-2-rgb) / .35);
+  --border-default:      rgb(var(--white-rgb) / .12);
+  --border-subtle:       rgb(var(--white-rgb) / .07);
+  --border-strong:       #9AA2FF;
+  --border-glass-island: rgb(var(--white-rgb) / .14);
 
-  --gold-100: #EEF9FF;
-  --gold-200: #BAE6FD;
-  --gold-300: #0EA5E9;
-  --gold-400: #0891B2;                /* darker cyan — legible on white */
-  --gold-500: #4F46E5;
-  --gold-600: #4338CA;
-  --gold-700: #3730A3;
-  --gold-ink: #4F46E5;                /* accent TEXT on light surfaces */
+  --color-primary-subtle: rgb(var(--color-primary-rgb) / .18);
+  --accent-subtle:        rgb(var(--accent-rgb) / .18);
+  --color-accent:         #9AA2FF;
+  --color-destructive:  #FF6B6B;  --color-destructive-subtle: rgb(255 107 107 / .14);
+  --color-success:      #4ADE80;  --color-success-subtle:     rgb(74 222 128 / .14);
+  --color-warning:      #FBBF24;  --color-warning-subtle:     rgb(251 191 36 / .14);
+  --color-info:         #6CB6FF;  --color-info-subtle:        rgb(108 182 255 / .14);
 
-  /* text-safe brand gradient on light surfaces (darker cyan / magenta ends) */
-  --gradient-brand: linear-gradient(135deg, #0891B2 0%, var(--c-violet-2) 55%, color-mix(in srgb, var(--c-magenta) 78%, #000) 100%);
+  --overlay-scrim:         rgb(var(--black-rgb) / .65);
+  --overlay-shimmer-base:  rgb(var(--white-rgb) / .06);
+  --overlay-shimmer-peak:  rgb(var(--white-rgb) / .14);
 
-  --ok: #047857;  --err: #B91C1C;  --warn: #B45309;
-  --grain: .02;
-  --focus-ring: 0 0 0 3px rgb(var(--c-violet-2-rgb) / .35);
+  --shadow-card:           0 8px 24px rgb(var(--black-rgb) / .55);
+  --shadow-glass-island:   0 12px 32px rgb(var(--black-rgb) / .60);
+  --shadow-button-primary: 0 6px 20px rgb(var(--color-primary-rgb) / .38);
+  --shadow-modal:          0 24px 64px rgb(var(--black-rgb) / .70);
+  --glow-neon:             0 0 32px rgb(var(--color-primary-rgb) / .30);
 
-  --shadow-1: 0 1px 2px rgba(20, 28, 90, .06), 0 8px 24px -12px rgba(20, 28, 90, .14);
-  --shadow-2: 0 24px 48px -24px rgba(20, 28, 90, .20);
-  --shadow-sm: 0 4px 14px rgba(20, 28, 90, .10);
-  --shadow-md: 0 12px 36px rgba(20, 28, 90, .14);
-  --shadow-glow: 0 0 35px rgb(var(--c-violet-2-rgb) / .14), 0 0 70px rgb(var(--c-cyan-rgb) / .10);
+  --aurora-a: rgb(var(--color-primary-rgb) / .26);
+  --aurora-b: rgb(var(--cta-end-rgb) / .24);
+  --aurora-c: rgb(var(--ig-orange-rgb) / .16);
 
-  --amb-a: rgb(var(--c-cyan-rgb) / .10);
-  --amb-b: rgb(var(--c-violet-2-rgb) / .10);
-  --amb-c: rgb(var(--c-magenta-rgb) / .07);
-  --amb-d: rgb(var(--c-sky-rgb) / .09);
+  --tint-rgb: var(--white-rgb);
+  --shadow-rgb: var(--black-rgb);
+  --destructive-rgb: 255 107 107;
+  --success-rgb: 74 222 128;
+  --warning-rgb: 251 191 36;
+  --info-rgb: 108 182 255;
+
+  --hero-bg: linear-gradient(135deg, #0B0B0E 0%, #140D18 52%, #180E24 100%);
+  --hero-ink: var(--text-primary);
+  --hero-ink-2: var(--text-secondary);
+  --hero-border: rgb(var(--color-primary-rgb) / .35);
+  --hero-pill-bg: rgb(var(--cta-end-rgb) / .22);
+  --hero-pill-border: rgb(var(--cta-end-rgb) / .55);
+  --hero-glow-a: rgb(var(--cta-end-rgb) / .42);
+  --hero-glow-b: rgb(var(--color-primary-rgb) / .30);
+  --hero-glow-c: rgb(var(--ig-orange-rgb) / .12);
+  --hero-text-shadow: 0 2px 12px rgb(var(--black-rgb) / .45);
+  --logo-gradient: var(--brand-gradient);
+}
+
+/* ── Composites that depend on theme values ──────────────────────────────── */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --aurora-backdrop:
+    radial-gradient(60% 50% at 20% 10%, var(--aurora-a), transparent 70%),
+    radial-gradient(50% 45% at 80% 20%, var(--aurora-b), transparent 70%),
+    radial-gradient(45% 40% at 50% 0%, var(--aurora-c), transparent 70%);
+  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--border-strong);
+
+  /* PRD aliases (no new values) */
+  --color-throttled: var(--color-warning);
+  --color-banned: var(--color-destructive);
+  --color-pending: var(--color-info);
+  --color-pending-subtle: var(--color-info-subtle);
+  --shadow-floating-action: var(--shadow-glass-island);
+  --text-link: var(--text-brand);
+  --border-destructive: var(--color-destructive);
+  --bg-glass-rail: var(--bg-glass-island);
+
+  /* ── DEPRECATED legacy aliases — the ~98 inner tool pages still use these.
+        They carry NO raw values; new code must use the PRD names above. ── */
+  --bg: var(--bg-base);
+  --bg-dark: var(--bg-base);
+  --surface: var(--bg-surface);
+  --surface-2: var(--bg-surface-2);
+  --surface-3: var(--bg-surface-3);
+  --bg-card: var(--bg-surface);
+  --bg-card-hover: var(--bg-surface-2);
+  --bg-glass: var(--bg-glass-island);
+  --ink: var(--text-primary);
+  --ink-2: var(--text-secondary);
+  --ink-3: var(--text-secondary);
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --text-dim: var(--text-secondary);
+  --line: var(--border-default);
+  --line-strong: rgb(var(--color-primary-rgb) / .32);
+  --border-color: var(--border-default);
+  --border-focus: var(--border-strong);
+  --border-glow: rgb(var(--color-primary-rgb) / .30);
+  --gold-100: var(--color-primary-subtle);
+  --gold-200: var(--color-primary-subtle);
+  --gold-300: var(--color-primary);
+  --gold-400: var(--color-primary);
+  --gold-500: var(--cta-end);
+  --gold-600: var(--color-primary-hover);
+  --gold-700: var(--color-primary-dark);
+  --gold-ink: var(--text-brand);
+  --on-accent: var(--text-on-primary);
+  --molten: var(--cta-gradient);
+  --gradient-button: var(--cta-gradient);
+  --gradient-button-hover: var(--cta-gradient-hover);
+  --gradient-brand: linear-gradient(var(--color-primary), var(--color-primary)); /* solid: gradients only on CTA + logo */
+  --gradient-glow: linear-gradient(135deg, var(--color-primary-subtle), var(--accent-subtle));
+  --brand-cyan: var(--color-primary);
+  --brand-violet: var(--cta-end);
+  --brand-purple: var(--cta-end);
+  --brand-pink: var(--ig-pink);
+  --brand-grab: var(--color-primary);
+  --brand-amber: var(--color-warning);
+  --brand-gradient-start: var(--ig-yellow);
+  --brand-gradient-mid: var(--ig-pink);
+  --brand-gradient-end: var(--ig-blue);
+  --c-cyan: var(--color-primary);
+  --c-sky: var(--accent);
+  --c-violet: var(--cta-end);
+  --c-violet-2: var(--cta-end);
+  --c-magenta: var(--ig-pink);
+  --c-pink: var(--ig-pink);
+  --c-cyan-rgb: var(--color-primary-rgb);
+  --c-sky-rgb: var(--accent-rgb);
+  --c-violet-rgb: var(--cta-end-rgb);
+  --c-violet-2-rgb: var(--cta-end-rgb);
+  --c-magenta-rgb: var(--ig-pink-rgb);
+  --c-pink-rgb: var(--ig-pink-rgb);
+  --ok: var(--color-success);
+  --err: var(--color-destructive);
+  --warn: var(--color-warning);
+  --grain: 0;
+  --shadow-1: var(--shadow-card);
+  --shadow-2: var(--shadow-card);
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: var(--shadow-card);
+  --shadow-glow: var(--glow-neon);
+  --amb-a: var(--aurora-a);
+  --amb-b: var(--aurora-b);
+  --amb-c: var(--aurora-c);
+  --amb-d: transparent;
+  --font-mono: var(--font-stack);
+  --font-serif: var(--font-stack);
 }

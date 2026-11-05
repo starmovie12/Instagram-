@@ -49,7 +49,7 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     setP(getPrefs()); setSound(isSoundOn()); setIos(isIosSafari());
-    setDark((document.documentElement.dataset.theme ?? "dark") === "dark");
+    setDark((document.documentElement.dataset.theme ?? "light") === "dark");
     setSession(getSessionId()); setCobalt(getCobaltInstance());
   }, []);
 

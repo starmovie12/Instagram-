@@ -135,7 +135,7 @@ export default function Page() {
         .htd-hero h1 { font-size: clamp(1.7rem, 1.2rem + 2.4vw, 2.6rem); line-height: 1.1; margin: 8px 0 16px; }
         .htd-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .htd-steps li { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: 18px; background: var(--bg-surface); border: 1px solid var(--line-strong); font-weight: 700; color: var(--ink); text-align: center; font-size: 14px; }
-        .htd-steps b { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--on-accent); background: var(--gradient-button); }
+        .htd-steps b { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--on-accent); background: var(--color-primary); }
         .htd-acc { border: 1px solid var(--line); border-radius: 16px; margin-bottom: 8px; background: var(--bg-surface); }
         .htd-acc summary { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; cursor: pointer; font-weight: 700; color: var(--ink); }
         .htd-acc ol { margin: 0; padding: 0 18px 14px 36px; }

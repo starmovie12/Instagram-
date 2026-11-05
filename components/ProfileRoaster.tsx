@@ -99,7 +99,7 @@ export default function ProfileRoaster() {
       {roast && profile && (
         <div className="card intro-rise" style={{ padding: 24, borderColor: "var(--gold-300)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <span style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", border: "2px solid var(--molten)", flexShrink: 0, background: "var(--surface-2)" }}>
+            <span style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", border: "2px solid var(--color-primary)", flexShrink: 0, background: "var(--surface-2)" }}>
               {profile.profilePicHd && /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={dl(profile.profilePicHd, "avatar")} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
             </span>

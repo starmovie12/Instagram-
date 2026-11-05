@@ -77,7 +77,7 @@ export default function PhotoFilters() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8, WebkitMaskImage: "linear-gradient(90deg,#000 94%,transparent)" }}>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8, WebkitMaskImage: "linear-gradient(90deg,var(--black) 94%,transparent)" }}>
             {FILTERS.map((f) => (
               <button key={f.id} onClick={() => setActive(f.id)}
                 style={{ flexShrink: 0, width: 86, background: "none", border: "none", cursor: "pointer", padding: 0 }}

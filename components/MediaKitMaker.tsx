@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { FileText, Download } from "lucide-react";
+import { cssToken } from "@/lib/css-token";
 
 type Kit = {
   name: string; handle: string; niche: string; city: string;
@@ -36,13 +37,13 @@ function draw(canvas: HTMLCanvasElement, k: Kit) {
   canvas.width = W; canvas.height = H;
 
   // Ivory paper + gold frame (the InstaGrab editorial look)
-  ctx.fillStyle = "#F4F6FF"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = cssToken("--art-paper"); ctx.fillRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, "#22E4FF"); g.addColorStop(0.5, "#6366F1"); g.addColorStop(1, "#D946EF");
+  g.addColorStop(0, cssToken("--art-accent")); g.addColorStop(0.5, cssToken("--art-accent-2")); g.addColorStop(1, cssToken("--art-accent-3"));
   ctx.strokeStyle = g; ctx.lineWidth = 6; ctx.strokeRect(28, 28, W - 56, H - 56);
   ctx.lineWidth = 1.5; ctx.strokeRect(44, 44, W - 88, H - 88);
 
-  const gold = "#4F46E5", ink = "#0B1030", ink2 = "#414C78";
+  const gold = cssToken("--art-accent"), ink = cssToken("--art-ink"), ink2 = cssToken("--art-ink-2");
   ctx.textBaseline = "alphabetic";
 
   // Label

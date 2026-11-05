@@ -48,7 +48,7 @@ export default function OnboardingTour() {
 
   return (
     <div onClick={finish} role="dialog" aria-modal="true" aria-label="Welcome tour"
-      style={{ position: "fixed", inset: 0, zIndex: 131, background: "rgba(10,9,6,.5)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      style={{ position: "fixed", inset: 0, zIndex: 131, background: "var(--overlay-scrim)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div onClick={(e) => e.stopPropagation()} className="card intro-rise"
         style={{ width: "100%", maxWidth: 400, padding: 28, textAlign: "center", position: "relative" }}>
         <button className="btn-icon" onClick={finish} aria-label="Skip tour"
@@ -61,7 +61,7 @@ export default function OnboardingTour() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24 }}>
           <span style={{ display: "flex", gap: 6 }}>
             {STEPS.map((_, i) => (
-              <span key={i} aria-hidden="true" style={{ width: 7, height: 7, borderRadius: 99, background: i === step ? "var(--molten)" : "var(--line-strong, var(--line))" }} />
+              <span key={i} aria-hidden="true" style={{ width: 7, height: 7, borderRadius: 99, background: i === step ? "var(--color-primary)" : "var(--line-strong, var(--line))" }} />
             ))}
           </span>
           <span style={{ display: "flex", gap: 8 }}>

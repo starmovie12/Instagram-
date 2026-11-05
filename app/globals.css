@@ -183,11 +183,7 @@ input:focus { outline: none; }
 
 .gilded {
   font-style: normal;
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: var(--text-brand); /* solid accent text — gradients are reserved for the CTA + logo */
 }
 
 /* ==========================================================================
@@ -263,7 +259,7 @@ section[id] { scroll-margin-top: 88px; }
 .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .btn-molten {
-  background: var(--gradient-brand);
+  background: var(--cta-gradient); /* the primary CTA of each tool page */
   color: var(--on-accent);
   height: 48px;
   font-weight: 800;
@@ -448,10 +444,7 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .hero-title span {
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-brand);
 }
 
 .hero-subtitle {
@@ -550,7 +543,7 @@ section[id] { scroll-margin-top: 88px; }
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--tint-rgb) / 0.06);
   border: none;
   color: var(--text-muted);
   cursor: pointer;
@@ -561,7 +554,7 @@ section[id] { scroll-margin-top: 88px; }
 
 .btn-clear:hover {
   color: var(--text-main);
-  background: rgba(255, 255, 255, 0.14);
+  background: rgb(var(--tint-rgb) / 0.14);
 }
 
 .input-actions {
@@ -570,7 +563,7 @@ section[id] { scroll-margin-top: 88px; }
   gap: 8px;
   margin-top: 6px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgb(var(--tint-rgb) / 0.06);
 }
 
 .btn-paste {
@@ -579,7 +572,7 @@ section[id] { scroll-margin-top: 88px; }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--tint-rgb) / 0.06);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 0 16px;
@@ -592,7 +585,7 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .btn-paste:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgb(var(--tint-rgb) / 0.12);
   border-color: var(--line-strong);
 }
 
@@ -637,7 +630,7 @@ section[id] { scroll-margin-top: 88px; }
 .supported-strip-wrap {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  border-top: 1px dashed rgb(var(--tint-rgb) / 0.08);
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -669,8 +662,8 @@ section[id] { scroll-margin-top: 88px; }
   min-height: 36px;
   padding: 0 11px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgb(var(--tint-rgb) / 0.04);
+  border: 1px solid rgb(var(--tint-rgb) / 0.08);
   color: var(--text-main);
   font-size: 0.76rem;
   font-weight: 700;
@@ -713,7 +706,7 @@ section[id] { scroll-margin-top: 88px; }
 .spinner {
   width: 44px;
   height: 44px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid rgb(var(--tint-rgb) / 0.1);
   border-top-color: var(--brand-cyan);
   border-right-color: var(--brand-violet);
   border-radius: 50%;
@@ -722,8 +715,8 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .error-box {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.38);
+  background: rgb(var(--destructive-rgb) / 0.1);
+  border: 1px solid rgb(var(--destructive-rgb) / 0.38);
   border-radius: var(--radius-md);
   padding: 16px;
   display: flex;
@@ -734,13 +727,13 @@ section[id] { scroll-margin-top: 88px; }
 .error-title {
   font-weight: 800;
   font-size: 0.95rem;
-  color: #FCA5A5;
+  color: var(--color-destructive);
   margin-bottom: 4px;
 }
 
 .error-message {
   font-size: 0.85rem;
-  color: #E2E8F0;
+  color: var(--text-primary);
   line-height: 1.45;
 }
 
@@ -750,9 +743,9 @@ section[id] { scroll-margin-top: 88px; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(239, 68, 68, 0.22);
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  color: #FECACA;
+  background: rgb(var(--destructive-rgb) / 0.22);
+  border: 1px solid rgb(var(--destructive-rgb) / 0.45);
+  color: var(--color-destructive);
   padding: 0 14px;
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
@@ -776,7 +769,7 @@ section[id] { scroll-margin-top: 88px; }
   justify-content: space-between;
   padding: 14px 18px;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--tint-rgb) / 0.02);
 }
 
 .result-author {
@@ -822,9 +815,9 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .platform-pill.facebook {
-  background: rgba(24, 119, 242, 0.2);
-  color: #60A5FA;
-  border: 1px solid rgba(24, 119, 242, 0.4);
+  background: rgb(var(--brand-facebook-rgb) / 0.2);
+  color: var(--color-info);
+  border: 1px solid rgb(var(--brand-facebook-rgb) / 0.4);
 }
 
 .platform-pill.instagram {
@@ -836,7 +829,7 @@ section[id] { scroll-margin-top: 88px; }
 .media-badge {
   background: rgb(var(--c-violet-2-rgb) / 0.2);
   border: 1px solid rgb(var(--c-violet-2-rgb) / 0.45);
-  color: #C7D2FE;
+  color: var(--accent-ink);
   font-size: 0.74rem;
   font-weight: 800;
   padding: 4px 10px;
@@ -846,7 +839,7 @@ section[id] { scroll-margin-top: 88px; }
 
 .media-preview-area {
   position: relative;
-  background: #000;
+  background: var(--black);
   min-height: 260px;
   max-height: 500px;
   display: flex;
@@ -867,9 +860,9 @@ section[id] { scroll-margin-top: 88px; }
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(5, 11, 36, 0.75);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgb(var(--black-rgb) / 0.75);
+  color: var(--white);
+  border: 1px solid rgb(var(--tint-rgb) / 0.22);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -886,8 +879,8 @@ section[id] { scroll-margin-top: 88px; }
 .carousel-indicator {
   position: absolute;
   bottom: 12px;
-  background: rgba(5, 11, 36, 0.8);
-  color: #fff;
+  background: rgb(var(--black-rgb) / 0.8);
+  color: var(--white);
   padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: 0.78rem;
@@ -921,8 +914,8 @@ section[id] { scroll-margin-top: 88px; }
   position: absolute;
   top: 4px;
   right: 4px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
+  background: rgb(var(--black-rgb) / 0.75);
+  color: var(--white);
   font-size: 0.65rem;
   font-weight: 700;
   padding: 2px 6px;
@@ -983,7 +976,7 @@ section[id] { scroll-margin-top: 88px; }
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--tint-rgb) / 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 0 14px;
@@ -996,26 +989,26 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .btn-action-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--tint-rgb) / 0.1);
   border-color: var(--line-strong);
 }
 
 /* Download Progress Bar Feedback (from instagrab-main) */
 .download-progress-card {
-  background: rgba(11, 18, 48, 0.95);
+  background: var(--bg-surface-elevated);
   border: 1px solid rgb(var(--c-cyan-rgb) / 0.45);
   border-radius: var(--radius-md);
   padding: 14px 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgb(var(--c-cyan-rgb) / 0.15);
+  box-shadow: 0 8px 32px rgb(var(--black-rgb) / 0.45), 0 0 20px rgb(var(--c-cyan-rgb) / 0.15);
   animation: fadeIn 0.25s ease-out;
 }
 
 .download-progress-card.status-completed {
-  border-color: rgba(16, 185, 129, 0.65);
+  border-color: rgb(var(--success-rgb) / 0.65);
 }
 
 .download-progress-card.status-error {
-  border-color: rgba(239, 68, 68, 0.65);
+  border-color: rgb(var(--destructive-rgb) / 0.65);
 }
 
 .progress-header {
@@ -1060,7 +1053,7 @@ section[id] { scroll-margin-top: 88px; }
 .progress-track {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--tint-rgb) / 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
@@ -1082,7 +1075,7 @@ section[id] { scroll-margin-top: 88px; }
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
+    rgb(var(--tint-rgb) / 0.4) 50%,
     transparent 100%
   );
   animation: shimmer 1.4s infinite;
@@ -1164,7 +1157,7 @@ section[id] { scroll-margin-top: 88px; }
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--tint-rgb) / 0.04);
   color: var(--text-main);
   font-size: 0.82rem;
   width: 190px;
@@ -1190,7 +1183,7 @@ section[id] { scroll-margin-top: 88px; }
   padding: 0 13px;
   border-radius: 999px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--tint-rgb) / 0.03);
   color: var(--text-muted);
   font-size: 0.78rem;
   font-weight: 700;
@@ -1230,7 +1223,7 @@ section[id] { scroll-margin-top: 88px; }
   border-radius: 14px;
   text-decoration: none;
   color: var(--text-main);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--tint-rgb) / 0.02);
   border: 1px solid transparent;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -1238,7 +1231,7 @@ section[id] { scroll-margin-top: 88px; }
 }
 
 .ott-app-tile:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--tint-rgb) / 0.06);
   border-color: rgb(var(--c-cyan-rgb) / 0.35);
   transform: translateY(-3px);
 }
@@ -1254,8 +1247,8 @@ section[id] { scroll-margin-top: 88px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  color: var(--white);
+  box-shadow: 0 6px 16px rgb(var(--black-rgb) / 0.35);
   position: relative;
   transition: transform 0.2s ease;
 }
@@ -1275,7 +1268,7 @@ section[id] { scroll-margin-top: 88px; }
   background: var(--c-cyan);
   color: var(--on-accent);
   text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgb(var(--black-rgb) / 0.4);
 }
 
 .ott-app-label {

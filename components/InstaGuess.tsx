@@ -157,7 +157,7 @@ export default function InstaGuess() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span className="label" style={{ color: "var(--gold-ink)" }}>Today&apos;s mystery DP</span>
         <span className="chip" style={{ gap: 6, borderColor: streak > 0 ? "var(--gold-400)" : undefined }}>
-          <Flame size={13} strokeWidth={1.5} style={{ color: streak > 0 ? "var(--molten)" : "var(--ink-3)" }} />
+          <Flame size={13} strokeWidth={1.5} style={{ color: streak > 0 ? "var(--color-primary)" : "var(--ink-3)" }} />
           <b>{streak}</b> day streak
         </span>
       </div>
